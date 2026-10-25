@@ -31,3 +31,9 @@ gui/project.json
 .DS_Store
 Thumbs.db
 .env
+
+# Interface web
+!web/package.json
+!web/package-lock.json
+!web/tsconfig.json
+!web/public/modeles/*.xlsx
