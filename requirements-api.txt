@@ -10,3 +10,5 @@ networkx>=3.0
 pyyaml>=6.0
 reportlab>=4.0
 simpy>=4.0
+httpx>=0.27
+pyjwt[crypto]>=2.8

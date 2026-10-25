@@ -41,6 +41,32 @@ Docker : `docker build -t tlb-api . && docker run -p 8000:8000 -e TLB_API_KEYS=d
 Le résultat expose `success` (verdict du solveur) **et** `compliant` (= success sans violation
 détectée par `engine.diagnostics.validate_result`), plus la liste `violations`.
 
+## Comptes et ateliers (Supabase)
+
+Actif si `TLB_SUPABASE_URL` et `TLB_SUPABASE_ANON_KEY` (clé *publishable*) sont définis.
+Le navigateur se connecte avec Supabase Auth (supabase-js) puis appelle l'API avec
+`Authorization: Bearer <access_token>`. Le jeton est vérifié localement (JWKS ES256).
+L'API transmet ce jeton à Postgres : **l'isolation entre ateliers est garantie par RLS**,
+pas seulement par le code Python. Aucune clé service n'est nécessaire.
+
+| Méthode | Route | Rôle |
+|---|---|---|
+| GET | `/v1/me` | utilisateur + ateliers + abonnement |
+| POST | `/v1/orgs` | créer un atelier `{name, country}` (propriétaire, essai 30 j) |
+| GET | `/v1/orgs/{org}` | atelier, rôle, offre et limites, membres |
+| GET/POST | `/v1/orgs/{org}/lines` · DELETE `/lines/{id}` | lignes de production (quota de l'offre) |
+| GET/POST | `/v1/orgs/{org}/problems` · GET `/problems/{id}` | gammes enregistrées (SAM + postes + ouvriers) |
+| POST | `/v1/orgs/{org}/runs` | calcul historisé `{kind, solver, problem_id | problem, line_id}` -> 202 |
+| GET | `/v1/orgs/{org}/runs` · `/runs/{id}` · `/runs/{id}/export.json` | historique, détail, export |
+
+Rôles : `owner`, `admin`, `methodes`, `chef_ligne` (peut lancer des calculs), `lecteur` (lecture seule).
+Quotas appliqués en base : lignes, utilisateurs, opérations par gamme ; calculs refusés si essai expiré.
+Les routes sans état (`/v1/precheck`, `/v1/balance`…) acceptent aussi le jeton utilisateur ;
+`X-API-Key` reste disponible pour les intégrations.
+
+Variables : `TLB_SUPABASE_URL`, `TLB_SUPABASE_ANON_KEY`, optionnelles
+`TLB_SUPABASE_SERVICE_KEY` (mise à jour des calculs très longs), `TLB_CORS_ORIGINS`.
+
 ## Limites connues
 
 - File en mémoire : les calculs sont perdus au redémarrage (prod : Redis + arq ou Postgres).

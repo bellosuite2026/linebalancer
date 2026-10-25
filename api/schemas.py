@@ -132,3 +132,35 @@ class JobOut(BaseModel):
     finished_at: Optional[float] = None
     result: Optional[dict[str, Any]] = None
     error: str = ""
+
+
+# ---------------------------------------------------------------- Comptes / ateliers (Supabase)
+class OrgCreate(BaseModel):
+    name: str = Field(min_length=2, max_length=120)
+    country: str = Field(default="TN", min_length=2, max_length=2)
+
+
+class LineCreate(BaseModel):
+    name: str = Field(min_length=1, max_length=120)
+    product: str = ""
+    target_cycle_time: Optional[float] = Field(default=None, gt=0)
+
+
+class ProblemSave(BaseModel):
+    problem: ProblemIn
+    line_id: Optional[str] = None
+
+
+class RunCreate(BaseModel):
+    """Lance un calcul enregistré dans l'historique de l'atelier.
+
+    Fournir soit `problem_id` (gamme déjà enregistrée), soit `problem` (gamme
+    complète, enregistrée automatiquement si `save_problem`)."""
+    kind: JobKind = JobKind.balance
+    solver: SolverName = SolverName.rpw
+    problem_id: Optional[str] = None
+    problem: Optional[ProblemIn] = None
+    line_id: Optional[str] = None
+    save_problem: bool = True
+    time_limit_seconds: int = Field(default=10, ge=1)
+    precision: float = Field(default=0.05, gt=0, le=1, description="min_cycle uniquement")

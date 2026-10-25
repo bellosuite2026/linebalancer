@@ -12,6 +12,14 @@ def _int(name: str, default: int) -> int:
         return default
 
 
+def _env(*names: str) -> str:
+    for n in names:
+        v = os.environ.get(n, "").strip()
+        if v:
+            return v
+    return ""
+
+
 @dataclass
 class Settings:
     # Clés API autorisées, séparées par des virgules. Vide = auth désactivée (dev).
@@ -26,6 +34,17 @@ class Settings:
     max_upload_bytes: int = 5 * 1024 * 1024
     # Nombre max d'opérations par problème (garde-fou CPU).
     max_operations: int = 500
+    # Supabase (comptes, ateliers, historique). Vide = mode sans compte.
+    supabase_url: str = ""
+    supabase_anon_key: str = ""        # clé publishable (sb_publishable_…) ou anon
+    supabase_service_key: str = ""     # optionnelle : mise à jour des calculs longs
+    supabase_jwt_secret: str = ""      # optionnelle : jetons HS256 historiques
+    # Origines autorisées pour le navigateur (CORS), séparées par des virgules.
+    cors_origins: list[str] = field(default_factory=list)
+
+    @property
+    def supabase_enabled(self) -> bool:
+        return bool(self.supabase_url and self.supabase_anon_key)
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -37,4 +56,9 @@ class Settings:
             job_workers=_int("TLB_JOB_WORKERS", 2),
             max_upload_bytes=_int("TLB_MAX_UPLOAD_BYTES", 5 * 1024 * 1024),
             max_operations=_int("TLB_MAX_OPERATIONS", 500),
+            supabase_url=_env("TLB_SUPABASE_URL", "SUPABASE_URL"),
+            supabase_anon_key=_env("TLB_SUPABASE_ANON_KEY", "SUPABASE_PUBLISHABLE_KEY", "SUPABASE_ANON_KEY"),
+            supabase_service_key=_env("TLB_SUPABASE_SERVICE_KEY", "SUPABASE_SECRET_KEY"),
+            supabase_jwt_secret=_env("TLB_SUPABASE_JWT_SECRET", "SUPABASE_JWT_SECRET"),
+            cors_origins=[o.strip() for o in os.environ.get("TLB_CORS_ORIGINS", "").split(",") if o.strip()],
         )

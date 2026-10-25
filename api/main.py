@@ -10,6 +10,9 @@ Routes v1 :
   POST /v1/min-cycle                cadence minimale synchrone
   POST /v1/export/json              équilibrage -> fichier JSON téléchargeable
   POST /v1/jobs  /  GET /v1/jobs/{id}  /  GET /v1/jobs/{id}/export.json
+
+Avec Supabase configuré : comptes, ateliers, lignes, gammes et historique
+(voir api/routes_saas.py).
 """
 from __future__ import annotations
 
@@ -19,6 +22,7 @@ from typing import Optional
 
 from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, UploadFile
 from fastapi.concurrency import run_in_threadpool
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 
 from engine.solvers import registry
@@ -36,9 +40,16 @@ from api.schemas import (
 from api.settings import Settings
 
 
-def create_app(settings: Optional[Settings] = None) -> FastAPI:
+def create_app(settings: Optional[Settings] = None, *, auth=None, store=None) -> FastAPI:
+    """`auth` / `store` : injection pour les tests (sinon construits depuis Supabase)."""
     settings = settings or Settings.from_env()
     queue = JobQueue(workers=settings.job_workers)
+    if settings.supabase_enabled:
+        from api.auth import SupabaseAuth
+        from api.store import SupabaseStore
+        auth = auth or SupabaseAuth(settings.supabase_url, jwt_secret=settings.supabase_jwt_secret)
+        store = store or SupabaseStore(settings.supabase_url, settings.supabase_anon_key,
+                                       service_key=settings.supabase_service_key)
 
     @asynccontextmanager
     async def lifespan(_app: FastAPI):
@@ -48,14 +59,24 @@ def create_app(settings: Optional[Settings] = None) -> FastAPI:
     app = FastAPI(title="Textile Line Balancer API", version=__version__, lifespan=lifespan,
                   description="Équilibrage de lignes de confection (RPW, CP-SAT).")
     app.state.settings, app.state.queue = settings, queue
+    if settings.cors_origins:
+        app.add_middleware(CORSMiddleware, allow_origins=settings.cors_origins,
+                           allow_methods=["*"], allow_headers=["*"], allow_credentials=False)
 
-    # --- Sécurité : clé API par atelier (MVP ; comptes/JWT à venir) ---------
-    def tenant(x_api_key: Optional[str] = Header(default=None)) -> str:
-        if not settings.api_keys:
+    # --- Sécurité : jeton Supabase (utilisateur) ou clé API (intégrations) ----
+    def tenant(x_api_key: Optional[str] = Header(default=None),
+               authorization: Optional[str] = Header(default=None)) -> str:
+        if auth is not None and authorization and authorization.lower().startswith("bearer "):
+            from api.auth import AuthError
+            try:
+                return "user:" + auth.verify(authorization.split(" ", 1)[1].strip()).user_id
+            except AuthError as e:
+                raise HTTPException(401, str(e))
+        if x_api_key and x_api_key in settings.api_keys:
+            return x_api_key
+        if not settings.api_keys and auth is None:
             return "dev"
-        if not x_api_key or x_api_key not in settings.api_keys:
-            raise HTTPException(401, "Clé API manquante ou invalide (en-tête X-API-Key).")
-        return x_api_key
+        raise HTTPException(401, "Authentification requise (Authorization: Bearer <jeton> ou X-API-Key).")
 
     def guard(p: ProblemIn) -> None:
         if len(p.operations) > settings.max_operations:
@@ -193,6 +214,10 @@ def create_app(settings: Optional[Settings] = None) -> FastAPI:
         if j.status != "done":
             raise HTTPException(409, f"Calcul non terminé (statut : {j.status}).")
         return _json_file({"job": j.id, "kind": j.kind, "result": j.result}, f"calcul_{j.id[:8]}.json")
+
+    if auth is not None and store is not None:
+        from api import routes_saas
+        routes_saas.register(app, settings, queue, auth, store)
 
     return app
 
