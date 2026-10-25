@@ -14,6 +14,8 @@ Authentification : en-tête `Authorization: Bearer <jeton d'accès Supabase>`.
   GET    /v1/orgs/{org}/runs                      historique
   GET    /v1/orgs/{org}/runs/{id}                 détail + résultat
   GET    /v1/orgs/{org}/runs/{id}/export.json
+  GET    /v1/orgs/{org}/runs/{id}/export.xlsx
+  GET    /v1/orgs/{org}/runs/{id}/export.pdf
 """
 from __future__ import annotations
 
@@ -26,6 +28,7 @@ from uuid import UUID
 from fastapi import Depends, FastAPI, Header, HTTPException, Query
 from fastapi.responses import Response
 
+from api import exports
 from api.auth import AuthError, Principal, SupabaseAuth
 from api.conversion import run_balance, run_min_cycle
 from api.jobs import JobQueue
@@ -237,3 +240,31 @@ def register(app: FastAPI, settings: Settings, queue: JobQueue,
         payload = {"run": {k: v for k, v in run.items() if k != "result"}, "result": run.get("result")}
         return Response(json.dumps(payload, ensure_ascii=False, indent=2), media_type="application/json",
                         headers={"Content-Disposition": f'attachment; filename="calcul_{run_id[:8]}.json"'})
+
+    def _export_inputs(org_id: str, run_id: str, p: Principal):
+        membership(org_id, p)
+        run = call(store.get_run, p.token, org_id, uuid_or_404(run_id, "Calcul"))
+        if run.get("status") != "done":
+            raise HTTPException(409, f"Calcul non terminé (statut : {run.get('status')}).")
+        problem = None
+        if run.get("problem_id"):
+            try:
+                problem = store.get_problem(p.token, org_id, run["problem_id"]).get("payload")
+            except Exception:  # noqa: BLE001 - la gamme peut avoir été supprimée
+                problem = None
+        org_name = next((o.get("name", "") for o in call(store.my_orgs, p.token, p.user_id)
+                         if o.get("id") == org_id), "")
+        return run, problem, org_name
+
+    @app.get("/v1/orgs/{org_id}/runs/{run_id}/export.xlsx", tags=["calculs"])
+    def export_run_xlsx(org_id: str, run_id: str, p: Principal = Depends(principal)):
+        run, problem, org_name = _export_inputs(org_id, run_id, p)
+        return Response(exports.build_xlsx(run, problem, org_name),
+                        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        headers={"Content-Disposition": f'attachment; filename="equilibrage_{run_id[:8]}.xlsx"'})
+
+    @app.get("/v1/orgs/{org_id}/runs/{run_id}/export.pdf", tags=["calculs"])
+    def export_run_pdf(org_id: str, run_id: str, p: Principal = Depends(principal)):
+        run, problem, org_name = _export_inputs(org_id, run_id, p)
+        return Response(exports.build_pdf(run, problem, org_name), media_type="application/pdf",
+                        headers={"Content-Disposition": f'attachment; filename="equilibrage_{run_id[:8]}.pdf"'})

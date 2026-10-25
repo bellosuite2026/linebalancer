@@ -190,6 +190,15 @@ def test_run_lifecycle(ctx):
     assert d["status"] == "done" and d["stations_used"] >= 2 and d["result"]["success"]
     assert c.get(f"/v1/orgs/{org}/runs/{rid}", headers=B).status_code == 404
     assert c.get(f"/v1/orgs/{org}/runs/{rid}/export.json", headers=A).status_code == 200
+    x = c.get(f"/v1/orgs/{org}/runs/{rid}/export.xlsx", headers=A)
+    assert x.status_code == 200 and x.content[:2] == b"PK"
+    import io as _io
+    from openpyxl import load_workbook
+    wb = load_workbook(_io.BytesIO(x.content))
+    assert {"Synthèse", "Répartition", "Graphique", "Gamme"} <= set(wb.sheetnames)
+    pdf = c.get(f"/v1/orgs/{org}/runs/{rid}/export.pdf", headers=A)
+    assert pdf.status_code == 200 and pdf.content[:4] == b"%PDF"
+    assert c.get(f"/v1/orgs/{org}/runs/{rid}/export.pdf", headers=B).status_code == 404
     # gamme réutilisée pour la cadence minimale
     r2 = c.post(f"/v1/orgs/{org}/runs", json={"kind": "min_cycle", "problem_id": r.json()["problem_id"]},
                 headers=A)
