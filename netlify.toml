@@ -1,0 +1,6 @@
+# Netlify ne publie QUE l'interface web (dossier web/). L'API Python est sur Render.
+# Provisoire : page d'attente statique, en attendant l'application React + Vite.
+[build]
+  base    = "web"
+  publish = "public"
+  command = "echo 'page statique'"
