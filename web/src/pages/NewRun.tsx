@@ -165,7 +165,7 @@ export default function NewRun() {
               ))}
             </ul>
           )}
-          {errors.length > 0 && <p className="notice warn">{errors.length} point(s) bloquant(s) : le calcul peut échouer ou donner une solution non conforme.</p>}
+          {errors.length > 0 && <p className="notice warn">{errors.length} point{errors.length > 1 ? "s" : ""} bloquant{errors.length > 1 ? "s" : ""} : le calcul peut échouer ou donner une solution non conforme.</p>}
 
           <h3>3. Calcul</h3>
           <div className="form-grid">

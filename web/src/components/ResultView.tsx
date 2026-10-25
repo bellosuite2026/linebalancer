@@ -2,6 +2,11 @@ import type { Result } from "../lib/types";
 import { fmt, SOLVER_LABEL } from "../lib/api";
 import LoadChart from "./LoadChart";
 
+const STATUS: Record<string, string> = {
+  OPTIMAL: "solution optimale", FEASIBLE: "solution réalisable", INFEASIBLE: "aucune solution",
+  INFEASIBLE_CONSTRAINTS: "contraintes non respectées", HEURISTIC: "solution heuristique", TIMEOUT: "temps limite atteint", ERROR: "erreur",
+};
+
 export default function ResultView({ r }: { r: Result }) {
   const output = r.actual_cycle_time > 0 ? 60 / r.actual_cycle_time : 0;
   const errors = r.violations.filter((v) => v.severity === "error");
@@ -10,12 +15,12 @@ export default function ResultView({ r }: { r: Result }) {
     <>
       {!r.success && r.error_message && <p className="notice err">{r.error_message}</p>}
       {r.success && !r.compliant && (
-        <p className="notice warn">Solution trouvée, mais {errors.length || r.violations.length} point(s) à corriger avant de l'appliquer en atelier (voir ci-dessous).</p>
+        <p className="notice warn">Solution trouvée, mais {plural(errors.length || r.violations.length, "point")} à corriger avant de l'appliquer en atelier (voir ci-dessous).</p>
       )}
       <div className="kpis">
         <Kpi label="Stations" value={r.stations_used} />
         <Kpi label="Opérateurs" value={r.operators} />
-        <Kpi label="Cycle réel" value={`${fmt.n(r.actual_cycle_time)} min`} sub={`cible ${fmt.n(r.target_cycle_time)}`} />
+        <Kpi label="Cycle réel" value={`${fmt.n(r.actual_cycle_time, 3)} min`} sub={`cible ${fmt.n(r.target_cycle_time, 3)}`} />
         <Kpi label="Rendement ligne" value={`${fmt.n(r.efficiency, 1)} %`} tone={r.efficiency >= 85 ? "ok" : r.efficiency >= 70 ? "" : "warn"} />
         <Kpi label="Production" value={`${fmt.n(output, 0)} pcs/h`} sub={`${fmt.n(output * 8, 0)} pcs / 8 h`} />
         <Kpi label="Perte d'équilibrage" value={`${fmt.n(r.balance_delay, 1)} %`} />
@@ -56,7 +61,7 @@ export default function ResultView({ r }: { r: Result }) {
           </ul>
         </section>
       )}
-      <p className="muted small">Solveur : {SOLVER_LABEL[r.solver] ?? r.solver} · statut {r.status} · {fmt.n(r.solve_time_seconds, 2)} s{otherWarnings.length ? " · " + otherWarnings.join(" · ") : ""}</p>
+      <p className="muted small">Solveur : {SOLVER_LABEL[r.solver] ?? r.solver} · {STATUS[r.status] ?? r.status} · {fmt.n(r.solve_time_seconds, 2)} s{otherWarnings.length ? " · " + otherWarnings.join(" · ") : ""}</p>
     </>
   );
 }
@@ -64,3 +69,5 @@ export default function ResultView({ r }: { r: Result }) {
 function Kpi({ label, value, sub, tone = "" }: { label: string; value: string | number; sub?: string; tone?: string }) {
   return <div className={`kpi ${tone}`}><span>{label}</span><b>{value}</b>{sub && <small>{sub}</small>}</div>;
 }
+
+export const plural = (n: number, w: string) => `${n} ${w}${n > 1 ? "s" : ""}`;
