@@ -45,11 +45,11 @@ export const GARMENTS: { value: string; label: string }[] = [
 // Famille de vêtement → valeurs « vetements » du catalogue
 const FAMILY: Record<string, string[]> = {
   chemise: ["chemise", "chemisier"],
-  pantalon: ["pantalon", "jean", "short", "cargo"],
-  maille: ["t-shirt", "polo", "sweat", "jogging", "debardeur", "leggings", "sous-vetement"],
-  veste: ["veste", "blazer", "blouson", "parka", "gilet"],
-  robe: ["robe", "jupe", "top", "combinaison", "chemisier"],
-  travail: ["blouse-travail", "cargo", "veste", "pantalon"],
+  pantalon: ["pantalon", "jean", "short", "cargo", "pantalon-costume", "pantalon-travail"],
+  maille: ["debardeur", "t-shirt", "polo", "sweat", "jogging", "debardeur", "leggings", "sous-vetement"],
+  veste: ["veste", "blazer", "blouson", "parka", "gilet", "veste-tailleur", "veste-travail"],
+  robe: ["robe", "jupe", "top", "combinaison", "chemisier", "lingerie"],
+  travail: ["blouse-travail", "cargo", "veste-travail", "pantalon-travail", "combinaison-travail", "tablier", "scrub", "gilet-hv"],
 };
 
 export const norm = (s: string) =>

@@ -1,0 +1,123 @@
+vetement;section;operation_source;operation_fr;machine;sam_min;source_url
+combinaison-travail;capuche;HOOD JOINING SEAMS;Assembler coutures capuche;SURJ;0.53;https://tantutextile.com/wp-content/uploads/2026/06/45b643e6c23ad32a3bb5b8ae9f7a9ed0.pdf
+combinaison-travail;capuche;HOOD SEAM-SEAM SEALING;Thermo-souder coutures capuche;THERMO;0.67;https://tantutextile.com/wp-content/uploads/2026/06/45b643e6c23ad32a3bb5b8ae9f7a9ed0.pdf
+combinaison-travail;manche;SLEEVE HEM;Ourler bas de manche avec élastique;SURJ;0.66;https://tantutextile.com/wp-content/uploads/2026/06/45b643e6c23ad32a3bb5b8ae9f7a9ed0.pdf
+combinaison-travail;manche;SLEEVE JOIN AT INSEAM;Fermer manche (couture dessous de bras);SURJ;0.79;https://tantutextile.com/wp-content/uploads/2026/06/45b643e6c23ad32a3bb5b8ae9f7a9ed0.pdf
+combinaison-travail;manche;SLEEVE INSEAM SEAM SEALING;Thermo-souder couture dessous de manche;THERMO;0.60;https://tantutextile.com/wp-content/uploads/2026/06/45b643e6c23ad32a3bb5b8ae9f7a9ed0.pdf
+combinaison-travail;montage;ATTACH FRONT AND BACK YOKE CONTINUOUSLY;Assembler empiècements devant et dos en continu;SURJ;0.73;https://tantutextile.com/wp-content/uploads/2026/06/45b643e6c23ad32a3bb5b8ae9f7a9ed0.pdf
+combinaison-travail;montage;FRONT AND BACK YOKE SEAM SEALING;Thermo-souder coutures empiècements;THERMO;1.00;https://tantutextile.com/wp-content/uploads/2026/06/45b643e6c23ad32a3bb5b8ae9f7a9ed0.pdf
+combinaison-travail;montage;JOIN C.BACK SEAM + BACK RISE SEAM;Assembler milieu dos et fourche dos;SURJ;0.46;https://tantutextile.com/wp-content/uploads/2026/06/45b643e6c23ad32a3bb5b8ae9f7a9ed0.pdf
+combinaison-travail;montage;CENTER BACK SEAM + BACK RISE -SEAM SEALING;Thermo-souder milieu dos et fourche dos;THERMO;0.47;https://tantutextile.com/wp-content/uploads/2026/06/45b643e6c23ad32a3bb5b8ae9f7a9ed0.pdf
+combinaison-travail;capuche;HOOD ATTACHING TO BODY AT NECK LINE;Monter capuche sur encolure;SURJ;0.33;https://tantutextile.com/wp-content/uploads/2026/06/45b643e6c23ad32a3bb5b8ae9f7a9ed0.pdf
+combinaison-travail;capuche;HOOD HEM FACING;Ourler visage capuche avec élastique;SURJ;0.40;https://tantutextile.com/wp-content/uploads/2026/06/45b643e6c23ad32a3bb5b8ae9f7a9ed0.pdf
+combinaison-travail;fermeture;MEASURE, MARK AND CHECK FRONT FLAP;Mesurer, marquer et contrôler rabat devant;PIQ;0.37;https://tantutextile.com/wp-content/uploads/2026/06/45b643e6c23ad32a3bb5b8ae9f7a9ed0.pdf
+combinaison-travail;montage;JOIN FRONT RISE;Assembler fourche devant;SURJ;0.13;https://tantutextile.com/wp-content/uploads/2026/06/45b643e6c23ad32a3bb5b8ae9f7a9ed0.pdf
+combinaison-travail;fermeture;ATTACH ZIP TO RIGHT FRONT PLACKET;Poser fermeture éclair sur patte devant droite;PIQ;0.37;https://tantutextile.com/wp-content/uploads/2026/06/45b643e6c23ad32a3bb5b8ae9f7a9ed0.pdf
+combinaison-travail;fermeture;ATTACH ZIP TO LEFT FRONT PLACKET ALONG WITH FRONT FLAP;Poser fermeture éclair sur patte devant gauche avec rabat;PIQ;0.42;https://tantutextile.com/wp-content/uploads/2026/06/45b643e6c23ad32a3bb5b8ae9f7a9ed0.pdf
+combinaison-travail;fermeture;SEAM SEALING ON RIGHT FRONT PLACKET;Thermo-souder patte devant droite;THERMO;0.58;https://tantutextile.com/wp-content/uploads/2026/06/45b643e6c23ad32a3bb5b8ae9f7a9ed0.pdf
+combinaison-travail;fermeture;SEAM SEALING ON LEFT FRONT PLACKET + FRONT RISE;Thermo-souder patte devant gauche et fourche devant;THERMO;0.78;https://tantutextile.com/wp-content/uploads/2026/06/45b643e6c23ad32a3bb5b8ae9f7a9ed0.pdf
+combinaison-travail;bas;BOTTOM HEM;Ourler bas de jambe avec élastique;SURJ;0.60;https://tantutextile.com/wp-content/uploads/2026/06/45b643e6c23ad32a3bb5b8ae9f7a9ed0.pdf
+combinaison-travail;entrejambe;JOIN INSEAM;Fermer entrejambe;SURJ;0.79;https://tantutextile.com/wp-content/uploads/2026/06/45b643e6c23ad32a3bb5b8ae9f7a9ed0.pdf
+combinaison-travail;entrejambe;INSEAM-SEAM SEALING;Thermo-souder entrejambe;THERMO;0.83;https://tantutextile.com/wp-content/uploads/2026/06/45b643e6c23ad32a3bb5b8ae9f7a9ed0.pdf
+combinaison-travail;encolure;NECK LINE-SEAM SEALING;Thermo-souder couture encolure;THERMO;0.47;https://tantutextile.com/wp-content/uploads/2026/06/45b643e6c23ad32a3bb5b8ae9f7a9ed0.pdf
+tablier;lien;Corong Tali;Piquer et retourner lien (corong);PIQ;1.333;https://jurnal.usbypkp.ac.id/index.php/ReTIMS/article/download/1756/697/5507
+tablier;lien;Gabung Tali;Assembler liens;PIQ;0.250;https://jurnal.usbypkp.ac.id/index.php/ReTIMS/article/download/1756/697/5507
+tablier;devant;Jahit Plaket;Piquer patte de boutonnage;PIQ;1.950;https://jurnal.usbypkp.ac.id/index.php/ReTIMS/article/download/1756/697/5507
+tablier;ceinture;Pasang Wadah Tali Pinggang;Poser passe-lien ceinture (poste 1);PIQ;1.217;https://jurnal.usbypkp.ac.id/index.php/ReTIMS/article/download/1756/697/5507
+tablier;ceinture;Pasang Wadah Tali Pinggang;Poser passe-lien ceinture (poste 2);PIQ;1.517;https://jurnal.usbypkp.ac.id/index.php/ReTIMS/article/download/1756/697/5507
+tablier;ceinture;Pasang Wadah Tali Pinggang;Poser passe-lien ceinture (poste 3);PIQ;1.350;https://jurnal.usbypkp.ac.id/index.php/ReTIMS/article/download/1756/697/5507
+tablier;épaules;Obras Bahu;Surjeter épaules;SURJ;1.233;https://jurnal.usbypkp.ac.id/index.php/ReTIMS/article/download/1756/697/5507
+tablier;manche;Obras Tangan;Surjeter montage manche (poste 1);SURJ;1.633;https://jurnal.usbypkp.ac.id/index.php/ReTIMS/article/download/1756/697/5507
+tablier;manche;Obras Tangan;Surjeter montage manche (poste 2);SURJ;1.600;https://jurnal.usbypkp.ac.id/index.php/ReTIMS/article/download/1756/697/5507
+tablier;côtés;Obras Pinggir Badan;Surjeter côtés;SURJ;1.650;https://jurnal.usbypkp.ac.id/index.php/ReTIMS/article/download/1756/697/5507
+tablier;élastique;Pasang Karet Tangan;Poser élastique bas de manche (poste 1);PIQ;2.183;https://jurnal.usbypkp.ac.id/index.php/ReTIMS/article/download/1756/697/5507
+tablier;élastique;Pasang Karet Tangan;Poser élastique bas de manche (poste 2);PIQ;2.117;https://jurnal.usbypkp.ac.id/index.php/ReTIMS/article/download/1756/697/5507
+tablier;col;Pasang Kerah;Monter col;PIQ;2.567;https://jurnal.usbypkp.ac.id/index.php/ReTIMS/article/download/1756/697/5507
+tablier;col;Obras Kerah;Surjeter col;SURJ;1.000;https://jurnal.usbypkp.ac.id/index.php/ReTIMS/article/download/1756/697/5507
+tablier;col;Jahit Dalam Kerah;Piquer intérieur col;PIQ;1.036;https://jurnal.usbypkp.ac.id/index.php/ReTIMS/article/download/1756/697/5507
+tablier;col;Stik Kerah;Surpiquer col;PIQ;1.276;https://jurnal.usbypkp.ac.id/index.php/ReTIMS/article/download/1756/697/5507
+tablier;col;Jahit Kerah;Piquer col;PIQ;1.000;https://jurnal.usbypkp.ac.id/index.php/ReTIMS/article/download/1756/697/5507
+tablier;col;Pasan Tali Kerah;Poser lien d'encolure;PIQ;1.276;https://jurnal.usbypkp.ac.id/index.php/ReTIMS/article/download/1756/697/5507
+tablier;ceinture;Melubangi Area Pinggang;Percer passage lien à la taille;MAN;0.985;https://jurnal.usbypkp.ac.id/index.php/ReTIMS/article/download/1756/697/5507
+tablier;finition;Memotong Tali;Couper liens;MAN;0.091;https://jurnal.usbypkp.ac.id/index.php/ReTIMS/article/download/1756/697/5507
+pantalon-travail;braguette;FLY FUSING;Thermocoller patte de braguette;FER;0.25;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;braguette;S/FLY +D/FLY + FNT RISE +SEAM+ FACING SERGING;Surjeter pattes de braguette, fourche devant et parementures;SURJ;0.45;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;préparation;BODY SERIAL + THREAD CUT;Numéroter pièces et couper fils;MAN;0.20;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;poche devant;SEAM MARK;Marquer couture poche;MAN;0.30;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;poche devant;FACING JOIN WITH PKTING + D/FLY MAKE;Assembler parementure sur fond de poche et préparer double patte;PIQ;0.35;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;poche devant;SEAM JOIN  WITH PKTING;Assembler couture sur fond de poche;PIQ;0.35;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;poche devant;FNT PKTING  JOIN WITH BODY;Monter fond de poche devant sur devant;PIQ;0.40;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;poche devant;FNT PKT MOUTH ROLLING;Surpiquer entrée de poche devant;DBL;0.50;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;poche devant;FNT PKT HORI+VER TACK;Arrêter poche devant (horizontal et vertical);PIQ;0.40;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;poche devant;FNT PKT BAG O/L;Surjeter sac de poche devant;SURJ;0.35;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;poche devant;PKT BAG TOP 1/4;Surpiquer sac de poche 1/4;PIQ;0.38;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;braguette;S/FLY JOIN + TOP STC;Poser patte de braguette simple et surpiquer;PIQ;0.35;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;braguette;ZIPPER JOIN;Poser fermeture éclair braguette;DBL;0.30;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;braguette;J TOP STC WITH MARK;Marquer et surpiquer J de braguette;DBL;0.35;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;braguette;D/FLY JOIN + BODY CLOSE;Poser double patte et fermer devant;PIQ;0.40;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;fourche;FNT RISE INSIDE TACK;Arrêter fourche devant intérieur;PIQ;0.50;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;fourche;FNT RISE TOP STC;Surpiquer fourche devant;PIQ;0.55;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;étiquette;CARE LABEL MAKE + JOIN WITH WAIST;Préparer et poser étiquette d'entretien à la taille;PIQ;0.25;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;poche cuisse;FLAP +W/BELT FUSING;Thermocoller rabats et ceinture;FER;0.20;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;renfort;REINFORCEMENT CREASING (4 PICS);Repasser plis des renforts (4 pièces);FER;0.40;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;poche cuisse;FLAP TOP STC;Surpiquer rabat;PIQ;0.40;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;poche cuisse;THAI PKT DART MAKE;Piquer pinces poche cuisse;PIQ;0.35;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;poche cuisse;THAI PKT DART TOP STC;Surpiquer pinces poche cuisse;PIQ;0.28;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;poche cuisse;THAI +BK PKT FLAP MAKE;Piquer rabats poche cuisse et poche arrière;PIQ;0.60;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;poche cuisse;THAI +PKT FLAP TOP 1/4;Surpiquer rabats 1/4;PIQ;0.50;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;poche cuisse;THAI PKT O/L;Surjeter poche cuisse;SURJ;0.30;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;poche cuisse;THAI PKT+THAI COIN PKT ROLLING;Ourler entrée poche cuisse et petite poche;PIQ;0.40;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;poche cuisse;THAI COIN PKT LOOP JOIN+DECO STC;Poser passant petite poche cuisse et piqûre déco;PIQ;0.40;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;poche cuisse;THAI COIN PKT VELCO JOIN;Poser velcro petite poche cuisse;AUTRE;0.40;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;poche cuisse;THAI  COIN PKT JOIN;Poser petite poche sur poche cuisse;PIQ;0.45;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;fourche;BK RISE JOIN;Assembler fourche dos;PIQ;0.65;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;fourche;BK RISE TOP STC;Surpiquer fourche dos;DBL;0.62;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;poche arrière;BK PKT SERGING;Surjeter poche arrière;SURJ;0.55;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;poche arrière;BK PKT ROLLING;Ourler entrée poche arrière;PIQ;0.35;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;poche arrière;BK PKT+FLAP POSITION MARK;Marquer emplacement poche arrière et rabat;MAN;0.65;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;poche arrière;BK PKT JOIN WITH REINFORCEMENT;Poser poche arrière avec renfort;PIQ;0.40;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;poche arrière;BK PKT 1/4;Surpiquer poche arrière 1/4;PIQ;0.30;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;poche arrière;BK PKT PLAP JOIN;Poser rabat poche arrière;DBL;0.50;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;étiquette;BK PART LBL JOIN;Poser étiquette dos;PIQ;0.30;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;montage;FNT+ Bk PART +  MATCHING;Appairer devant et dos;MAN;0.30;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;côtés;SIDESEAM JOIN;Assembler côtés;SURJ;0.48;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;côtés;SIDE SEAM TOP STC;Surpiquer côtés;CHAIN;0.40;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;poche cuisse;MARK THAI PKT, BTM HEM;Marquer poche cuisse et bas;MAN;0.45;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;poche cuisse;THAI PKT JOIN;Poser poche cuisse;PIQ;0.70;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;poche cuisse;THAI PKT 1/4;Surpiquer poche cuisse 1/4;PIQ;0.60;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;poche cuisse;FLAP MATCH;Appairer rabats;MAN;0.20;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;poche cuisse;FLAP JOIN;Poser rabat poche cuisse;PIQ;0.40;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;poche cuisse;FLAP TOP STC;Surpiquer rabat poche cuisse;PIQ;0.48;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;passants;LOOP MAKE;Confectionner passants;RECOUV;0.35;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;passants;MARK LOOP JOIN + CUT;Marquer emplacement et couper passants;MAN;0.40;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;poche passepoilée;BON PKT POSITION MARK;Marquer emplacement poche passepoilée;PIQ;0.65;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;poche passepoilée;BON ROLLING;Ourler passepoil;PIQ;0.30;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;poche passepoilée;BON MACHING +BON LENGHT MARK;Appairer passepoils et marquer longueur;MAN;0.20;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;poche passepoilée;BON CREASING;Repasser passepoil;FER;0.40;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;poche passepoilée;BON JOIN;Poser passepoil;DBL;0.70;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;poche passepoilée;BON CUT + TURN OVER;Couper et retourner poche passepoilée;MAN;0.35;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;poche passepoilée;BON TOP STC DOWNSIDE;Surpiquer passepoil côté bas;PIQ;0.65;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;poche passepoilée;BON PKTING HARMONIUM  FACING  SERGING;Surjeter parementure soufflet poche passepoilée;SURJ;0.52;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;poche passepoilée;BON PKTING SERGING;Surjeter fond de poche passepoilée;SURJ;0.45;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;poche passepoilée;BON PKT FACING JOIN WITH PKTING;Assembler parementure sur fond de poche passepoilée;PIQ;0.70;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;poche passepoilée;BON TOP STC UPPER SIDE;Surpiquer passepoil côté haut;PIQ;0.60;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;poche passepoilée;BK BON PKT INSIDE TACK;Arrêter poche passepoilée dos intérieur;PIQ;0.55;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;ceinture;W/ BELT MARK+ ALLOWANCE CUT;Marquer ceinture et couper surplus;MAN;0.35;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;ceinture;W/BELT CREASING;Repasser ceinture;FER;0.35;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;ceinture;W/BELT POSITION MARK;Marquer emplacement ceinture;MAN;0.25;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;ceinture;W/BELT MATCHING;Appairer ceinture;PIQ;0.30;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;ceinture;W/BELT JOIN;Monter ceinture;PIQ;0.85;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;élastique;W/BELT ELASTIC CUT + MARK;Couper et marquer élastique ceinture;MAN;0.40;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;élastique;W/BELT ELASTIC TACK;Fixer élastique ceinture;PIQ;0.55;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;élastique;W/BELT TOP STC(ELASTIC PART);Surpiquer ceinture partie élastique;CHAIN;0.55;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;ceinture;W/BELT TOP STC;Surpiquer ceinture;CHAIN;0.75;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;ceinture;MOUTH CUT;Couper extrémités ceinture;MAN;0.35;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;ceinture;MOUTH  REMOVE;Dégager extrémités ceinture;MAN;0.30;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;ceinture;MOUTH CLOSE;Fermer extrémités ceinture;PIQ;0.84;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;passants;LOOP DEEP TACK;Arrêter passants;PIQ;0.60;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;entrejambe;INSEAM JOIN;Fermer entrejambe;SURJ;0.35;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;entrejambe;INSEAM TOP STC;Surpiquer entrejambe;CHAIN;0.38;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;bas;BTM HEM ROLLING;Ourler bas de jambe;PIQ;0.75;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;bas;VELCROW POSITION MARK;Marquer emplacement velcro bas;MAN;0.65;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;bas;VELCROW JOIN;Poser velcro bas de jambe;AUTRE;0.75;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/
+pantalon-travail;finition;FINAL THREAD CUT;Couper fils final;MAN;0.50;https://ordnur.com/apparel/operation-breakdown-and-smv-of-cargo-pant/

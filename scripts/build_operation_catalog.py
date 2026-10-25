@@ -54,6 +54,15 @@ TITLES = {
     "textileengineering.net": "Textile Engineering",
     "ojstexere.stttekstil.ac.id": "Texere vol. 23 n° 1, 2025 : blouse de laboratoire (accès libre)",
     "ajer.org": "American Journal of Engineering Research 2018",
+    "researchgate.net/publication/380023224": "Ferdous, Manik & Rahman 2023, Bangladesh J. Fashion Tech. : blazer",
+    "garmentmanufacturerguru.blogspot.com": "Garment Manufacturer Guru (blog)",
+    "tantutextile.com": "H&H Asia / UNIK : bulletin technique combinaison EPI",
+    "jurnal.usbypkp.ac.id": "Safaati & Azwar, Jurnal ReTiMs : tablier médical",
+    "dergipark.org.tr": "Karabay 2014, Tekstil ve Konfeksiyon : chemisier",
+    "revistaindustriatextila.ro": "Shao et al. 2022, Industria Textila : robe en lin",
+    "ijiset.com": "IJISET 2025 vol. 12 n° 4 : débardeur",
+    "hilarispublisher.com": "Murugesan 2018, J. Textile Sci. Eng. : débardeur",
+    "tekstilec.si": "Kirin & Hursa Šajatović 2020, Tekstilec : col de chemisier",
 }
 
 
@@ -67,7 +76,7 @@ def title_for(url: str) -> str:
     for key, t in TITLES.items():
         if key in url:
             slug = urlparse(url).path.rstrip("/").split("/")[-1]
-            if any(k in url for k in ("doi.org", "wiley", "eujournal", "ceon", "ojstexere", "ajer.org")):
+            if any(k in url for k in ("doi.org", "wiley", "eujournal", "ceon", "ojstexere", "ajer.org", "researchgate", "tantutextile", "usbypkp", "dergipark", "industriatextila", "ijiset", "hilarispublisher", "tekstilec")):
                 return t
             words = re.sub(r"[-_]+", " ", slug).replace(".html", "").strip()
             return f"{t} : {words}" if words else t

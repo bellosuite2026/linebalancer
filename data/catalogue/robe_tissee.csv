@@ -1,0 +1,61 @@
+vetement;section;operation_source;operation_fr;machine;sam_min;source_url
+chemisier;parementure;Interlining upper back facing;Thermocoller parementure haut dos;THERMO;0.402;https://dergipark.org.tr/en/download/article-file/218377
+chemisier;parementure;Ironing upper back facing;Repasser parementure haut dos;FER;0.352;https://dergipark.org.tr/en/download/article-file/218377
+chemisier;parementure;Interlining upper front facing;Thermocoller parementure haut devant;THERMO;0.987;https://dergipark.org.tr/en/download/article-file/218377
+chemisier;parementure;Ironing upper front facing;Repasser parementure haut devant;FER;0.907;https://dergipark.org.tr/en/download/article-file/218377
+chemisier;parementure;Interlining lower back facing;Thermocoller parementure bas dos;THERMO;0.402;https://dergipark.org.tr/en/download/article-file/218377
+chemisier;parementure;Interlining lower front facing;Thermocoller parementure bas devant;THERMO;0.987;https://dergipark.org.tr/en/download/article-file/218377
+chemisier;parementure;Assembling lower back and front facings;Assembler parementures bas dos et devant;PIQ;0.522;https://dergipark.org.tr/en/download/article-file/218377
+chemisier;parementure;Assembling upper back and front facings;Assembler parementures haut dos et devant;PIQ;0.522;https://dergipark.org.tr/en/download/article-file/218377
+chemisier;parementure;Overall lower and upper facing;Assembler parementures haute et basse;AUTRE;1.908;https://dergipark.org.tr/en/download/article-file/218377
+chemisier;parementure;Edge stitching of facing;Surpiquer bord parementure;PIQ;1.517;https://dergipark.org.tr/en/download/article-file/218377
+chemisier;parementure;Stitching label to facing;Coudre étiquette sur parementure;PIQ;0.525;https://dergipark.org.tr/en/download/article-file/218377
+chemisier;parementure;Ironing of facing;Repasser parementure;FER;0.342;https://dergipark.org.tr/en/download/article-file/218377
+chemisier;manche;Stitching rubber to sleeves;Poser élastique manches;AUTRE;0.373;https://dergipark.org.tr/en/download/article-file/218377
+chemisier;pinces;Stitching the dart of front yoke;Piquer pinces empiècement devant;PIQ;0.507;https://dergipark.org.tr/en/download/article-file/218377
+chemisier;manche;Joining the sleeve to yoke;Monter manche sur empiècement;PIQ;0.507;https://dergipark.org.tr/en/download/article-file/218377
+chemisier;corsage;Assembling the backs;Assembler dos;PIQ;0.553;https://dergipark.org.tr/en/download/article-file/218377
+chemisier;parementure;Assembling the facing;Monter parementure sur corps;PIQ;1.905;https://dergipark.org.tr/en/download/article-file/218377
+chemisier;parementure;Edge stitching of facing;Surpiquer bord parementure monté;PIQ;1.838;https://dergipark.org.tr/en/download/article-file/218377
+chemisier;parementure;Pick stitching of front yoke from the facing;Piquer empiècement devant par la parementure;PIQ;0.2;https://dergipark.org.tr/en/download/article-file/218377
+chemisier;corsage;Assembling the front;Assembler devant;PIQ;0.042;https://dergipark.org.tr/en/download/article-file/218377
+chemisier;corsage;Edge stitching of front;Surpiquer bord devant;PIQ;0.363;https://dergipark.org.tr/en/download/article-file/218377
+chemisier;corsage;Side seams;Fermer côtés;AUTRE;0.662;https://dergipark.org.tr/en/download/article-file/218377
+chemisier;ourlet;Hemming the trimming;Ourler garniture;PIQ;0.655;https://dergipark.org.tr/en/download/article-file/218377
+chemisier;manche;Overlock trimming of sleeve hem;Surjeter garniture bas de manche;SURJ;0.598;https://dergipark.org.tr/en/download/article-file/218377
+chemisier;manche;Trimming of sleeve hem;Poser garniture bas de manche;PIQ;1.005;https://dergipark.org.tr/en/download/article-file/218377
+chemisier;finition;Attaching rivet;Poser rivet;AUTRE;2.567;https://dergipark.org.tr/en/download/article-file/218377
+chemisier;col;Runstitching women's blouse collars (non-equipped universal lockstitch machine, MTM normal time 28.75 s);Piquer contour col (machine non équipée);PIQ;0.479;http://www.tekstilec.si/wp-content/uploads/2020/09/10.14502Tekstilec2020.63.203-215.pdf
+chemisier;col;Runstitching women's blouse collars (equipped universal lockstitch machine, auto tack/trim, MTM normal time 21.25 s);Piquer contour col (machine équipée coupe-fil);PIQ;0.354;http://www.tekstilec.si/wp-content/uploads/2020/09/10.14502Tekstilec2020.63.203-215.pdf
+robe;pinces;Sewing darts;Piquer pinces;PIQ;1.317;https://revistaindustriatextila.ro/images/2022/2/002%20YIBING%20Revista%20IndustriaTextila%20No2_2022.pdf
+robe;corsage;Joining shoulder seam;Assembler épaules;PIQ;1.683;https://revistaindustriatextila.ro/images/2022/2/002%20YIBING%20Revista%20IndustriaTextila%20No2_2022.pdf
+robe;col;Top-stitching under collar;Surpiquer dessous de col;PIQ;0.7;https://revistaindustriatextila.ro/images/2022/2/002%20YIBING%20Revista%20IndustriaTextila%20No2_2022.pdf
+robe;col;Joining under the collar and top collar;Assembler dessus et dessous de col;PIQ;1.25;https://revistaindustriatextila.ro/images/2022/2/002%20YIBING%20Revista%20IndustriaTextila%20No2_2022.pdf
+robe;col;Sewing collar on and down;Monter et rabattre col;PIQ;0.8;https://revistaindustriatextila.ro/images/2022/2/002%20YIBING%20Revista%20IndustriaTextila%20No2_2022.pdf
+robe;manche;Joining sleeve seam;Fermer manches;PIQ;1.117;https://revistaindustriatextila.ro/images/2022/2/002%20YIBING%20Revista%20IndustriaTextila%20No2_2022.pdf
+robe;manche;Setting in sleeve;Monter manches;PIQ;1.067;https://revistaindustriatextila.ro/images/2022/2/002%20YIBING%20Revista%20IndustriaTextila%20No2_2022.pdf
+robe;corsage;Joining centre back seam;Assembler milieu dos;PIQ;0.983;https://revistaindustriatextila.ro/images/2022/2/002%20YIBING%20Revista%20IndustriaTextila%20No2_2022.pdf
+robe;ceinture;Stitching waistband and lining;Monter ceinture et doublure;PIQ;1.1;https://revistaindustriatextila.ro/images/2022/2/002%20YIBING%20Revista%20IndustriaTextila%20No2_2022.pdf
+robe;corsage;Joining side seam;Fermer côtés;PIQ;0.9;https://revistaindustriatextila.ro/images/2022/2/002%20YIBING%20Revista%20IndustriaTextila%20No2_2022.pdf
+robe;manche;Attaching sleeve tab (actual standard time 51.6 s);Poser patte de manche;PIQ;0.86;https://revistaindustriatextila.ro/images/2022/2/002%20YIBING%20Revista%20IndustriaTextila%20No2_2022.pdf
+robe;poche;Attaching pocket to the garment;Poser poche;PIQ;0.367;https://revistaindustriatextila.ro/images/2022/2/002%20YIBING%20Revista%20IndustriaTextila%20No2_2022.pdf
+robe;fermeture;Attaching zipper;Poser fermeture à glissière;PIQ;2.0;https://revistaindustriatextila.ro/images/2022/2/002%20YIBING%20Revista%20IndustriaTextila%20No2_2022.pdf
+robe;finition;Kids dress - SAM value for trimming;Ébarber fils (robe enfant);MAN;0.55;https://ijiset.com/vol12/v12s4/IJISET_V12_I04_03.pdf
+debardeur;ourlet;Bottom hem;Ourler bas;RECOUV;0.35;https://ijiset.com/vol12/v12s4/IJISET_V12_I04_03.pdf
+debardeur;emmanchure;Armhole binding;Border emmanchure (1re);RECOUV;0.75;https://ijiset.com/vol12/v12s4/IJISET_V12_I04_03.pdf
+debardeur;emmanchure;Armhole binding;Border emmanchure (2e);RECOUV;0.71;https://ijiset.com/vol12/v12s4/IJISET_V12_I04_03.pdf
+debardeur;assemblage;shoulder attach;Assembler 1re épaule;SURJ;0.4;https://ijiset.com/vol12/v12s4/IJISET_V12_I04_03.pdf
+debardeur;encolure;Neck binding;Border encolure;RECOUV;0.35;https://ijiset.com/vol12/v12s4/IJISET_V12_I04_03.pdf
+debardeur;assemblage;2nd shoulder attach;Assembler 2e épaule;SURJ;0.34;https://ijiset.com/vol12/v12s4/IJISET_V12_I04_03.pdf
+debardeur;etiquette;Bottom label;Poser étiquette bas;PIQ;0.4;https://ijiset.com/vol12/v12s4/IJISET_V12_I04_03.pdf
+debardeur;finition;Peack tak;Faire point d'arrêt;PIQ;0.44;https://ijiset.com/vol12/v12s4/IJISET_V12_I04_03.pdf
+debardeur;etiquette;Print size label;Thermocoller étiquette taille;THERMO;0.44;https://ijiset.com/vol12/v12s4/IJISET_V12_I04_03.pdf
+debardeur;finition;Trimming;Ébarber fils;MAN;0.84;https://ijiset.com/vol12/v12s4/IJISET_V12_I04_03.pdf
+debardeur;controle;Checking;Contrôler pièce;MAN;0.4;https://ijiset.com/vol12/v12s4/IJISET_V12_I04_03.pdf
+debardeur;assemblage;Side seam attachment;Fermer côtés;SURJ;0.69;https://www.hilarispublisher.com/open-access/analysis-on-production-efficiency-of-lean-implemented-sewing-line-a-case-study-2165-8064-1000386.pdf
+debardeur;encolure;Binding attachment front neck;Border encolure devant;RECOUV;0.54;https://www.hilarispublisher.com/open-access/analysis-on-production-efficiency-of-lean-implemented-sewing-line-a-case-study-2165-8064-1000386.pdf
+debardeur;emmanchure;Binding attachment arm hole;Border emmanchures;RECOUV;0.58;https://www.hilarispublisher.com/open-access/analysis-on-production-efficiency-of-lean-implemented-sewing-line-a-case-study-2165-8064-1000386.pdf
+debardeur;assemblage;Shoulder attachment;Assembler épaules;SURJ;0.32;https://www.hilarispublisher.com/open-access/analysis-on-production-efficiency-of-lean-implemented-sewing-line-a-case-study-2165-8064-1000386.pdf
+debardeur;ourlet;Bottom hemming;Ourler bas;RECOUV;0.48;https://www.hilarispublisher.com/open-access/analysis-on-production-efficiency-of-lean-implemented-sewing-line-a-case-study-2165-8064-1000386.pdf
+debardeur;etiquette;Label heat setting;Thermocoller étiquette;THERMO;0.2;https://www.hilarispublisher.com/open-access/analysis-on-production-efficiency-of-lean-implemented-sewing-line-a-case-study-2165-8064-1000386.pdf
+debardeur;finition;Secure tack;Faire points d'arrêt;PIQ;0.38;https://www.hilarispublisher.com/open-access/analysis-on-production-efficiency-of-lean-implemented-sewing-line-a-case-study-2165-8064-1000386.pdf
