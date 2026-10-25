@@ -1,0 +1,10 @@
+Op_ID;Description;SAM_min;Predecesseurs;Type_Machine;Competences;Section;Optionnel
+OP010;Préparation pièces;0.45;;table_travail;lecture_plan;Montage;
+OP020;Montage corps-devant;1.20;OP010;piqueuse_plate;couture_droite;Montage;
+OP030;Montage manches;0.95;OP010;piqueuse_plate;couture_droite;Montage;
+OP040;Fermeture côtés;0.80;"OP020;OP030";surjeteuse_5_fils;surjet;Montage;
+OP050;Pose col;1.10;OP040;piqueuse_plate;couture_courbe;Montage;
+OP060;Piqure col;0.65;OP050;piqueuse_plate;piqure_apparente;Finition;
+OP070;Ourlet bas;0.55;OP040;piqueuse_2_aiguilles;ourlet;Finition;
+OP080;Contrôle final;0.30;"OP060;OP070";table_controle;controle_qualite;Qualite;
+OP090;Repassage/Emballage;0.40;OP080;presse_vapeur;repassage;Expedition;

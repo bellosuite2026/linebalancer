@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="workerBody" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#12b76a"/>
+      <stop offset="100%" stop-color="#0e9e58"/>
+    </linearGradient>
+    <linearGradient id="skinTone" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fbd38d"/>
+      <stop offset="100%" stop-color="#f6ad55"/>
+    </linearGradient>
+    <linearGradient id="apronGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1a365d"/>
+      <stop offset="100%" stop-color="#2c5282"/>
+    </linearGradient>
+    <linearGradient id="darkGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2d3748"/>
+      <stop offset="100%" stop-color="#1a202c"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="52" width="56" height="8" rx="3" fill="url(#darkGrad)"/>
+  <ellipse cx="32" cy="16" rx="14" ry="16" fill="url(#skinTone)" stroke="#cbd5e0" stroke-width="1"/>
+  <ellipse cx="32" cy="14" rx="10" ry="10" fill="#e2e8f0" stroke="#cbd5e0" stroke-width="1"/>
+  <ellipse cx="28" cy="13" rx="2" ry="2" fill="#2d3748"/>
+  <ellipse cx="36" cy="13" rx="2" ry="2" fill="#2d3748"/>
+  <path d="M28 18 Q32 16 36 18" stroke="#4a5568" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M26 24 Q32 28 38 24" fill="url(#apronGrad)" stroke="#2c5282" stroke-width="2"/>
+  <rect x="18" y="38" width="28" height="20" rx="4" fill="url(#workerBody)" stroke="#0e9e58" stroke-width="1.5"/>
+  <rect x="22" y="40" width="20" height="16" rx="2" fill="#fbd38d" stroke="#f6ad55" stroke-width="0.5"/>
+  <circle cx="26" cy="45" r="2" fill="#2d3748"/>
+  <circle cx="38" cy="45" r="2" fill="#2d3748"/>
+  <rect x="16" y="50" width="32" height="10" rx="3" fill="#1a202c" stroke="#4a5568" stroke-width="1"/>
+  <g stroke="#68d391" stroke-width="2" stroke-linecap="round">
+    <line x1="20" y1="52" x2="20" y2="58"/>
+    <line x1="44" y1="52" x2="44" y2="58"/>
+  </g>
+  <rect x="14" y="4" width="36" height="6" rx="2" fill="#12b76a" opacity="0.9"/>
+  <text x="32" y="9" font-family="monospace" font-size="6" font-weight="bold" fill="#faf089" text-anchor="middle">OUVRIER</text>
+</svg>

@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="body" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2d3748"/>
+      <stop offset="100%" stop-color="#1a202c"/>
+    </linearGradient>
+    <linearGradient id="beam" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#fc8181" stop-opacity="0"/>
+      <stop offset="50%" stop-color="#fc8181" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#fc8181" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="laser" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f56565"/>
+      <stop offset="100%" stop-color="#c53030"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#bee3f8" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#63b3ed" stop-opacity="0.2"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="44" width="60" height="16" rx="2" fill="#1a202c"/>
+  <rect x="4" y="46" width="56" height="4" rx="1" fill="#2d3748"/>
+  <rect x="4" y="52" width="56" height="6" rx="1" fill="#2d3748"/>
+  <path d="M8 44 L8 8 L56 8 L56 44" fill="url(#body)" stroke="#4a5568" stroke-width="1.5"/>
+  <rect x="10" y="10" width="44" height="32" rx="1" fill="#0f172a" stroke="#4a5568" stroke-width="1"/>
+  <rect x="10" y="10" width="44" height="32" rx="1" fill="url(#glass)"/>
+  <line x1="14" y1="16" x2="50" y2="16" stroke="url(#beam)" stroke-width="2"/>
+  <line x1="14" y1="22" x2="50" y2="22" stroke="url(#beam)" stroke-width="1.5"/>
+  <line x1="14" y1="28" x2="50" y2="28" stroke="url(#beam)" stroke-width="1"/>
+  <line x1="14" y1="34" x2="50" y2="34" stroke="url(#beam)" stroke-width="0.8"/>
+  <line x1="32" y1="8" x2="32" y2="4" stroke="#fc8181" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="32" cy="4" r="3" fill="#fc8181">
+    <animate attributeName="opacity" values="1;0.3;1" dur="0.8s" repeatCount="indefinite"/>
+  </circle>
+  <path d="M28 4 L24 8 L40 8 L36 4 Z" fill="#e53e3e" stroke="#c53030" stroke-width="1"/>
+  <rect x="20" y="38" width="24" height="4" rx="1" fill="#4a5568"/>
+  <g stroke="#a0aec0" stroke-width="1.5" fill="none">
+    <path d="M14 42 Q20 38 26 40 Q32 42 38 40 Q44 38 50 42"/>
+  </g>
+  <rect x="3" y="58" width="58" height="3" rx="1" fill="#2d3748"/>
+  <g fill="#4a5568">
+    <circle cx="14" cy="52" r="2"/>
+    <circle cx="26" cy="52" r="2"/>
+    <circle cx="38" cy="52" r="2"/>
+    <circle cx="50" cy="52" r="2"/>
+  </g>
+  <text x="32" y="62" font-family="Arial, sans-serif" font-size="5" font-weight="bold" fill="#fc8181" text-anchor="middle">LASER</text>
+  <rect x="48" y="4" width="12" height="20" rx="2" fill="#1a202c" stroke="#4a5568" stroke-width="1"/>
+  <g fill="#63b3ed">
+    <rect x="50" y="6" width="8" height="3" rx="1"/>
+    <rect x="50" y="11" width="8" height="3" rx="1"/>
+    <rect x="50" y="16" width="8" height="3" rx="1"/>
+  </g>
+</svg>

@@ -1,0 +1,22 @@
+Op_ID;Description;SAM_min;Predecesseurs;Type_Machine;Competences;Section;Optionnel
+OP010;Préparation & lecture plan;0.50;;table_travail;lecture_plan;Montage;
+OP020;Tri & marquage pièces (devants, dos, manches, col, revers, poches, doublure);0.80;OP010;table_travail;tri_pieces;marquage_pieces;Montage;
+OP030;Thermocollage pièces (revers, col, parementures, poches, manches);1.10;OP020;presse_vapeur;thermocollage;Montage;
+OP040;Montage poches passepoilées (devants);2.20;OP030;piqueuse_plate;couture_courbe;poche_passepoilee;Montage;
+OP050;Montage poches poitrine (plaquée + rabat);1.10;OP030;piqueuse_plate;couture_droite;pose_poche;Montage;
+OP060;Assemblage corps (épaules + côtés);0.95;OP040;OP050;piqueuse_plate;couture_droite;Montage;
+OP070;Préparation & montage revers (couture + cranage + retournement);1.80;OP030;piqueuse_plate;couture_courbe;Montage;
+OP080;Montage revers sur corps (revers + col);1.40;OP060;OP070;piqueuse_plate;couture_courbe;pose_col;Montage;
+OP090;Préparation manches (couture manche + fente + poignet);2.10;OP030;piqueuse_plate;couture_droite;montage_manche;Montage;
+OP100;Montage manches dans emmanchures (emboitage);1.30;OP080;OP090;piqueuse_plate;couture_courbe;montage_manche;Montage;
+OP110;Fermeture côtés corps + manches (une seule couture);0.95;OP100;surjeteuse_5_fils;surjet_5_fils;Montage;
+OP120;Montage doublure (corps + manches);1.60;OP030;piqueuse_plate;couture_droite;Montage;
+OP130;Pose doublure dans veste (enfourchement + retournement);1.80;OP110;OP120;piqueuse_plate;couture_courbe;Montage;
+OP140;Piqure apparente (bords, revers, poches, manches);1.20;OP130;piqueuse_plate;piqure_apparente;Finition;
+OP150;Boutonnières (2-3 devant + 1 manche);0.85;OP140;piqueuse_boutonniere;piqueuse_boutonniere;Finition;
+OP160;Pose boutons (devant + manche);0.40;OP150;piqueuse_bouton;piqueuse_bouton;Finition;
+OP170;Ourlet bas veste + manches (invisible);0.90;OP110;piqueuse_2_aiguilles;ourlet;Finition;
+OP180;Contrôle visuel & mesures complet;0.50;OP140;OP170;table_controle;controle_visuel;controle_mesures;Qualite;
+OP190;Repassage final complet (vapeur + forme corps/manches);1.00;OP180;presse_vapeur;repassage;formage_vapeur;Finition;
+OP200;Pliage veste + housse;0.45;OP190;table_travail;pliage_specifique;mise_sous_poche;Expedition;
+OP210;Étiquetage + cartonnage;0.30;OP200;table_travail;etiquetage_final;cartonnage;Expedition;

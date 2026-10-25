@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="pqBody" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#3182ce"/>
+      <stop offset="100%" stop-color="#2b6cb0"/>
+    </linearGradient>
+    <linearGradient id="metalGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#e2e8f0"/>
+      <stop offset="50%" stop-color="#cbd5e0"/>
+      <stop offset="100%" stop-color="#a0aec0"/>
+    </linearGradient>
+    <linearGradient id="darkGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2d3748"/>
+      <stop offset="100%" stop-color="#1a202c"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="52" width="56" height="8" rx="3" fill="url(#darkGrad)"/>
+  <path d="M10 14 L10 52 Q10 56 14 56 L50 56 Q54 56 54 52 L54 14 Q54 10 50 10 L14 10 Q10 10 10 14 Z" fill="url(#pqBody)" stroke="#2b6cb0" stroke-width="1.5"/>
+  <ellipse cx="32" cy="14" rx="16" ry="8" fill="#1a365d" stroke="#3182ce" stroke-width="2"/>
+  <ellipse cx="32" cy="14" rx="10" ry="4" fill="#fefcbf" stroke="#ecc94b" stroke-width="1"/>
+  <g font-family="monospace" font-size="5" font-weight="bold" fill="#c05621" text-anchor="middle">
+    <text x="32" y="12">●</text>
+    <text x="32" y="17">4</text>
+    <text x="32" y="21" font-size="4">TROUS</text>
+  </g>
+  <rect x="16" y="26" width="32" height="8" rx="2" fill="#c05621" stroke="#9c4221" stroke-width="1" opacity="0.9"/>
+  <text x="32" y="31" font-family="monospace" font-size="6" font-weight="bold" fill="#faf089" text-anchor="middle">L=12mm W=3mm</text>
+  <rect x="14" y="36" width="36" height="1" rx="0.5" fill="#dd6b20" opacity="0.7"/>
+  <text x="32" y="40" font-family="monospace" font-size="4" fill="#faf089" text-anchor="middle">Densité 0.5mm</text>
+  <rect x="20" y="46" width="24" height="8" rx="2" fill="#1a202c" stroke="#dd6b20" stroke-width="2" opacity="0.9"/>
+  <text x="32" y="51" font-family="monospace" font-size="5" fill="#faf089" text-anchor="middle">AUTO-CUT</text>
+  <rect x="20" y="56" width="24" height="4" rx="1" fill="#c05621" opacity="0.9"/>
+  <text x="32" y="59" font-family="monospace" font-size="5" fill="#faf089" text-anchor="middle">AUTO</text>
+  <rect x="14" y="4" width="36" height="6" rx="2" fill="#c05621" opacity="0.9"/>
+  <text x="32" y="9" font-family="monospace" font-size="6" font-weight="bold" fill="#faf089" text-anchor="middle">BOUTONNIÈRE AUTO</text>
+</svg>

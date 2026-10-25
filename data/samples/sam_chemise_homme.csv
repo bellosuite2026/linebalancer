@@ -1,0 +1,22 @@
+Op_ID;Description;SAM_min;Predecesseurs;Type_Machine;Competences;Section;Optionnel
+OP010;Préparation & lecture plan;0.45;;table_travail;lecture_plan;Montage;FALSE
+OP020;Tri & marquage pièces (devant, dos, manches, col, poches);0.60;OP010;table_travail;tri_pieces,marquage_pieces;Montage;FALSE
+OP030;Thermocollage pièces (col, pattes, poignets, parementures);0.80;OP020;presse_vapeur;thermocollage;Montage;FALSE
+OP040;Montage corps-devant (pinces, poches plaquees);1.20;OP030;piqueuse_plate;couture_droite,pose_poche;Montage;FALSE
+OP050;Montage dos (pinces, couture milieu dos);0.95;OP030;piqueuse_plate;couture_droite;Montage;FALSE
+OP060;Fermeture épaules (devant + dos);0.45;OP040,OP050;piqueuse_plate;couture_droite;Montage;FALSE
+OP070;Préparation & montage col (pose col, piqure col);1.80;OP060;piqueuse_plate;couture_courbe,pose_col;Montage;FALSE
+OP080;Préparation & montage manches (couture manche, fente, poignet);2.20;OP060;piqueuse_plate;couture_droite,montage_manche;Montage;FALSE
+OP090;Montage manches dans emmanchures (emboitage);1.10;OP070,OP080;piqueuse_plate;couture_courbe,montage_manche;Montage;FALSE
+OP100;Fermeture côtés (devant + dos + manches);0.80;OP090;surjeteuse_5_fils;surjet_5_fils;Montage;FALSE
+OP110;Pose pattes boutonnage (devant);0.65;OP060;piqueuse_plate;couture_droite;Montage;FALSE
+OP120;Piqure pattes boutonnage (apparente);0.55;OP110;piqueuse_plate;piqure_apparente;Montage;FALSE
+OP130;Piqure col (apparente);0.70;OP070;piqueuse_plate;piqure_apparente;Montage;FALSE
+OP140;Finition bas corps (ourlet double);0.55;OP100;piqueuse_2_aiguilles;ourlet;Finition;FALSE
+OP150;Finition bas manches (ourlet + poignet);0.65;OP090;piqueuse_2_aiguilles;ourlet;Finition;FALSE
+OP160;Boutonnières (7-8 boutonnières);0.90;OP130;piqueuse_boutonniere;piqueuse_boutonniere;Finition;FALSE
+OP170;Pose boutons (7-8 boutons);0.45;OP160;piqueuse_bouton;piqueuse_bouton;Finition;FALSE
+OP180;Contrôle visuel & mesures (cahier charges);0.40;OP140,OP150,OP170;table_controle;controle_visuel,controle_mesures;Qualite;FALSE
+OP190;Repassage final (vapeur + forme);0.70;OP180;presse_vapeur;repassage,formage_vapeur;Finition;FALSE
+OP200;Pliage chemise + mise sous pochette;0.35;OP190;table_travail;pliage,mise_sous_poche;Expedition;FALSE
+OP210;Étiquetage final + cartonnage;0.25;OP200;table_travail;etiquetage_final,cartonnage;Expedition;FALSE

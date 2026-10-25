@@ -1,0 +1,15 @@
+Poste_ID;Nom;Type_Machine;Disponible;Max_Ouvriers;Section
+WS01;Poste préparation & lecture plan;table_travail;Oui;1;Montage
+WS02;Piqueuse plate 1;piqueuse_plate;Oui;1;Montage
+WS03;Piqueuse plate 2;piqueuse_plate;Oui;1;Montage
+WS04;Piqueuse plate 3;piqueuse_plate;Oui;1;Montage
+WS05;Surjeteuse 5 fils;surjeteuse_5_fils;Oui;1;Montage
+WS06;Surjeteuse 4 fils;surjeteuse_4_fils;Oui;1;Montage
+WS07;Surjeteuse 3 fils;surjeteuse_3_fils;Oui;1;Montage
+WS08;Piqueuse 2 aiguilles;piqueuse_2_aiguilles;Oui;1;Finition
+WS09;Piqueuse boutonnière;piqueuse_boutonniere;Oui;1;Finition
+WS10;Piqueuse bouton;piqueuse_bouton;Oui;1;Finition
+WS11;Poste contrôle & mesures;table_controle;Oui;1;Qualite
+WS12;Presse vapeur 1;presse_vapeur;Oui;1;Finition
+WS13;Presse vapeur 2;presse_vapeur;Oui;1;Finition
+WS14;Poste emballage & étiquetage;table_travail;Oui;1;Expedition

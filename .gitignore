@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+.venv/
+venv/
+env/
+*.so
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Build
+dist/
+build/
+*.whl
+
+# Data
+results/
+*.xlsx
+*.json
+!gui/project.json
+
+# Qt
+gui/project.json
+
+# OS
+.DS_Store
+Thumbs.db

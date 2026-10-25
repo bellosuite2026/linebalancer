@@ -1,0 +1,11 @@
+Ouvrier_ID;Nom;Competences;Efficacite;Disponible;Poste_Assigne
+W001;Marie D.;lecture_plan;tri_pieces;marquage_pieces;thermocollage;couture_droite;couture_courbe;1.00;Oui;
+W002;Ahmed B.;couture_droite;surjet_4_fils;surjet_5_fils;montage_manche;1.05;Oui;
+W003;Sophie L.;couture_droite;piqure_apparente;pose_col;pose_poignet;pose_poche;0.95;Oui;
+W004;Karim M.;couture_droite;surjet_4_fils;surjet_5_fils;thermocollage;1.10;Oui;
+W005;Fatou S.;piqueuse_2_aiguilles;ourlet;piqueuse_boutonniere;piqueuse_bouton;1.00;Oui;
+W006;Youssef A.;presse_vapeur;formage_vapeur;couture_droite;1.00;Oui;
+W007;Leila K.;controle_visuel;controle_mesures;controle_normes;lecture_plan;1.00;Oui;
+W008;Omar T.;pliage_specifique;mise_sous_poche;etiquetage_final;cartonnage;1.00;Oui;
+W009;Aicha R.;couture_droite;couture_courbe;surjet_3_fils;pose_passant;0.98;Oui;
+W010;Mehdi L.;couture_droite;montage_manche;pose_poche;1.02;Oui;

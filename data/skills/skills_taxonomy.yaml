@@ -1,0 +1,298 @@
+# Taxonomie des compétences textile - Habillement
+# Structure hiérarchique: catégorie > famille > compétence spécifique
+# Utilisée pour: validation, formation, affectation postes, polyvalence
+
+categories:
+  - id: "coupe"
+    name: "Coupe & Préparation"
+    description: "Opérations de coupe, préparation pièces, tri"
+    families:
+      - id: "coupe_manuelle"
+        name: "Coupe manuelle"
+        skills:
+          - id: "coupe_ciseaux"
+            name: "Coupe aux ciseaux"
+            level: 1
+          - id: "coupe_disque"
+            name: "Coupe au disque/tranchant"
+            level: 2
+          - id: "tri_pieces"
+            name: "Tri et regroupement pièces"
+            level: 1
+          - id: "marquage_pieces"
+            name: "Marquage pièces (taille, repères)"
+            level: 1
+      - id: "coupe_auto"
+        name: "Coupe automatisée"
+        skills:
+          - id: "coupe_laser"
+            name: "Coupe laser"
+            level: 3
+          - id: "coupe_jet_eau"
+            name: "Coupe jet d'eau"
+            level: 3
+          - id: "chargement_coupeuse"
+            name: "Chargement/déchargement coupeuse auto"
+            level: 2
+      - id: "preparation"
+        name: "Préparation & étiquetage"
+        skills:
+          - id: "etiquetage"
+            name: "Étiquetage pièces (taille, modèle, lot)"
+            level: 1
+          - id: "controle_coupe"
+            name: "Contrôle qualité coupe"
+            level: 2
+          - id: "emballage_coupe"
+            name: "Emballage kits coupe"
+            level: 1
+
+  - id: "couture"
+    name: "Couture & Assemblage"
+    description: "Opérations de piqûre, surjet, assemblage pièces"
+    families:
+      - id: "piqueuse_plate"
+        name: "Piqueuse plate (point droit)"
+        skills:
+          - id: "couture_droite"
+            name: "Couture droite standard"
+            level: 1
+          - id: "couture_courbe"
+            name: "Couture courbe/arrondie"
+            level: 2
+          - id: "couture_angle"
+            name: "Couture angles/vifs"
+            level: 2
+          - id: "piqure_apparente"
+            name: "Piqure apparente/décorative"
+            level: 3
+          - id: "couture_renforcee"
+            name: "Couture renforcée (points arrière, barres)"
+            level: 2
+          - id: "reglage_piqueuse_plate"
+            name: "Réglage piqueuse plate (tension, longueur point)"
+            level: 3
+      - id: "surjeteuse"
+        name: "Surjeteuse (overlock)"
+        skills:
+          - id: "surjet_3_fils"
+            name: "Surjet 3 fils"
+            level: 1
+          - id: "surjet_4_fils"
+            name: "Surjet 4 fils"
+            level: 2
+          - id: "surjet_5_fils"
+            name: "Surjet 5 fils (sécurité)"
+            level: 2
+          - id: "surjet_elastique"
+            name: "Surjet élastique/lingerie"
+            level: 3
+          - id: "reglage_surjeteuse"
+            name: "Réglage surjeteuse (différentiel, largeur)"
+            level: 3
+      - id: "piqueuse_speciale"
+        name: "Piqueuses spéciales"
+        skills:
+          - id: "piqueuse_2_aiguilles"
+            name: "Piqueuse 2 aiguilles (double piqûre)"
+            level: 2
+          - id: "piqueuse_boutonniere"
+            name: "Piqueuse boutonnière"
+            level: 3
+          - id: "piqueuse_bouton"
+            name: "Piqueuse pose bouton"
+            level: 2
+          - id: "piqueuse_ourlet"
+            name: "Piqueuse ourlet invisible/roulé"
+            level: 2
+          - id: "piqueuse_galon"
+            name: "Piqueuse pose galon/biais"
+            level: 2
+          - id: "piqueuse_pointe"
+            name: "Piqueuse point de chaînette"
+            level: 2
+          - id: "piqueuse_zigzag"
+            name: "Piqueuse zigzag"
+            level: 2
+      - id: "assemblage_complexe"
+        name: "Assemblages complexes"
+        skills:
+          - id: "montage_manche"
+            name: "Montage manche (emboitage)"
+            level: 3
+          - id: "pose_col"
+            name: "Pose col (chemise, polo, veste)"
+            level: 3
+          - id: "pose_poignet"
+            name: "Pose poignets (chemise)"
+            level: 3
+          - id: "patte_boutonnage"
+            name: "Patte de boutonnage"
+            level: 3
+          - id: "fente_manche"
+            name: "Fente manche (chemise)"
+            level: 3
+          - id: "poche_plaquee"
+            name: "Poche plaquée"
+            level: 2
+          - id: "poche_italienne"
+            name: "Poche italienne/insérée"
+            level: 3
+          - id: "poche_passepoilee"
+            name: "Poche passepoilée"
+            level: 4
+          - id: "ceinture_pantalon"
+            name: "Ceinture pantalon (passants, boucle)"
+            level: 3
+
+  - id: "finition"
+    name: "Finition & Détail"
+    description: "Opérations de finition, repassage, contrôle, emballage"
+    families:
+      - id: "repassage"
+        name: "Repassage & Vapeur"
+        skills:
+          - id: "repassage_fer"
+            name: "Repassage fer à vapeur"
+            level: 1
+          - id: "presse_vapeur"
+            name: "Presse à vapeur (haut/bas)"
+            level: 2
+          - id: "repasseuse_tunnel"
+            name: "Repasseuse tunnel"
+            level: 2
+          - id: "formage_vapeur"
+            name: "Formage vapeur (manches, cols)"
+            level: 3
+      - id: "controle"
+        name: "Contrôle Qualité"
+        skills:
+          - id: "controle_visuel"
+            name: "Contrôle visuel (coutures, défauts tissu)"
+            level: 1
+          - id: "controle_mesures"
+            name: "Contrôle mesures (toisé)"
+            level: 2
+          - id: "controle_finition"
+            name: "Contrôle finition (boutons, fils, étiquettes)"
+            level: 2
+          - id: "controle_normes"
+            name: "Contrôle selon cahier des charges/client"
+            level: 3
+      - id: "emballage"
+        name: "Emballage & Expédition"
+        skills:
+          - id: "pliage"
+            name: "Pliage standard (chemise, tee-shirt, pantalon)"
+            level: 1
+          - id: "pliage_specifique"
+            name: "Pliage spécifique (veste, manteau)"
+            level: 2
+          - id: "mise_sous_poche"
+            name: "Mise sous pochette/sachet"
+            level: 1
+          - id: "etiquetage_final"
+            name: "Étiquetage final (prix, composition, origine)"
+            level: 1
+          - id: "cartonnage"
+            name: "Cartonnage / mise en caisse"
+            level: 1
+
+  - id: "maintenance"
+    name: "Maintenance & Réglage Machines"
+    description: "Maintenance premier niveau, réglages, changement pièces"
+    families:
+      - id: "maintenance_piqueuse"
+        name: "Maintenance piqueuses"
+        skills:
+          - id: "changement_aiguille"
+            name: "Changement aiguille"
+            level: 1
+          - id: "changement_canette"
+            name: "Changement canette / enfilage"
+            level: 1
+          - id: "reglage_tension"
+            name: "Réglage tension fil"
+            level: 2
+          - id: "nettoyage_piqueuse"
+            name: "Nettoyage/graissage piqueuse"
+            level: 1
+          - id: "diagnostic_panne"
+            name: "Diagnostic pannes courantes"
+            level: 3
+      - id: "maintenance_surjeteuse"
+        name: "Maintenance surjeteuses"
+        skills:
+          - id: "changement_couteau"
+            name: "Changement couteau surjeteuse"
+            level: 2
+          - id: "reglage_differentiel"
+            name: "Réglage différentiel"
+            level: 3
+
+  - id: "logistique"
+    name: "Logistique & Flux"
+    description: "Gestion flux, approvisionnement, transport interne"
+    families:
+      - id: "approvisionnement"
+        name: "Approvisionnement postes"
+        skills:
+          - id: "lecture_bon_travail"
+            name: "Lecture bon de travail / OF"
+            level: 1
+          - id: "preparation_kits"
+            name: "Préparation kits pièces"
+            level: 1
+          - id: "gerage_stocks"
+            name: "Gestion stocks intermédiaires"
+            level: 2
+
+# Matrice de polyvalence suggérée par poste type
+poste_competences_requises:
+  "poste_preparation":
+    obligatoires: ["tri_pieces", "marquage_pieces", "etiquetage"]
+    optionnelles: ["lecture_bon_travail", "controle_coupe"]
+  "poste_piqueuse_plate":
+    obligatoires: ["couture_droite"]
+    optionnelles: ["couture_courbe", "piqure_apparente", "reglage_piqueuse_plate", "changement_aiguille"]
+  "poste_surjeteuse":
+    obligatoires: ["surjet_3_fils", "surjet_4_fils"]
+    optionnelles: ["surjet_5_fils", "reglage_surjeteuse", "changement_couteau"]
+  "poste_piqueuse_speciale":
+    obligatoires: []  # Dépend de la machine
+    optionnelles: ["piqueuse_2_aiguilles", "piqueuse_boutonniere", "piqueuse_bouton", "piqueuse_ourlet", "piqueuse_galon"]
+  "poste_assemblage_complexe":
+    obligatoires: ["couture_droite", "couture_courbe"]
+    optionnelles: ["montage_manche", "pose_col", "pose_poignet", "patte_boutonnage", "poche_plaquee", "poche_italienne"]
+  "poste_finition_repassage":
+    obligatoires: ["repassage_fer"]
+    optionnelles: ["presse_vapeur", "formage_vapeur", "controle_visuel", "controle_mesures"]
+  "poste_controle_final":
+    obligatoires: ["controle_visuel", "controle_finition"]
+    optionnelles: ["controle_mesures", "controle_normes"]
+  "poste_emballage":
+    obligatoires: ["pliage", "mise_sous_poche", "etiquetage_final"]
+    optionnelles: ["pliage_specifique", "cartonnage"]
+
+# Niveaux de compétence
+niveaux:
+  1: "Débutant - Exécution sous supervision, tâches simples répétitives"
+  2: "Autonome - Exécution standard, réglages basiques, détection anomalies"
+  3: "Expert - Réglages complexes, dépannage, formation, opérations critiques"
+  4: "Référent/Technicien - Maintenance avancée, optimisation, création gammes"
+
+# Correspondance machine -> compétences minimales
+machine_competences_min:
+  "piqueuse_plate": ["couture_droite"]
+  "piqueuse_2_aiguilles": ["couture_droite", "piqueuse_2_aiguilles"]
+  "surjeteuse_3_fils": ["surjet_3_fils"]
+  "surjeteuse_4_fils": ["surjet_3_fils", "surjet_4_fils"]
+  "surjeteuse_5_fils": ["surjet_4_fils", "surjet_5_fils"]
+  "piqueuse_boutonniere": ["piqueuse_boutonniere"]
+  "piqueuse_bouton": ["piqueuse_bouton"]
+  "piqueuse_ourlet": ["piqueuse_ourlet"]
+  "piqueuse_galon": ["piqueuse_galon"]
+  "presse_vapeur": ["repassage_fer", "presse_vapeur"]
+  "repasseuse_tunnel": ["repassage_fer"]
+  "table_controle": ["controle_visuel"]
+  "table_travail": ["tri_pieces", "lecture_bon_travail"]

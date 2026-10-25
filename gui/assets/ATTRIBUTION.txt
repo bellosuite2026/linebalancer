@@ -1,0 +1,21 @@
+# Attribution — Icônes et Assets Graphiques
+
+## Icônes UI (gui/assets/icons/)
+Dessinées spécialement pour Textile Line Balancer.
+Licence : MIT (libres de droit, sans attribution requise).
+
+## Icônes Machines (gui/assets/machines/)
+Les icônes SVG de machines textiles sont adaptées de ressources
+open-source / free-tier. Chaque icône représente une machine type
+de l'industrie de la confection :
+
+- piqueuse_plate, surjeteuse, presse_vapeur, etc.
+- Licence : CC0 / Libre de droit pour usage commercial.
+
+## Icônes Workers (gui/assets/workers/)
+- worker_default.svg : Icône générique d'opérateur.
+- Licence : Domaine public.
+
+## Polices
+- Segoe UI Variable / Segoe UI : Police système Microsoft.
+- Cascadia Mono / Consolas : Police monospace pour terminal.

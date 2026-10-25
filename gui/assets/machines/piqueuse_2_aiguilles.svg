@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="phBody" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ed8936"/>
+      <stop offset="100%" stop-color="#dd6b20"/>
+    </linearGradient>
+    <linearGradient id="metalGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#e2e8f0"/>
+      <stop offset="50%" stop-color="#cbd5e0"/>
+      <stop offset="100%" stop-color="#a0aec0"/>
+    </linearGradient>
+    <linearGradient id="darkGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2d3748"/>
+      <stop offset="100%" stop-color="#1a202c"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="52" width="56" height="8" rx="3" fill="url(#darkGrad)"/>
+  <path d="M8 14 L8 52 Q8 56 12 52 L52 52 Q56 52 56 48 L56 14 Q56 10 52 10 L12 10 Q8 10 8 14 Z" fill="url(#phBody)" stroke="#c05621" stroke-width="1.5"/>
+  <ellipse cx="32" cy="14" rx="18" ry="10" fill="#faf089" stroke="#c05621" stroke-width="2"/>
+  <ellipse cx="32" cy="14" rx="12" ry="6" fill="#fefcbf" stroke="#ecc94b" stroke-width="1"/>
+  <g font-family="monospace" font-size="5" font-weight="bold" fill="#c05621" text-anchor="middle">
+    <text x="32" y="13">●</text>
+    <text x="32" y="19">2</text>
+    <text x="32" y="23" font-size="4">AIGUILLES</text>
+  </g>
+  <rect x="42" y="20" width="10" height="30" rx="1" fill="url(#metalGrad)" stroke="#a0aec0" stroke-width="1"/>
+  <rect x="43" y="44" width="12" height="3" rx="1" fill="#718096"/>
+  <line x1="46" y1="45" x2="46" y2="50" stroke="#e2e8f0" stroke-width="2" stroke-linecap="round"/>
+  <line x1="51" y1="45" x2="51" y2="50" stroke="#e2e8f0" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="46" cy="50" r="1.5" fill="#e2e8f0" stroke="#cbd5e0" stroke-width="0.5"/>
+  <circle cx="51" cy="50" r="1.5" fill="#e2e8f0" stroke="#cbd5e0" stroke-width="0.5"/>
+  <path d="M38 38 L52 38 L50 44 L40 44 Z" fill="#a0aec0" stroke="#718096" stroke-width="1"/>
+  <g fill="#4a5568" stroke="#2d3748" stroke-width="0.5">
+    <rect x="34" y="42.5" width="2" height="2" rx="0.5"/>
+    <rect x="37" y="42.5" width="2" height="2" rx="0.5"/>
+    <rect x="40" y="42.5" width="2" height="2" rx="0.5"/>
+    <rect x="43" y="42.5" width="2" height="2" rx="0.5"/>
+    <rect x="46" y="42.5" width="2" height="2" rx="0.5"/>
+    <rect x="49" y="42.5" width="2" height="2" rx="0.5"/>
+    <rect x="52" y="42.5" width="2" height="2" rx="0.5"/>
+  </g>
+  <rect x="30" y="38" width="20" height="10" rx="2" fill="#1a202c" stroke="#4a5568" stroke-width="1"/>
+  <ellipse cx="40" cy="43" rx="6" ry="3" fill="#2d3748" stroke="#4a5568" stroke-width="1"/>
+  <rect x="14" y="10" width="8" height="30" rx="2" fill="#1a202c" stroke="#4a5568" stroke-width="1"/>
+  <g fill="#e2e8f0">
+    <circle cx="18" cy="16" r="3"/>
+    <circle cx="18" cy="24" r="3"/>
+    <circle cx="18" cy="32" r="3"/>
+  </g>
+  <g stroke="#ecc94b" stroke-width="1.5" stroke-linecap="round">
+    <line x1="18" y1="19" x2="18" y2="21"/>
+    <line x1="18" y1="27" x2="18" y2="29"/>
+    <line x1="18" y1="35" x2="18" y2="37"/>
+  </g>
+  <path d="M18 10 L18 8 Q22 6 26 8 L26 12" stroke="#cbd5e0" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M20 38 L20 50 L18 52 L16 50 L16 38 Z" fill="#e53e3e" stroke="#c53030" stroke-width="1"/>
+  <circle cx="58" cy="42" r="8" fill="#1a202c" stroke="#4a5568" stroke-width="2"/>
+  <circle cx="58" cy="42" r="4" fill="#2d3748"/>
+  <g stroke="#63b3ed" stroke-width="2" stroke-linecap="round">
+    <line x1="58" y1="38" x2="58" y2="34"/>
+    <line x1="58" y1="46" x2="58" y2="50"/>
+    <line x1="54" y1="42" x2="50" y2="42"/>
+    <line x1="62" y1="42" x2="66" y2="42"/>
+  </g>
+  <text x="58" y="45" font-family="monospace" font-size="6" font-weight="bold" fill="#63b3ed" text-anchor="middle">mm</text>
+  <rect x="16" y="42" width="28" height="10" rx="2" fill="#c05621" opacity="0.9"/>
+  <text x="30" y="49" font-family="Arial, sans-serif" font-size="7" font-weight="bold" fill="#faf089" text-anchor="middle">JUKI</text>
+  <text x="30" y="55" font-family="monospace" font-size="5" fill="#faf089" text-anchor="middle">LH-3528</text>
+  <rect x="50" y="10" width="12" height="18" rx="2" fill="#1a202c" stroke="#4a5568" stroke-width="1"/>
+  <g font-family="monospace" font-size="6" font-weight="bold" fill="#f6e05e" text-anchor="middle">
+    <text x="56" y="16">0</text>
+    <text x="56" y="22">●</text>
+    <text x="56" y="28">2</text>
+    <text x="56" y="34">4</text>
+  </g>
+  <rect x="16" y="4" width="28" height="8" rx="2" fill="#c05621" opacity="0.9"/>
+  <text x="30" y="10" font-family="monospace" font-size="6" font-weight="bold" fill="#faf089" text-anchor="middle">2 AIGUILLES</text>
+  <text x="30" y="17" font-family="monospace" font-size="5" fill="#faf089" text-anchor="middle">écart 6.4mm</text>
+</svg>

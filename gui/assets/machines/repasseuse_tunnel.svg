@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="tunnelBody" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#4299e1"/>
+      <stop offset="100%" stop-color="#2b6cb0"/>
+    </linearGradient>
+    <linearGradient id="metalGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#e2e8f0"/>
+      <stop offset="50%" stop-color="#cbd5e0"/>
+      <stop offset="100%" stop-color="#a0aec0"/>
+    </linearGradient>
+    <linearGradient id="darkGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2d3748"/>
+      <stop offset="100%" stop-color="#1a202c"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="52" width="56" height="8" rx="3" fill="url(#darkGrad)"/>
+  <path d="M8 14 L8 52 Q8 56 12 52 L52 52 Q56 52 56 48 L56 14 Q56 10 52 10 L12 10 Q8 10 8 14 Z" fill="url(#tunnelBody)" stroke="#2b6cb0" stroke-width="1.5"/>
+  <rect x="6" y="16" width="52" height="8" rx="2" fill="#1a202c" stroke="#4a5568" stroke-width="1" opacity="0.9"/>
+  <g fill="#4299e1" stroke="#2b6cb0" stroke-width="1.5" stroke-linecap="round">
+    <line x1="10" y1="20" x2="54" y2="20"/>
+    <line x1="10" y1="26" x2="54" y2="26"/>
+    <line x1="10" y1="32" x2="54" y2="32"/>
+    <line x1="10" y1="38" x2="54" y2="38"/>
+    <line x1="10" y1="44" x2="54" y2="44"/>
+  </g>
+  <rect x="10" y="46" width="44" height="2" rx="1" fill="#38b2ac" stroke="#319795" stroke-width="1" opacity="0.7"/>
+  <text x="32" y="47" font-family="monospace" font-size="4" fill="#a7f3d0" text-anchor="middle">Conveyor</text>
+  <rect x="10" y="10" width="44" height="4" rx="2" fill="#1a202c" stroke="#4a5568" stroke-width="1"/>
+  <g fill="#63b3ed" stroke="#2b6cb0" stroke-width="1">
+    <circle cx="18" cy="12" r="2"/>
+    <circle cx="28" cy="12" r="2"/>
+    <circle cx="38" cy="12" r="2"/>
+    <circle cx="48" cy="12" r="2"/>
+  </g>
+  <g stroke="#63b3ed" stroke-width="2" stroke-linecap="round" fill="none">
+    <path d="M18 14 L18 10 Q22 8 32 8 L32 10"/>
+    <path d="M28 14 L28 10 Q34 8 42 8 L42 10"/>
+  </g>
+  <circle cx="52" cy="32" r="8" fill="#1a202c" stroke="#4a5568" stroke-width="2"/>
+  <circle cx="52" cy="32" r="4" fill="#2d3748"/>
+  <circle cx="52" cy="32" r="2" fill="#4299e1"/>
+  <g stroke="#63b3ed" stroke-width="2" stroke-linecap="round">
+    <line x1="52" y1="26" x2="52" y2="22"/>
+    <line x1="52" y1="38" x2="52" y2="42"/>
+    <line x1="46" y1="32" x2="42" y2="32"/>
+    <line x1="58" y1="32" x2="62" y2="32"/>
+  </g>
+  <rect x="14" y="4" width="36" height="6" rx="2" fill="#2c5282" opacity="0.9"/>
+  <text x="32" y="9" font-family="monospace" font-size="6" font-weight="bold" fill="#63b3ed" text-anchor="middle">REPASSEUSE TUNNEL</text>
+  <rect x="4" y="58" width="56" height="4" rx="3" fill="#2d3748" stroke="#4a5568" stroke-width="1"/>
+  <g stroke="#cbd5e0" stroke-width="1" stroke-dasharray="3,3" fill="none">
+    <path d="M12 54 Q20 48 32 46"/>
+    <path d="M22 54 Q30 48 42 46"/>
+    <path d="M32 54 Q40 48 52 46"/>
+  </g>
+  <circle cx="52" cy="32" r="6" fill="#1a202c" stroke="#4a5568" stroke-width="2"/>
+  <circle cx="52" cy="32" r="3" fill="#2d3748"/>
+  <circle cx="52" cy="32" r="1" fill="#4299e1"/>
+</svg>

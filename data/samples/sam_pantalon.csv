@@ -1,0 +1,18 @@
+Op_ID;Description;SAM_min;Predecesseurs;Type_Machine;Competences;Section;Optionnel
+OP010;Préparation & lecture plan;0.40;;table_travail;lecture_plan;Montage;
+OP020;Tri & marquage pièces (devants, dos, poches, ceinture, passants);0.55;OP010;table_travail;tri_pieces;marquage_pieces;Montage;
+OP030;Thermocollage pièces (ceinture, poches, bas jambes);0.65;OP020;presse_vapeur;thermocollage;Montage;
+OP040;Montage poches italiennes (devants);1.40;OP030;piqueuse_plate;couture_courbe;pose_poche;Montage;
+OP050;Montage poches plaquées (dos);0.95;OP030;piqueuse_plate;couture_droite;pose_poche;Montage;
+OP060;Préparation & montage braguette (zip + patte);1.20;OP030;piqueuse_plate;couture_droite;couture_courbe;Montage;
+OP070;Montage passants ceinture;0.50;OP030;piqueuse_plate;couture_droite;pose_passant;Montage;
+OP080;Fermeture côtés (devant + dos);0.75;OP040;OP050;surjeteuse_5_fils;surjet_5_fils;Montage;
+OP090;Fermeture entrejambe (couture intérieure);0.85;OP060;OP080;surjeteuse_4_fils;surjet_4_fils;Montage;
+OP100;Montage ceinture (double, surpiqure);1.10;OP070;OP080;piqueuse_plate;couture_droite;Montage;
+OP110;Pose passants sur ceinture;0.40;OP100;piqueuse_plate;couture_droite;pose_passant;Montage;
+OP120;Surpiqure ceinture (apparente);0.55;OP110;piqueuse_plate;piqure_apparente;Finition;
+OP130;Ourlet bas jambes (double, invisible);0.70;OP090;piqueuse_2_aiguilles;ourlet;Finition;
+OP140;Contrôle visuel & mesures;0.35;OP120;OP130;table_controle;controle_visuel;controle_mesures;Qualite;
+OP150;Repassage final (jambes, ceinture);0.60;OP140;presse_vapeur;repassage;formage_vapeur;Finition;
+OP160;Pliage pantalon + mise sous pochette;0.30;OP150;table_travail;pliage_specifique;mise_sous_poche;Expedition;
+OP170;Étiquetage + cartonnage;0.25;OP160;table_travail;etiquetage_final;cartonnage;Expedition;

@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="benchBody" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#48bb78"/>
+      <stop offset="100%" stop-color="#2f855a"/>
+    </linearGradient>
+    <linearGradient id="metalGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#e2e8f0"/>
+      <stop offset="50%" stop-color="#cbd5e0"/>
+      <stop offset="100%" stop-color="#a0aec0"/>
+    </linearGradient>
+    <linearGradient id="darkGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2d3748"/>
+      <stop offset="100%" stop-color="#1a202c"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="52" width="56" height="8" rx="3" fill="url(#darkGrad)"/>
+  <rect x="8" y="14" width="48" height="34" rx="3" fill="url(#benchBody)" stroke="#2f855a" stroke-width="2"/>
+  <rect x="10" y="16" width="44" height="30" rx="2" fill="#1a202c" stroke="#4a5568" stroke-width="1"/>
+  <g stroke="#68d391" stroke-width="1" stroke-dasharray="4,4" fill="none" opacity="0.5">
+    <line x1="16" y1="20" x2="52" y2="20"/>
+    <line x1="16" y1="26" x2="52" y2="26"/>
+    <line x1="16" y1="32" x2="52" y2="32"/>
+    <line x1="16" y1="38" x2="52" y2="38"/>
+    <line x1="16" y1="44" x2="52" y2="44"/>
+  </g>
+  <rect x="12" y="18" width="16" height="10" rx="2" fill="#cbd5e0" stroke="#a0aec0" stroke-width="1"/>
+  <text x="20" y="25" font-family="monospace" font-size="5" font-weight="bold" fill="#2f855a" text-anchor="middle">PLAN</text>
+  <rect x="36" y="18" width="16" height="10" rx="2" fill="#cbd5e0" stroke="#a0aec0" stroke-width="1"/>
+  <text x="44" y="25" font-family="monospace" font-size="5" font-weight="bold" fill="#2f855a" text-anchor="middle">CRAYON</text>
+  <rect x="20" y="32" width="24" height="8" rx="2" fill="#1a202c" stroke="#38b2ac" stroke-width="1" opacity="0.8"/>
+  <text x="32" y="37" font-family="monospace" font-size="5" fill="#68d391" text-anchor="middle">MARQUAGE</text>
+  <rect x="14" y="4" width="36" height="6" rx="2" fill="#2f855a" opacity="0.9"/>
+  <text x="32" y="9" font-family="monospace" font-size="6" font-weight="bold" fill="#faf089" text-anchor="middle">TABLE DE TRAVAIL</text>
+  <rect x="4" y="58" width="56" height="4" rx="3" fill="#2d3748" stroke="#4a5568" stroke-width="1"/>
+  <g stroke="#cbd5e0" stroke-width="1" stroke-dasharray="3,3" fill="none">
+    <path d="M12 54 Q20 48 32 46"/>
+    <path d="M22 54 Q30 48 42 46"/>
+    <path d="M32 54 Q40 48 52 46"/>
+  </g>
+  <circle cx="52" cy="32" r="6" fill="#1a202c" stroke="#4a5568" stroke-width="2"/>
+  <circle cx="52" cy="32" r="3" fill="#2d3748"/>
+  <circle cx="52" cy="32" r="1" fill="#48bb78"/>
+</svg>

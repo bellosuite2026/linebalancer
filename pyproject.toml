@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "textile-line-balancer"
+version = "2.1.0"
+description = "Équilibrage de lignes de production textile/habillement (ALBP) avec éditeur 3 vues PySide6"
+requires-python = ">=3.10"
+dependencies = [
+    "PySide6>=6.5",
+    "ortools>=9.8",
+    "openpyxl>=3.1",
+    "numpy>=1.24",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0", "black>=23.0", "mypy>=1.0"]
+images = ["requests>=2.28"]
+
+[project.scripts]
+tlb-balance = "scripts.balance:main"
+
+[tool.setuptools.packages.find]
+include = ["engine*", "gui*", "scripts*"]
+exclude = ["tests*"]
+
+[tool.setuptools.package-data]
+"gui" = ["*.svg", "*.png", "*.json"]
+"data" = ["samples/*"]
+
+[tool.black]
+line-length = 100
+target-version = ["py310"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

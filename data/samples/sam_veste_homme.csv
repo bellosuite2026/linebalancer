@@ -1,0 +1,32 @@
+Op_ID;Description;SAM_min;Predecesseurs;Type_Machine;Competences;Section;Optionnel
+OP010;Étude gamme & lecture plan;0.35;;table_travail;lecture_plan;Montage;FALSE
+OP020;Préparation pièces (tri, marquage, thermocollage renforts);0.60;OP010;table_travail;tri_pieces;marquage_pieces;thermocollage;Montage;FALSE
+OP030;Montage poches poitrine (passepoil);1.10;OP020;piqueuse_plate;couture_droite;piqure_apparente;pose_poche;Montage;FALSE
+OP040;Montage poches basses (à rabat ou passepoil);1.30;OP020;piqueuse_plate;couture_droite;piqure_apparente;pose_poche;Montage;FALSE
+OP050;Montage poches intérieures;0.75;OP020;piqueuse_plate;couture_droite;Montage;FALSE
+OP060;Montage épaule (devant/dos);0.65;OP020;piqueuse_plate;couture_droite;Montage;FALSE
+OP070;Montage côtés (devant/dos);0.75;OP060;piqueuse_plate;couture_droite;Montage;FALSE
+OP080;Préparation manches (surjet bas + thermocollage tête);0.55;OP020;surjeteuse_4_fils;surjet_4_fils;thermocollage;Montage;FALSE
+OP090;Montage manches (emboitage tête de manche);1.40;OP070;OP080;piqueuse_plate;couture_courbe;montage_manche;Montage;FALSE
+OP100;Surjet côtés + emmanchures;0.60;OP090;surjeteuse_5_fils;surjet_5_fils;Montage;FALSE
+OP110;Préparation col (thermocollage, pliage, piqûre);1.00;OP020;table_travail;thermocollage;piqure_apparente;Montage;FALSE
+OP120;Pose col (pied de col + col) - opération critique;1.50;OP100;OP110;piqueuse_plate;couture_courbe;pose_col;Montage;FALSE
+OP130;Piqure col (piqûre apparente double);0.80;OP120;piqueuse_plate;piqure_apparente;Finition;FALSE
+OP140;Préparation revers/collet (si veste);0.70;OP020;table_travail;thermocollage;Montage;FALSE
+OP150;Montage revers/collet;0.95;OP120;OP140;piqueuse_plate;couture_courbe;Montage;FALSE
+OP160;Préparation poignets (thermocollage, surjet);0.45;OP020;surjeteuse_3_fils;surjet_3_fils;thermocollage;Montage;FALSE
+OP170;Pose poignets (manchette + poignet);1.10;OP090;OP160;piqueuse_plate;couture_courbe;pose_poignet;Montage;FALSE
+OP180;Piqure poignets;0.50;OP170;piqueuse_plate;piqure_apparente;Finition;FALSE
+OP190;Montage doublure (corps + manches) - assemblage;1.80;OP020;piqueuse_plate;couture_droite;Montage;FALSE
+OP200;Pose doublure dans veste (retourné + piqûre);1.60;OP190;OP130;OP150;OP180;piqueuse_plate;couture_courbe;Montage;FALSE
+OP210;Boutonnières (corps + manches);0.85;OP120;OP180;piqueuse_boutonniere;piqueuse_boutonniere;Finition;FALSE
+OP220;Pose boutons (corps + manches);0.55;OP210;piqueuse_bouton;piqueuse_bouton;Finition;FALSE
+OP230;Passants & oeillets (manches, dos);0.40;OP090;piqueuse_plate;couture_droite;pose_passant;Montage;FALSE
+OP240;Ourlet bas veste (doublure + tissu);0.70;OP200;piqueuse_2_aiguilles;piqueuse_2_aiguilles;ourlet;Finition;FALSE
+OP250;Ourlet bas manches (doublure);0.45;OP200;piqueuse_2_aiguilles;piqueuse_2_aiguilles;ourlet;Finition;FALSE
+OP260;Coupe fils, nettoyage, contrôle interne;0.35;OP220;OP240;OP250;OP230;table_travail;couture_droite;Finition;FALSE
+OP270;Contrôle final visuel & mesures;0.50;OP260;table_controle;controle_visuel;controle_mesures;controle_normes;Qualite;FALSE
+OP280;Repassage complet (corps, manches, col);0.85;OP270;presse_vapeur;presse_vapeur;formage_vapeur;Finition;FALSE
+OP290;Pliage veste (méthode spécifique);0.40;OP280;table_travail;pliage_specifique;Expedition;FALSE
+OP300;Mise sous housse & étiquetage final;0.30;OP290;table_travail;mise_sous_poche;etiquetage_final;Expedition;FALSE
+OP310;Cartonnage & palettisation;0.20;OP300;table_travail;cartonnage;Expedition;FALSE

@@ -1,0 +1,23 @@
+Op_ID;Description;SAM_min;Predecesseurs;Type_Machine;Competences;Section;Optionnel
+OP010;Étude gamme & lecture plan;0.25;;table_travail;lecture_plan;Montage;FALSE
+OP020;Préparation pièces (tri, marquage, thermocollage poches);0.50;OP010;table_travail;tri_pieces;marquage_pieces;thermocollage;Montage;FALSE
+OP030;Montage poches arrière (passepoil + piqûre);0.85;OP020;piqueuse_plate;couture_droite;piqure_apparente;pose_poche;Montage;FALSE
+OP040;Montage poches devant (italienne ou passepoil);0.95;OP020;piqueuse_plate;couture_droite;piqure_apparente;pose_poche;Montage;FALSE
+OP050;Montage fourche (devant);0.60;OP020;piqueuse_plate;couture_droite;Montage;FALSE
+OP060;Montage fourche (dos);0.55;OP020;piqueuse_plate;couture_droite;Montage;FALSE
+OP070;Assemblage fourche (devant + dos);0.45;OP050;OP060;piqueuse_plate;couture_droite;Montage;FALSE
+OP080;Montage côtés (devant/dos);0.70;OP070;piqueuse_plate;couture_droite;Montage;FALSE
+OP090;Montage ceinture (préparation + thermocollage);0.55;OP020;table_travail;thermocollage;Montage;FALSE
+OP100;Pose ceinture sur corps;0.80;OP080;OP090;piqueuse_plate;couture_droite;pose_ceinture;Montage;FALSE
+OP110;Surjet côtés + fourche;0.45;OP100;surjeteuse_5_fils;surjet_5_fils;Montage;FALSE
+OP120;Préparation bas de jambes (ourlet ou revers);0.40;OP020;table_travail;marquage_pieces;Montage;FALSE
+OP130;Ourlet bas jambes (double);0.50;OP120;piqueuse_2_aiguilles;piqueuse_2_aiguilles;ourlet;Finition;FALSE
+OP140;Pose zip / braguette (fermeture);1.10;OP080;piqueuse_plate;couture_droite;pose_zip;Montage;FALSE
+OP150;Piqure braguette (renfort + piqûre apparente);0.55;OP140;piqueuse_plate;piqure_apparente;Finition;FALSE
+OP160;Passants ceinture (découpe + pose);0.65;OP100;piqueuse_plate;couture_droite;pose_passant;Montage;FALSE
+OP170;Pose passants sur ceinture;0.35;OP160;piqueuse_plate;couture_droite;Montage;FALSE
+OP180;Coupe fils & nettoyage;0.20;OP130;OP150;OP170;table_travail;couture_droite;Finition;FALSE
+OP190;Contrôle visuel & mesures;0.35;OP180;table_controle;controle_visuel;controle_mesures;Qualite;FALSE
+OP200;Repassage final (jambe + ceinture);0.55;OP190;presse_vapeur;presse_vapeur;Finition;FALSE
+OP210;Pliage & mise sous pochette;0.25;OP200;table_travail;pliage;mise_sous_poche;Expedition;FALSE
+OP220;Étiquetage & cartonnage;0.20;OP210;table_travail;etiquetage_final;cartonnage;Expedition;FALSE

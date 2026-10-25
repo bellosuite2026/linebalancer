@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="galonBody" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#805ad5"/>
+      <stop offset="100%" stop-color="#553c9a"/>
+    </linearGradient>
+    <linearGradient id="metalGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#e2e8f0"/>
+      <stop offset="50%" stop-color="#cbd5e0"/>
+      <stop offset="100%" stop-color="#a0aec0"/>
+    </linearGradient>
+    <linearGradient id="darkGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2d3748"/>
+      <stop offset="100%" stop-color="#1a202c"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="52" width="56" height="8" rx="3" fill="url(#darkGrad)"/>
+  <path d="M10 14 L10 52 Q10 56 14 52 L50 52 Q54 52 54 48 L54 14 Q54 10 50 10 L14 10 Q10 10 10 14 Z" fill="url(#galonBody)" stroke="#553c9a" stroke-width="1.5"/>
+  <rect x="14" y="16" width="36" height="6" rx="2" fill="#1a202c" stroke="#4a5568" stroke-width="1" opacity="0.9"/>
+  <text x="32" y="20" font-family="monospace" font-size="5" font-weight="bold" fill="#b794f4" text-anchor="middle">GALON AUTO</text>
+  <rect x="10" y="26" width="44" height="8" rx="2" fill="#1a202c" stroke="#4a5568" stroke-width="1" opacity="0.8"/>
+  <g fill="#e2e8f0" stroke="#b794f4" stroke-width="1">
+    <circle cx="18" cy="30" r="3"/>
+    <circle cx="32" cy="30" r="3"/>
+    <circle cx="46" cy="30" r="3"/>
+  </g>
+  <g stroke="#b794f4" stroke-width="1.5" stroke-linecap="round" fill="none">
+    <path d="M18 30 L18 26 Q22 22 32 22 L32 26"/>
+    <path d="M32 30 L32 26 Q38 22 48 22 L48 26"/>
+    <path d="M46 30 L46 26 Q50 24 56 24 L56 26"/>
+  </g>
+  <rect x="14" y="40" width="36" height="10" rx="2" fill="#1a202c" stroke="#805ad5" stroke-width="1" opacity="0.8"/>
+  <text x="32" y="47" font-family="monospace" font-size="5" fill="#f6e05e" text-anchor="middle">GALON TENSION AUTO</text>
+  <circle cx="52" cy="32" r="6" fill="#1a202c" stroke="#4a5568" stroke-width="2"/>
+  <circle cx="52" cy="32" r="3" fill="#2d3748"/>
+  <circle cx="52" cy="32" r="1" fill="#805ad5"/>
+  <rect x="14" y="4" width="36" height="6" rx="2" fill="#553c9a" opacity="0.9"/>
+  <text x="32" y="9" font-family="monospace" font-size="6" font-weight="bold" fill="#faf089" text-anchor="middle">POSE GALON AUTO</text>
+</svg>

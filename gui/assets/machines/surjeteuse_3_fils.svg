@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#38a169"/>
+      <stop offset="100%" stop-color="#276749"/>
+    </linearGradient>
+    <linearGradient id="metalGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#e2e8f0"/>
+      <stop offset="50%" stop-color="#cbd5e0"/>
+      <stop offset="100%" stop-color="#a0aec0"/>
+    </linearGradient>
+    <linearGradient id="darkGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2d3748"/>
+      <stop offset="100%" stop-color="#1a202c"/>
+    </linearGradient>
+    <linearGradient id="threadCone" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4299e1"/>
+      <stop offset="100%" stop-color="#2b6cb0"/>
+    </linearGradient>
+    <linearGradient id="knifeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#e2e8f0"/>
+      <stop offset="50%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#cbd5e0"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="50" width="56" height="8" rx="3" fill="url(#darkGrad)"/>
+  <path d="M10 16 L10 50 Q10 54 14 50 L50 50 Q54 50 54 46 L54 16 Q54 12 50 12 L14 12 Q10 12 10 16 Z" fill="url(#bodyGrad)" stroke="#276749" stroke-width="1.5"/>
+  <g transform="translate(12, 4)" fill="url(#threadCone)" stroke="#2b6cb0" stroke-width="1">
+    <polygon points="0,16 -4,0 4,0"/>
+    <polygon points="10,16 6,-2 14,-2"/>
+    <polygon points="20,16 16,-2 24,-2"/>
+    <polygon points="30,16 26,-2 34,-2"/>
+    <polygon points="40,16 36,-2 44,-2"/>
+  </g>
+  <g stroke="#cbd5e0" stroke-width="1" stroke-dasharray="2,2" fill="none">
+    <path d="M2 0 Q10 -4 20 -2"/>
+    <path d="M12 0 Q20 -4 30 -2"/>
+    <path d="M22 0 Q30 -4 40 -2"/>
+    <path d="M32 0 Q38 -4 44 -2"/>
+    <path d="M42 0 Q46 -4 48 -2"/>
+  </g>
+  <g transform="translate(28, 30)">
+    <rect x="-8" y="-6" width="16" height="3" rx="1" fill="url(#knifeGrad)" stroke="#718096" stroke-width="1"/>
+    <rect x="-6" y="4" width="12" height="2" rx="1" fill="url(#knifeGrad)" stroke="#718096" stroke-width="1"/>
+  </g>
+  <g stroke="#e2e8f0" stroke-width="1.5" stroke-linecap="round">
+    <line x1="30" y1="32" x2="30" y2="42"/>
+    <line x1="38" y1="32" x2="38" y2="42"/>
+  </g>
+  <ellipse cx="22" cy="40" rx="5" ry="2" transform="rotate(-30 22 40)" fill="#cbd5e0" stroke="#a0aec0" stroke-width="1"/>
+  <ellipse cx="38" cy="40" rx="5" ry="2" transform="rotate(30 38 40)" fill="#cbd5e0" stroke="#a0aec0" stroke-width="1"/>
+  <circle cx="52" cy="32" r="9" fill="#cbd5e0" stroke="#718096" stroke-width="2"/>
+  <circle cx="52" cy="32" r="5" fill="#38a169"/>
+  <circle cx="52" cy="32" r="2" fill="#68d391"/>
+  <rect x="14" y="26" width="20" height="6" rx="1" fill="#1a3c2e" stroke="#38a169" stroke-width="1" opacity="0.9"/>
+  <text x="24" y="30" font-family="monospace" font-size="7" font-weight="bold" fill="#68d391" text-anchor="middle">3 FILS</text>
+  <rect x="16" y="46" width="32" height="12" rx="2" fill="#1a202c" stroke="#38a169" stroke-width="1" opacity="0.8"/>
+  <text x="32" y="52" font-family="Arial" font-size="7" font-weight="bold" fill="#68d391" text-anchor="middle">JACK</text>
+  <text x="32" y="56" font-family="monospace" font-size="5" fill="#68d391" text-anchor="middle">W4-3-35</text>
+  <rect x="4" y="54" width="56" height="6" rx="2" fill="#2d3748" stroke="#4a5568" stroke-width="1"/>
+  <g stroke="#cbd5e0" stroke-width="1" stroke-dasharray="3,3" fill="none">
+    <path d="M10 50 Q20 44 32 42"/>
+    <path d="M20 50 Q30 44 42 42"/>
+    <path d="M30 50 Q40 44 52 42"/>
+  </g>
+  <circle cx="48" cy="36" r="7" fill="#1a202c" stroke="#4a5568" stroke-width="2"/>
+  <circle cx="48" cy="36" r="3.5" fill="#2d3748"/>
+  <circle cx="48" cy="36" r="1.5" fill="#38a169"/>
+  <rect x="10" y="50" width="16" height="6" rx="1" fill="#276749" opacity="0.9"/>
+  <text x="18" y="54.5" font-family="monospace" font-size="5" fill="#faf089" text-anchor="middle">AUTO</text>
+  <rect x="14" y="4" width="36" height="6" rx="2" fill="#276749" opacity="0.9"/>
+  <text x="32" y="9" font-family="monospace" font-size="6" font-weight="bold" fill="#faf089" text-anchor="middle">SURJETEUSE 3 FILS</text>
+</svg>

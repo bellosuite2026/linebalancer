@@ -1,0 +1,7 @@
+Ouvrier_ID;Nom;Competences;Efficacite;Disponible;Poste_Assigne
+W001;Marie D.;"lecture_plan;couture_droite;couture_courbe";1.0;Oui;
+W002;Ahmed B.;"couture_droite;surjet";1.05;Oui;
+W003;Sophie L.;"couture_droite;piqure_apparente;ourlet";0.95;Oui;
+W004;Karim M.;"surjet;couture_droite";1.1;Oui;
+W005;Fatou S.;"controle_qualite;lecture_plan";1.0;Oui;
+W006;Youssef A.;"repassage;couture_droite";1.0;Oui;

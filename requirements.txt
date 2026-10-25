@@ -1,0 +1,29 @@
+# Core
+pydantic>=2.0
+pyyaml>=6.0
+
+# Solveurs
+ortools>=9.8          # CP-SAT (optimal)
+# pulp>=2.7           # MILP alternatif (optionnel)
+
+# Graphe de flux
+networkx>=3.0          # Modélisation du flux matière
+
+# Rapports PDF
+reportlab>=4.0         # Génération de rapports PDF
+
+# Simulation
+simpy>=4.0            # Simulation à événements discrets
+
+# Parsers
+openpyxl>=3.1         # Excel .xlsx
+# pandas>=2.0         # Optionnel, pour gros datasets
+
+# Export
+# plotly>=5.0         # Gantt interactif (optionnel)
+# kaleido>=0.2        # Export statique plotly (optionnel)
+
+# Dev
+# pytest>=7.0
+# black>=23.0
+# mypy>=1.0

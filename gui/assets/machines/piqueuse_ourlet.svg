@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="ourletBody" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#38b2ac"/>
+      <stop offset="100%" stop-color="#2c7a7b"/>
+    </linearGradient>
+    <linearGradient id="metalGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#e2e8f0"/>
+      <stop offset="50%" stop-color="#cbd5e0"/>
+      <stop offset="100%" stop-color="#a0aec0"/>
+    </linearGradient>
+    <linearGradient id="darkGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2d3748"/>
+      <stop offset="100%" stop-color="#1a202c"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="52" width="56" height="8" rx="3" fill="url(#darkGrad)"/>
+  <path d="M8 14 L8 52 Q8 56 12 52 L52 52 Q56 52 56 48 L56 14 Q56 10 52 10 L12 10 Q8 10 8 14 Z" fill="url(#ourletBody)" stroke="#2c7a7b" stroke-width="1.5"/>
+  <rect x="4" y="44" width="56" height="8" rx="2" fill="#1a202c" stroke="#4a5568" stroke-width="2"/>
+  <text x="32" y="50" font-family="monospace" font-size="6" font-weight="bold" fill="#68d391" text-anchor="middle">OURLET 2 AIGUILLES</text>
+  <rect x="20" y="16" width="24" height="10" rx="2" fill="#cbd5e0" stroke="#a0aec0" stroke-width="1"/>
+  <text x="32" y="23" font-family="monospace" font-size="5" font-weight="bold" fill="#38b2ac" text-anchor="middle">DOUBLE</text>
+  <rect x="18" y="30" width="28" height="3" rx="1" fill="#a0aec0" stroke="#718096" stroke-width="1"/>
+  <g fill="#e2e8f0" stroke="#cbd5e0" stroke-width="1">
+    <circle cx="24" cy="31.5" r="2"/>
+    <circle cx="32" cy="31.5" r="2"/>
+    <circle cx="40" cy="31.5" r="2"/>
+  </g>
+  <path d="M16 42 L48 42 L46 44 L18 44 Z" fill="#a0aec0" stroke="#718096" stroke-width="1"/>
+  <circle cx="52" cy="32" r="6" fill="#1a202c" stroke="#4a5568" stroke-width="2"/>
+  <circle cx="52" cy="32" r="3" fill="#2d3748"/>
+  <circle cx="52" cy="32" r="1" fill="#38b2ac"/>
+  <rect x="14" y="4" width="36" height="6" rx="2" fill="#2c7a7b" opacity="0.9"/>
+  <text x="32" y="9" font-family="monospace" font-size="6" font-weight="bold" fill="#faf089" text-anchor="middle">PIQUEUSE OURLET</text>
+</svg>

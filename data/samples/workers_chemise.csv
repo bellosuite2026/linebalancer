@@ -1,0 +1,21 @@
+Ouvrier_ID;Nom;Competences;Efficacite;Disponible;Poste_Assigne
+W001;Marie D.;lecture_plan,couture_droite,couture_courbe,tri_pieces,marquage_pieces,pose_poche,thermocollage;1.00;Oui;
+W002;Ahmed B.;couture_droite,couture_courbe,piqure_apparente,piqueuse_boutonniere,piqueuse_bouton;1.05;Oui;
+W003;Sophie L.;couture_droite,surjet_4_fils,surjet_5_fils;1.00;Oui;
+W004;Karim M.;couture_droite,couture_courbe,pose_col,pose_poignet,montage_manche;0.95;Oui;
+W005;Fatou S.;couture_droite,piqueuse_2_aiguilles,ourlet;0.98;Oui;
+W006;Youssef A.;couture_droite,piqueuse_boutonniere,piqueuse_bouton;1.02;Oui;
+W007;Leila K.;controle_visuel,controle_mesures,lecture_plan;1.00;Oui;
+W008;Omar T.;presse_vapeur,formage_vapeur,repassage_fer,repassage;1.00;Oui;
+W009;Amina R.;pliage,mise_sous_poche,etiquetage_final,cartonnage;1.00;Oui;
+W010;Samir H.;couture_droite,surjet_3_fils,thermocollage,tri_pieces;1.00;Oui;
+W011;Nadia L.;couture_droite,couture_courbe,pose_col,pose_poche;1.00;Oui;
+W012;Hakim B.;couture_droite,surjet_5_fils,montage_manche;1.00;Oui;
+W013;Salma R.;couture_droite,piqure_apparente,piqueuse_boutonniere;1.00;Oui;
+W014;Yassin T.;couture_droite,piqueuse_2_aiguilles,ourlet;1.00;Oui;
+W015;Khadija M.;piqueuse_boutonniere,piqueuse_bouton,controle_visuel,controle_mesures;1.00;Oui;
+W016;Mehdi A.;presse_vapeur,formage_vapeur,repassage;1.00;Oui;
+W017;Fatima Z.;pliage,mise_sous_poche,etiquetage_final,cartonnage;1.00;Oui;
+W018;Omar T.;couture_droite,couture_courbe,pose_col,pose_poignet,montage_manche;1.00;Oui;
+W019;Leila K.;couture_droite,piqure_apparente,piqueuse_boutonniere,piqueuse_bouton;1.00;Oui;
+W020;Youssef A.;surjet_5_fils,couture_droite,montage_manche;1.00;Oui;
