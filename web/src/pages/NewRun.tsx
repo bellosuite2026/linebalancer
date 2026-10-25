@@ -15,11 +15,11 @@ export default function NewRun() {
   const [lines, setLines] = useState<Line[]>([]);
   const [saved, setSaved] = useState<ProblemRow[]>([]);
   const [lineId, setLineId] = useState(params.get("ligne") || "");
-  const [source, setSource] = useState<Source>("files");
+  const [source, setSource] = useState<Source>(params.get("gamme") ? "saved" : "files");
   const [name, setName] = useState("");
   const [cycle, setCycle] = useState("");
   const [files, setFiles] = useState<{ sam?: File; workstations?: File; workers?: File }>({});
-  const [savedId, setSavedId] = useState("");
+  const [savedId, setSavedId] = useState(params.get("gamme") || "");
   const [problem, setProblem] = useState<Problem | null>(null);
   const [problemId, setProblemId] = useState<string | null>(null);
   const [precheck, setPrecheck] = useState<Precheck | null>(null);
@@ -35,7 +35,11 @@ export default function NewRun() {
       const l = ls.find((x) => x.id === lineId);
       if (l) { setName(l.product || l.name); if (l.target_cycle_time) setCycle(String(l.target_cycle_time)); }
     }).catch(() => {});
-    api<ProblemRow[]>(`/v1/orgs/${org.id}/problems?limit=100`).then(setSaved).catch(() => {});
+    api<ProblemRow[]>(`/v1/orgs/${org.id}/problems?limit=100`).then((rows) => {
+      setSaved(rows);
+      const g = rows.find((r) => r.id === params.get("gamme"));
+      if (g) { setCycle(String(g.target_cycle_time)); if (g.line_id) setLineId(g.line_id); }
+    }).catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [org.id]);
 
@@ -127,11 +131,8 @@ export default function NewRun() {
               <FileField label="Postes / machines" file={files.workstations} onPick={(f) => { setFiles({ ...files, workstations: f }); reset(); }} />
               <FileField label="Ouvriers / compétences" file={files.workers} onPick={(f) => { setFiles({ ...files, workers: f }); reset(); }} />
             </div>
-            <p className="muted small">Excel (.xlsx), CSV ou JSON. Modèles :{" "}
-              <a href="/modeles/modele_gamme_SAM.xlsx" download>gamme SAM</a> ·{" "}
-              <a href="/modeles/modele_postes.xlsx" download>postes</a> ·{" "}
-              <a href="/modeles/modele_ouvriers.xlsx" download>ouvriers</a> ·{" "}
-              <Link to="/calcul?exemple=1">charger l'exemple chemise</Link>
+            <p className="muted small">Excel (.xlsx), CSV ou JSON · <Link to="/aide/fichiers">format attendu et modèles vides</Link> ·{" "}
+              <Link to="/calcul?exemple=1">charger l'exemple chemise</Link> · ou <Link to="/gamme">saisir la gamme en ligne</Link>
             </p>
           </>
         ) : (
@@ -147,7 +148,12 @@ export default function NewRun() {
 
       {problem && precheck && (
         <section className="card">
-          <h3>2. Diagnostic</h3>
+          <div className="card-head"><h3>2. Diagnostic</h3>
+            <button className="btn small ghost" onClick={() => {
+              sessionStorage.setItem("tlb.gamme.import", JSON.stringify({ problem, lineId }));
+              nav("/gamme");
+            }}>Modifier dans l'éditeur</button>
+          </div>
           <div className="kpis">
             <div className="kpi"><span>Opérations</span><b>{problem.operations.length}</b></div>
             <div className="kpi"><span>Temps total SAM</span><b>{fmt.n(totalSam)} min</b></div>

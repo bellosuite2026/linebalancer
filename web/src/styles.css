@@ -119,3 +119,41 @@ tr.row-over td { background: #fdf6f5; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 @media print { .topbar, .banner, .actions, .page-head .row { display: none !important; } .card { break-inside: avoid; border-color: #ccc; } body { background: #fff; } }
+
+/* Éditeur de gamme */
+.page.wide { max-width: 1400px; }
+.page-head .actions { margin-top: 0; display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; }
+.page-head .actions select { width: auto; max-width: 280px; }
+.tabs .spacer { flex: 1; }
+.tabs .btn { align-self: center; margin-bottom: .3rem; }
+.grid-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; max-height: 62vh; overflow-y: auto; }
+.egrid { display: grid; min-width: 980px; }
+.egrid .eh { position: sticky; top: 0; z-index: 1; background: var(--bg); font-size: .75rem; font-weight: 700; color: var(--muted);
+  padding: .45rem .4rem; border-bottom: 1px solid var(--line); text-transform: uppercase; letter-spacing: .02em; }
+.egrid .ecell, .egrid .enum { border-bottom: 1px solid #f0eee8; padding: 2px; display: flex; align-items: center; }
+.egrid .enum { justify-content: center; color: var(--muted); font-size: .78rem; }
+.egrid .ecell input:not([type=checkbox]) { width: 100%; border: 1px solid transparent; background: transparent; padding: .35rem .4rem; margin: 0;
+  border-radius: 5px; font: inherit; font-size: .88rem; }
+.egrid .ecell input:not([type=checkbox]):hover { border-color: var(--line); }
+.egrid .ecell input:not([type=checkbox]):focus { outline: none; border-color: var(--brand); background: #fff; }
+.egrid .ecell input.bad { border-color: var(--err); background: #fdf5f4; }
+.egrid .center-cell { justify-content: center; }
+.egrid .center-cell input { width: auto; margin: 0; }
+.row-actions { gap: 2px; justify-content: flex-end; }
+.row-actions button { border: 0; background: none; color: var(--muted); cursor: pointer; width: 1.25rem; height: 1.6rem; border-radius: 4px; font-size: .95rem; padding: 0; }
+.row-actions button:hover { background: var(--bg); color: var(--ink, #222); }
+.grid-foot { display: flex; gap: 1rem; align-items: center; margin-top: .7rem; flex-wrap: wrap; }
+.paste { background: var(--bg); border-radius: 8px; padding: .8rem; margin-bottom: .8rem; }
+.paste textarea { width: 100%; font-family: ui-monospace, monospace; font-size: .82rem; border: 1px solid var(--line); border-radius: 6px; padding: .5rem; }
+.paste .actions { display: flex; gap: .5rem; margin-top: .5rem; }
+.sticky-actions { position: sticky; bottom: 0; display: flex; gap: .6rem; align-items: center; justify-content: flex-end; flex-wrap: wrap;
+  background: rgba(246,245,241,.95); backdrop-filter: blur(4px); padding: .8rem 0; border-top: 1px solid var(--line); margin-top: .5rem; z-index: 2; }
+.sticky-actions span { margin-right: auto; }
+
+/* Aide fichiers */
+.doc table { width: 100%; border-collapse: collapse; font-size: .88rem; margin: .4rem 0 1rem; }
+.doc th, .doc td { text-align: left; padding: .45rem .5rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+.doc th { background: var(--bg); font-size: .78rem; text-transform: uppercase; color: var(--muted); }
+.doc code { background: var(--bg); padding: .05rem .3rem; border-radius: 4px; font-size: .84rem; }
+.doc .req { color: var(--err); font-weight: 700; }
+.dl-row { display: flex; gap: .5rem; flex-wrap: wrap; margin: .3rem 0 .8rem; }

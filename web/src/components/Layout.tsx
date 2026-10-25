@@ -17,6 +17,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         <div className="brand"><span className="logo" />Line Balancer</div>
         <nav>
           <NavLink to="/" end>Tableau de bord</NavLink>
+          <NavLink to="/gamme">Gamme</NavLink>
           <NavLink to="/calcul">Nouveau calcul</NavLink>
           <NavLink to="/calculs">Historique</NavLink>
           <NavLink to="/atelier">Atelier</NavLink>

@@ -9,6 +9,8 @@ import NewRun from "./pages/NewRun";
 import RunDetail from "./pages/RunDetail";
 import History from "./pages/History";
 import Account from "./pages/Account";
+import GammeEditor from "./pages/GammeEditor";
+import FileHelp from "./pages/FileHelp";
 
 export default function App() {
   const { session, loading, recovery, orgs, orgsLoaded, orgsError, refreshOrgs } = useSession();
@@ -32,6 +34,8 @@ export default function App() {
     <Layout>
       <Routes>
         <Route path="/" element={<Dashboard />} />
+        <Route path="/gamme" element={<GammeEditor />} />
+        <Route path="/aide/fichiers" element={<FileHelp />} />
         <Route path="/calcul" element={<NewRun />} />
         <Route path="/calculs" element={<History />} />
         <Route path="/calculs/:id" element={<RunDetail />} />
