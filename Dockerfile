@@ -8,5 +8,5 @@ COPY engine/ engine/
 COPY api/ api/
 COPY data/ data/
 EXPOSE 8000
-# TLB_API_KEYS="cle1,cle2" pour activer l'authentification
-CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
+# Config par variables d'environnement (voir .env.example). Render fournit $PORT.
+CMD ["sh", "-c", "uvicorn api.main:app --host 0.0.0.0 --port ${PORT:-8000} --workers 1 --proxy-headers --forwarded-allow-ips='*'"]

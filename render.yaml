@@ -1,0 +1,22 @@
+# Blueprint Render : API Textile Line Balancer (conteneur Docker, même région que Supabase)
+services:
+  - type: web
+    name: tlb-api
+    runtime: docker
+    region: oregon
+    plan: starter          # « free » possible pour tester (mise en veille après 15 min)
+    branch: main
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: TLB_SUPABASE_URL
+        value: https://lkdlqijhlszyfkmunzyt.supabase.co
+      - key: TLB_SUPABASE_ANON_KEY
+        sync: false        # clé publishable, saisie dans le tableau de bord Render
+      - key: TLB_CORS_ORIGINS
+        sync: false        # ex. https://linebalancer.netlify.app
+      - key: TLB_JOB_WORKERS
+        value: "2"
+      - key: TLB_JOB_TIME_LIMIT
+        value: "300"
