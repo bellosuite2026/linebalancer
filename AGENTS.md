@@ -37,12 +37,13 @@ python scripts/balance.py --sam data/samples/... --cycle-time 1.5 --solver rpw
   - `balance_runner.py` — worker thread d'équilibrage
   - `layout_toolbar.py` — outils Implantation 2D
   - `svg_icons.py` — loader d'icônes SVG (machines + UI)
-- `tests/` : 72 tests pytest (52 moteur + 20 GUI).
+- `api/` : API FastAPI du SaaS (adaptateur fin, **aucune logique métier** ; dépend de `engine/`, jamais de `gui/`). Lancer : `uvicorn api.main:app --reload`. Doc : `api/README.md`.
+- `tests/` : 72 tests moteur + 20 GUI + `tests/test_api.py` (API).
 - `gui/assets/` : icônes machines (15 SVG), icônes UI (10 SVG), ATTRIBUTION.txt.
 
 ## Conventions
 
-- `engine/` ne doit jamais importer depuis `gui/`.
+- `engine/` ne doit jamais importer depuis `gui/` ni `api/`.
 - Pas de `sys.path.insert` (imports de packages via `pyproject.toml`).
 - Source unique de construction du problème : `engine/builders.build_problem_from_workflow`.
 - Pont v1<->v2 : `engine/adapters.py` (`unified_to_problem`, `problem_to_unified`).

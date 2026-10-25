@@ -1,0 +1,134 @@
+"""Schémas Pydantic de l'API (miroir des dataclasses de engine.models)."""
+from __future__ import annotations
+
+from enum import Enum
+from typing import Any, Optional
+
+from pydantic import BaseModel, Field
+
+
+class OperationIn(BaseModel):
+    id: str
+    name: str = ""
+    duration: float = Field(ge=0, description="Temps standard SAM (min)")
+    predecessors: list[str] = []
+    machine_type: str = ""
+    required_skills: list[str] = []
+    section: str = ""
+    optional: bool = False
+    task_type: str = "VA"
+
+
+class WorkstationIn(BaseModel):
+    id: str
+    name: str = ""
+    machine_type: str = ""
+    available: bool = True
+    max_workers: int = Field(default=1, ge=1)
+    section: str = ""
+
+
+class WorkerIn(BaseModel):
+    id: str
+    name: str = ""
+    skills: list[str] = []
+    efficiency: float = Field(default=1.0, gt=0)
+    assigned_station: Optional[str] = None
+    available: bool = True
+
+
+class ProblemIn(BaseModel):
+    name: str = "ligne"
+    target_cycle_time: float = Field(gt=0, description="Cadence cible (min/pièce)")
+    operations: list[OperationIn] = Field(min_length=1)
+    workstations: list[WorkstationIn] = []
+    workers: list[WorkerIn] = []
+    max_stations: Optional[int] = Field(default=None, ge=1)
+    forced_assignments: dict[str, int] = {}
+    forbidden_assignments: dict[str, list[int]] = {}
+    same_station_groups: list[list[str]] = []
+
+
+class SolverName(str, Enum):
+    rpw = "rpw"
+    cp_sat = "cp_sat"
+
+
+class BalanceRequest(BaseModel):
+    problem: ProblemIn
+    solver: SolverName = SolverName.rpw
+    time_limit_seconds: int = Field(default=10, ge=1, description="CP-SAT uniquement")
+
+
+class MinCycleRequest(BaseModel):
+    problem: ProblemIn
+    solver: SolverName = SolverName.rpw
+    precision: float = Field(default=0.05, gt=0, le=1)
+    time_limit_seconds: int = Field(default=5, ge=1, description="CP-SAT, par itération")
+
+
+class IssueOut(BaseModel):
+    code: str
+    severity: str
+    message: str
+    suggestion: str = ""
+
+
+class PrecheckOut(BaseModel):
+    feasible: bool = Field(description="Aucune erreur bloquante détectée")
+    issues: list[IssueOut]
+    validation_errors: list[str] = Field(description="Contrôles de cohérence de LineBalancingProblem.validate()")
+
+
+class ResultOut(BaseModel):
+    success: bool
+    compliant: bool = Field(description="success ET aucune violation détectée par validate_result")
+    status: str
+    solver: str
+    solve_time_seconds: float
+    target_cycle_time: float
+    stations_used: int
+    actual_cycle_time: float
+    efficiency: float
+    balance_delay: float
+    smoothness_index: float
+    operators: int
+    station_details: list[dict[str, Any]]
+    operation_assignments: dict[str, int]
+    worker_assignments: dict[str, str]
+    warnings: list[str]
+    error_message: str = ""
+    violations: list[IssueOut] = []
+
+
+class MinCycleOut(BaseModel):
+    found: bool
+    min_cycle_time: Optional[float]
+    result: Optional[ResultOut]
+
+
+class ImportOut(BaseModel):
+    problem: ProblemIn
+    precheck: PrecheckOut
+
+
+class JobKind(str, Enum):
+    balance = "balance"
+    min_cycle = "min_cycle"
+
+
+class JobRequest(BaseModel):
+    kind: JobKind
+    balance: Optional[BalanceRequest] = None
+    min_cycle: Optional[MinCycleRequest] = None
+
+
+class JobOut(BaseModel):
+    id: str
+    kind: JobKind
+    status: str  # queued | running | done | failed
+    created_at: float
+    started_at: Optional[float] = None
+    finished_at: Optional[float] = None
+    result: Optional[dict[str, Any]] = None
+    error: str = ""

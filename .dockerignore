@@ -1,0 +1,9 @@
+.git
+.venv
+gui
+tests
+docs
+results
+projects
+*.pdf
+__pycache__
