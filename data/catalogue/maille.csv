@@ -1,0 +1,166 @@
+vetement;section;operation_source;operation_fr;machine;sam_min;source_url
+t-shirt;préparation;SMV for Number matching front to back part;Appairer devant et dos (numéros);MAN;0.24;https://eujournal.org/index.php/esj/article/download/4452/4287
+t-shirt;épaules;SMV for Shoulder joining;Assembler épaules;SURJ;0.27;https://eujournal.org/index.php/esj/article/download/4452/4287
+t-shirt;encolure/col;SMV for Neck make;Préparer bord-côte encolure (fermer en rond);PIQ;0.26;https://eujournal.org/index.php/esj/article/download/4452/4287
+t-shirt;encolure/col;SMV for Neck joint;Poser bord-côte encolure;SURJ;0.3;https://eujournal.org/index.php/esj/article/download/4452/4287
+t-shirt;encolure/col;SMV for Neck piping;Recouvrir encolure (piping);RECOUV;0.29;https://eujournal.org/index.php/esj/article/download/4452/4287
+t-shirt;encolure/col;SMV for Round neck edge tack;Arrêter bord encolure;PIQ;0.32;https://eujournal.org/index.php/esj/article/download/4452/4287
+t-shirt;encolure/col;SMV for Back tap top stitch;Surpiquer propreté dos encolure;PIQ;0.6;https://eujournal.org/index.php/esj/article/download/4452/4287
+t-shirt;étiquette;SMV for Main label attaching;Poser étiquette principale;PIQ;0.3;https://eujournal.org/index.php/esj/article/download/4452/4287
+t-shirt;manche;SMV for Sleeve hem;Ourler bas de manches à la recouvreuse;RECOUV;0.3;https://eujournal.org/index.php/esj/article/download/4452/4287
+t-shirt;manche;SMV for Sleeve match;Appairer manches;MAN;0.29;https://eujournal.org/index.php/esj/article/download/4452/4287
+t-shirt;manche;SMV for Sleeve joining;Monter manches;SURJ;0.6;https://eujournal.org/index.php/esj/article/download/4452/4287
+t-shirt;côtés;SMV for Side joining;Fermer côtés;SURJ;0.8;https://eujournal.org/index.php/esj/article/download/4452/4287
+t-shirt;étiquette;SMV for Care label joining;Poser étiquette d'entretien;PIQ;0.29;https://eujournal.org/index.php/esj/article/download/4452/4287
+t-shirt;finition;SMV for Body turning;Retourner le vêtement;MAN;0.32;https://eujournal.org/index.php/esj/article/download/4452/4287
+t-shirt;côtés;SMV for Side top stitch;Recouvrir coutures de côté;RECOUV;0.6;https://eujournal.org/index.php/esj/article/download/4452/4287
+t-shirt;encolure/col;SMV for Neck top stitch;Surpiquer encolure à la recouvreuse;RECOUV;0.35;https://eujournal.org/index.php/esj/article/download/4452/4287
+t-shirt;bas;SMV for Bottom hem;Ourler bas à la recouvreuse;RECOUV;0.35;https://eujournal.org/index.php/esj/article/download/4452/4287
+polo;étiquette;CARE LABEL CUT, ARRANGE & ATT;Couper et poser étiquette d'entretien;PIQ;0.35;https://ordnur.com/apparel/operation-breakdown-and-smv-polo-shirt/
+polo;patte de boutonnage;PLACKET & BODY STICKER MATCH;Appairer patte et devant (étiquettes);MAN;0.12;https://ordnur.com/apparel/operation-breakdown-and-smv-polo-shirt/
+polo;patte de boutonnage;PLACKET ROLLING & MARK;Plier et marquer patte de boutonnage;PIQ;0.35;https://ordnur.com/apparel/operation-breakdown-and-smv-polo-shirt/
+polo;patte de boutonnage;PLACKET ATTACH;Poser patte de boutonnage;PIQ;0.42;https://ordnur.com/apparel/operation-breakdown-and-smv-polo-shirt/
+polo;patte de boutonnage;PLACKET SCISSORING & NOSE TACK;Cranter patte et arrêter le nez;PIQ;0.32;https://ordnur.com/apparel/operation-breakdown-and-smv-polo-shirt/
+polo;dos;BK MOON IRON;Repasser demi-lune dos;FER;0.32;https://ordnur.com/apparel/operation-breakdown-and-smv-polo-shirt/
+polo;étiquette;MAIN & SIZE LABEL ATTACH;Poser étiquettes principale et taille;PIQ;0.4;https://ordnur.com/apparel/operation-breakdown-and-smv-polo-shirt/
+polo;dos;MOON ATTACH;Poser demi-lune dos;PIQ;0.35;https://ordnur.com/apparel/operation-breakdown-and-smv-polo-shirt/
+polo;préparation;FRT & BK STICKER MATCH;Appairer devant et dos (étiquettes);MAN;0.15;https://ordnur.com/apparel/operation-breakdown-and-smv-polo-shirt/
+polo;épaules;SHOULDER JOIN & cut;Assembler épaules et couper;SURJ;0.3;https://ordnur.com/apparel/operation-breakdown-and-smv-polo-shirt/
+polo;encolure/col;COLLAR  SERVICING;Surjeter col;SURJ;0.2;https://ordnur.com/apparel/operation-breakdown-and-smv-polo-shirt/
+polo;encolure/col;COLLAR MARK;Marquer col;MAN;0.15;https://ordnur.com/apparel/operation-breakdown-and-smv-polo-shirt/
+polo;encolure/col;COLLAR ATT W/BK TAPE;Monter col avec propreté dos;PIQ;0.37;https://ordnur.com/apparel/operation-breakdown-and-smv-polo-shirt/
+polo;encolure/col;BK TAPE TS;Surpiquer propreté dos encolure;PIQ;0.33;https://ordnur.com/apparel/operation-breakdown-and-smv-polo-shirt/
+polo;patte de boutonnage;LOWER PLACKET CLOSE;Fermer patte inférieure;PIQ;0.22;https://ordnur.com/apparel/operation-breakdown-and-smv-polo-shirt/
+polo;patte de boutonnage;UPPER PLACKET TS;Surpiquer patte supérieure;PIQ;0.2;https://ordnur.com/apparel/operation-breakdown-and-smv-polo-shirt/
+polo;patte de boutonnage;PLACKET BOX;Piquer carré de patte;PIQ;0.4;https://ordnur.com/apparel/operation-breakdown-and-smv-polo-shirt/
+polo;manche;CUFF JOIN;Poser bord-côte bas de manche;SURJ;0.4;https://ordnur.com/apparel/operation-breakdown-and-smv-polo-shirt/
+polo;manche;CUFF TS;Recouvrir bord-côte bas de manche;RECOUV;0.27;https://ordnur.com/apparel/operation-breakdown-and-smv-polo-shirt/
+polo;manche;Slv Pair Match;Appairer manches;MAN;0.15;https://ordnur.com/apparel/operation-breakdown-and-smv-polo-shirt/
+polo;manche;Slv& Body Sticker Match;Appairer manches et corps (étiquettes);MAN;0.25;https://ordnur.com/apparel/operation-breakdown-and-smv-polo-shirt/
+polo;manche;SLEEVE JOIN;Monter manches;SURJ;0.42;https://ordnur.com/apparel/operation-breakdown-and-smv-polo-shirt/
+polo;manche;ARMHOLE TS;Recouvrir emmanchures;RECOUV;0.32;https://ordnur.com/apparel/operation-breakdown-and-smv-polo-shirt/
+polo;bas;BTM HEM;Ourler bas à la recouvreuse;RECOUV;0.32;https://ordnur.com/apparel/operation-breakdown-and-smv-polo-shirt/
+polo;côtés;SIDE SPLIT TK;Arrêter fentes de côté;PIQ;0.27;https://ordnur.com/apparel/operation-breakdown-and-smv-polo-shirt/
+polo;côtés;SIDE SPLIT ROLLING BY TS;Rouler et surpiquer fentes de côté;PIQ;0.5;https://ordnur.com/apparel/operation-breakdown-and-smv-polo-shirt/
+polo;côtés;SIDE SEAM;Fermer côtés;SURJ;0.57;https://ordnur.com/apparel/operation-breakdown-and-smv-polo-shirt/
+polo;finition;SLEEVE OPEN & CLOSE TK & RAW EDGE TK;Arrêter ouvertures manches et bords francs;PIQ;0.45;https://ordnur.com/apparel/operation-breakdown-and-smv-polo-shirt/
+polo;patte de boutonnage;SEW BTN HOLE;Faire boutonnières;BOUT;0.3;https://ordnur.com/apparel/operation-breakdown-and-smv-polo-shirt/
+polo;patte de boutonnage;BTN ATTACH POSITION MARK;Marquer position des boutons;MAN;0.15;https://ordnur.com/apparel/operation-breakdown-and-smv-polo-shirt/
+polo;patte de boutonnage;BTN ATTACH;Poser boutons;BOUTON;0.27;https://ordnur.com/apparel/operation-breakdown-and-smv-polo-shirt/
+polo;patte de boutonnage;BTN PUSH;Boutonner;MAN;0.2;https://ordnur.com/apparel/operation-breakdown-and-smv-polo-shirt/
+polo;finition;STICKER REMOVE (4);Retirer étiquettes de repérage;MAN;0.15;https://ordnur.com/apparel/operation-breakdown-and-smv-polo-shirt/
+polo;finition;FINAL THREAD CUT;Couper fils (finition);MAN;0.45;https://ordnur.com/apparel/operation-breakdown-and-smv-polo-shirt/
+sweat;capuche;Hood upper two part attach;Assembler deux parties capuche extérieure;SURJ;0.3;https://ordnur.com/apparel/operation-breakdown-smv-layout-hoodies-manufacturing/
+sweat;capuche;Hood upper topstitch;Recouvrir couture capuche extérieure;RECOUV;0.28;https://ordnur.com/apparel/operation-breakdown-smv-layout-hoodies-manufacturing/
+sweat;capuche;Hood liner two part join;Assembler deux parties doublure capuche;SURJ;0.3;https://ordnur.com/apparel/operation-breakdown-smv-layout-hoodies-manufacturing/
+sweat;capuche;Hood upper n liner two part join;Assembler capuche et doublure;SURJ;0.33;https://ordnur.com/apparel/operation-breakdown-smv-layout-hoodies-manufacturing/
+sweat;capuche;Bluffstitch hood join seam;Surpiquer couture d'assemblage capuche;RECOUV;0.4;https://ordnur.com/apparel/operation-breakdown-smv-layout-hoodies-manufacturing/
+sweat;capuche;Hood mark n make hole;Marquer et percer capuche (œillets);AUTRE;0.28;https://ordnur.com/apparel/operation-breakdown-smv-layout-hoodies-manufacturing/
+sweat;capuche;Eyelets attach at hood;Poser œillets capuche;AUTRE;0.35;https://ordnur.com/apparel/operation-breakdown-smv-layout-hoodies-manufacturing/
+sweat;capuche;Hood channel make;Faire coulisse capuche;RECOUV;0.42;https://ordnur.com/apparel/operation-breakdown-smv-layout-hoodies-manufacturing/
+sweat;capuche;Hood middle tack;Arrêter milieu capuche;PIQ;0.18;https://ordnur.com/apparel/operation-breakdown-smv-layout-hoodies-manufacturing/
+sweat;capuche;Hood lower edge close;Fermer bord inférieur capuche;CHAIN;0.3;https://ordnur.com/apparel/operation-breakdown-smv-layout-hoodies-manufacturing/
+sweat;capuche;Hood crotch tack;Arrêter croisement capuche;PIQ;0.24;https://ordnur.com/apparel/operation-breakdown-smv-layout-hoodies-manufacturing/
+sweat;poche kangourou;Pocket position mark;Marquer position poche;MAN;0.24;https://ordnur.com/apparel/operation-breakdown-smv-layout-hoodies-manufacturing/
+sweat;poche kangourou;Pocket hem kangaroo pocket;Ourler entrées poche kangourou;RECOUV;0.35;https://ordnur.com/apparel/operation-breakdown-smv-layout-hoodies-manufacturing/
+sweat;poche kangourou;Pocket edge press;Repasser bords de poche;FER;0.4;https://ordnur.com/apparel/operation-breakdown-smv-layout-hoodies-manufacturing/
+sweat;poche kangourou;Pocket attach and edge close-[Kangaroo];Poser poche kangourou et surpiquer bords;PIQ;0.85;https://ordnur.com/apparel/operation-breakdown-smv-layout-hoodies-manufacturing/
+sweat;poche kangourou;Pocket excess raw-edge cut;Couper excédent bords de poche;MAN;0.3;https://ordnur.com/apparel/operation-breakdown-smv-layout-hoodies-manufacturing/
+sweat;poche kangourou;Pocket opening secure X4;Brider entrées de poche (x4);BRID;0.4;https://ordnur.com/apparel/operation-breakdown-smv-layout-hoodies-manufacturing/
+sweat;préparation;Front n back part match;Appairer devant et dos;MAN;0.28;https://ordnur.com/apparel/operation-breakdown-smv-layout-hoodies-manufacturing/
+sweat;épaules;Shoulder Join with/ without tape;Assembler épaules (avec/sans ruban);SURJ;0.35;https://ordnur.com/apparel/operation-breakdown-smv-layout-hoodies-manufacturing/
+sweat;manche;Sleeve n body match;Appairer manches et corps;MAN;0.35;https://ordnur.com/apparel/operation-breakdown-smv-layout-hoodies-manufacturing/
+sweat;manche;Insert Sleeves in hoodies;Monter manches;SURJ;0.56;https://ordnur.com/apparel/operation-breakdown-smv-layout-hoodies-manufacturing/
+sweat;manche;Armholes topstitch;Recouvrir emmanchures;RECOUV;0.5;https://ordnur.com/apparel/operation-breakdown-smv-layout-hoodies-manufacturing/
+sweat;étiquette;Care label make;Préparer étiquette d'entretien;PIQ;0.24;https://ordnur.com/apparel/operation-breakdown-smv-layout-hoodies-manufacturing/
+sweat;étiquette;Flag label tack at side;Poser étiquette drapeau au côté;PIQ;0.26;https://ordnur.com/apparel/operation-breakdown-smv-layout-hoodies-manufacturing/
+sweat;côtés;Side seams ins care label;Fermer côtés avec étiquette d'entretien;SURJ;0.8;https://ordnur.com/apparel/operation-breakdown-smv-layout-hoodies-manufacturing/
+sweat;manche;Cuff join as a circleX2;Fermer bords-côtes poignets en rond (x2);PIQ;0.28;https://ordnur.com/apparel/operation-breakdown-smv-layout-hoodies-manufacturing/
+sweat;manche;Cuff fold into half;Plier poignets en deux;MAN;0.24;https://ordnur.com/apparel/operation-breakdown-smv-layout-hoodies-manufacturing/
+sweat;manche;Cuffs attach at sleeve opening;Poser poignets bord-côte;SURJ;0.5;https://ordnur.com/apparel/operation-breakdown-smv-layout-hoodies-manufacturing/
+sweat;capuche;Hood n body match n mark;Appairer et marquer capuche et corps;MAN;0.3;https://ordnur.com/apparel/operation-breakdown-smv-layout-hoodies-manufacturing/
+sweat;encolure/col;Hood tack at neck;Bâtir capuche à l'encolure;PIQ;0.24;https://ordnur.com/apparel/operation-breakdown-smv-layout-hoodies-manufacturing/
+sweat;capuche;Hood attach to body;Monter capuche;SURJ;0.35;https://ordnur.com/apparel/operation-breakdown-smv-layout-hoodies-manufacturing/
+sweat;encolure/col;Front neck topstitch;Recouvrir encolure devant;RECOUV;0.3;https://ordnur.com/apparel/operation-breakdown-smv-layout-hoodies-manufacturing/
+sweat;encolure/col;Tape attach at back neck;Poser propreté dos encolure;PIQ;0.35;https://ordnur.com/apparel/operation-breakdown-smv-layout-hoodies-manufacturing/
+sweat;encolure/col;Back neck top stitch;Surpiquer propreté dos encolure;PIQ;0.45;https://ordnur.com/apparel/operation-breakdown-smv-layout-hoodies-manufacturing/
+sweat;étiquette;Label make;Préparer étiquette;PIQ;0.24;https://ordnur.com/apparel/operation-breakdown-smv-layout-hoodies-manufacturing/
+sweat;étiquette;Attach main label at back neck;Poser étiquette principale dos encolure;PIQ;0.3;https://ordnur.com/apparel/operation-breakdown-smv-layout-hoodies-manufacturing/
+sweat;bas;Bottom band join as circle;Fermer bord-côte bas en rond;PIQ;0.24;https://ordnur.com/apparel/operation-breakdown-smv-layout-hoodies-manufacturing/
+sweat;bas;Bottom band edges close and mark;Fermer bords et marquer bord-côte bas;CHAIN;0.45;https://ordnur.com/apparel/operation-breakdown-smv-layout-hoodies-manufacturing/
+sweat;bas;Bottom band attach to body;Poser bord-côte bas;SURJ;0.47;https://ordnur.com/apparel/operation-breakdown-smv-layout-hoodies-manufacturing/
+sweat;finition;Sticker remove and GMTs turn;Retirer étiquettes de repérage et retourner;MAN;0.26;https://ordnur.com/apparel/operation-breakdown-smv-layout-hoodies-manufacturing/
+sweat;manche;Cuffs topstitch [circular];Recouvrir poignets;RECOUV;0.45;https://ordnur.com/apparel/operation-breakdown-smv-layout-hoodies-manufacturing/
+sweat;bas;Bottom band topstitch;Recouvrir bord-côte bas;RECOUV;0.45;https://ordnur.com/apparel/operation-breakdown-smv-layout-hoodies-manufacturing/
+sweat;capuche;Tie insert at hood chennel;Passer cordon dans coulisse capuche;MAN;0.28;https://ordnur.com/apparel/operation-breakdown-smv-layout-hoodies-manufacturing/
+sweat;capuche;Secure tie at c/frt hood;Brider cordon milieu devant capuche;BRID;0.18;https://ordnur.com/apparel/operation-breakdown-smv-layout-hoodies-manufacturing/
+sweat;finition;Threads trim;Couper fils (finition);MAN;0.4;https://ordnur.com/apparel/operation-breakdown-smv-layout-hoodies-manufacturing/
+leggings;étiquette;Care label cut & attach;Couper et poser étiquette d'entretien;PIQ;0.2;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-leggings
+leggings;fourche;Front rise join with sticker match;Assembler fourche devant;SURJ;0.25;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-leggings
+leggings;fourche;Back rise join;Assembler fourche dos;SURJ;0.22;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-leggings
+leggings;entrejambe;Inseam join;Fermer entrejambes;SURJ;0.45;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-leggings
+leggings;ceinture;Waist belt Tape & Elastic open give steam & cut;Défroisser à la vapeur et couper ruban et élastique ceinture;MAN;0.3;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-leggings
+leggings;ceinture;Elastic ring make & mark;Fermer élastique en rond et marquer;PIQ;0.3;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-leggings
+leggings;ceinture;West belt make & mark;Préparer et marquer ceinture;PIQ;0.35;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-leggings
+leggings;ceinture;Elastic tk with belt;Bâtir élastique dans ceinture;PIQ;0.4;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-leggings
+leggings;ceinture;Body mark & tape attach with belt;Marquer corps et poser ruban à la ceinture;PIQ;0.3;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-leggings
+leggings;ceinture;West belt attaches at the waist;Monter ceinture à la taille;SURJ;0.6;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-leggings
+leggings;étiquette;Label attach 2;Poser étiquettes (x2);PIQ;0.25;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-leggings
+leggings;bas;Leg Hem;Ourler bas de jambes à la recouvreuse;RECOUV;0.45;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-leggings
+leggings;entrejambe;Crosspoint BTK;Brider croisement d'entrejambe;BRID;0.12;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-leggings
+leggings;finition;FINAL THREAD CUT & STICKER REMOVE;Couper fils et retirer étiquettes de repérage;MAN;0.45;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-leggings
+jogging;devant;Front leg panel attach;Assembler panneau jambe devant;SURJ;1.44;https://ordnur.com/apparel/operation-breakdown-smv-layout-jogger-manufacturing/
+jogging;dos;Match n Back panel attach;Appairer et assembler panneau dos;SURJ;1.44;https://ordnur.com/apparel/operation-breakdown-smv-layout-jogger-manufacturing/
+jogging;fourche;Front Rise join;Assembler fourche devant;SURJ;0.3;https://ordnur.com/apparel/operation-breakdown-smv-layout-jogger-manufacturing/
+jogging;fourche;Back rise join;Assembler fourche dos;SURJ;0.3;https://ordnur.com/apparel/operation-breakdown-smv-layout-jogger-manufacturing/
+jogging;poche passepoilée;Pocket position mark;Marquer position poche;MAN;0.32;https://ordnur.com/apparel/operation-breakdown-smv-layout-jogger-manufacturing/
+jogging;poche passepoilée;Press welt with fusing paper n mark;Thermocoller et marquer passepoil;FER;0.48;https://ordnur.com/apparel/operation-breakdown-smv-layout-jogger-manufacturing/
+jogging;poche passepoilée;Pocket welts attach;Poser passepoils de poche;PIQ;0.56;https://ordnur.com/apparel/operation-breakdown-smv-layout-jogger-manufacturing/
+jogging;poche passepoilée;Pocket liner attach behind welt;Poser fond de poche derrière passepoil;PIQ;0.56;https://ordnur.com/apparel/operation-breakdown-smv-layout-jogger-manufacturing/
+jogging;poche passepoilée;Cut pocket mouth n form fishtail;Ouvrir poche et former queues d'aronde;MAN;0.7;https://ordnur.com/apparel/operation-breakdown-smv-layout-jogger-manufacturing/
+jogging;poche passepoilée;Welt edge neaten;Surjeter bords de passepoil;SURJ;0.5;https://ordnur.com/apparel/operation-breakdown-smv-layout-jogger-manufacturing/
+jogging;poche passepoilée;Secure fishtails;Arrêter queues d'aronde;PIQ;0.72;https://ordnur.com/apparel/operation-breakdown-smv-layout-jogger-manufacturing/
+jogging;poche passepoilée;Topstitch pocket welts with corner;Surpiquer passepoils avec coins;PIQ;0.84;https://ordnur.com/apparel/operation-breakdown-smv-layout-jogger-manufacturing/
+jogging;poche passepoilée;Pocket bag attach;Fermer sac de poche;SURJ;0.6;https://ordnur.com/apparel/operation-breakdown-smv-layout-jogger-manufacturing/
+jogging;poche passepoilée;Secure pocket bags OL seam;Arrêter couture surjetée sac de poche;PIQ;0.4;https://ordnur.com/apparel/operation-breakdown-smv-layout-jogger-manufacturing/
+jogging;poche passepoilée;Pocket bag tack at side n waist;Bâtir sac de poche au côté et à la taille;PIQ;0.48;https://ordnur.com/apparel/operation-breakdown-smv-layout-jogger-manufacturing/
+jogging;préparation;Front n back part sticker match;Appairer devant et dos (étiquettes);MAN;0.28;https://ordnur.com/apparel/operation-breakdown-smv-layout-jogger-manufacturing/
+jogging;côtés;Side mark n tack;Marquer et bâtir côtés;PIQ;0.56;https://ordnur.com/apparel/operation-breakdown-smv-layout-jogger-manufacturing/
+jogging;côtés;Sideseam join;Fermer côtés;SURJ;0.76;https://ordnur.com/apparel/operation-breakdown-smv-layout-jogger-manufacturing/
+jogging;entrejambe;Inseam join;Fermer entrejambes;SURJ;0.64;https://ordnur.com/apparel/operation-breakdown-smv-layout-jogger-manufacturing/
+jogging;entrejambe;Secure crotch point;Brider croisement d'entrejambe;BRID;0.18;https://ordnur.com/apparel/operation-breakdown-smv-layout-jogger-manufacturing/
+jogging;ceinture;Elastic press and cut to length;Repasser et couper élastique à longueur;FER;0.2;https://ordnur.com/apparel/operation-breakdown-smv-layout-jogger-manufacturing/
+jogging;ceinture;Elastic join as a circle n mark;Fermer élastique en rond et marquer;DBL;0.3;https://ordnur.com/apparel/operation-breakdown-smv-layout-jogger-manufacturing/
+jogging;ceinture;Waist band join as circle;Fermer ceinture en rond;PIQ;0.26;https://ordnur.com/apparel/operation-breakdown-smv-layout-jogger-manufacturing/
+jogging;ceinture;Mark n fusing attach;Marquer et thermocoller ceinture;FER;0.28;https://ordnur.com/apparel/operation-breakdown-smv-layout-jogger-manufacturing/
+jogging;ceinture;Mark n form holes at waist band;Faire œillets/boutonnières de cordon à la ceinture;BOUT;0.35;https://ordnur.com/apparel/operation-breakdown-smv-layout-jogger-manufacturing/
+jogging;ceinture;Elastic tack at waistbelt;Bâtir élastique dans ceinture;PIQ;0.48;https://ordnur.com/apparel/operation-breakdown-smv-layout-jogger-manufacturing/
+jogging;ceinture;Waist band topstitch form channel;Surpiquer ceinture et former coulisse;AUTRE;0.5;https://ordnur.com/apparel/operation-breakdown-smv-layout-jogger-manufacturing/
+jogging;ceinture;WB lower edge close n mark;Fermer bord inférieur ceinture et marquer;CHAIN;0.45;https://ordnur.com/apparel/operation-breakdown-smv-layout-jogger-manufacturing/
+jogging;ceinture;Attach waist band to body;Monter ceinture;SURJ;0.48;https://ordnur.com/apparel/operation-breakdown-smv-layout-jogger-manufacturing/
+jogging;étiquette;Care label make;Préparer étiquette d'entretien;PIQ;0.24;https://ordnur.com/apparel/operation-breakdown-smv-layout-jogger-manufacturing/
+jogging;étiquette;Label attach at back waist;Poser étiquette au dos de la taille;PIQ;0.4;https://ordnur.com/apparel/operation-breakdown-smv-layout-jogger-manufacturing/
+jogging;ceinture;Loop measure cut n attach at inside waist;Couper et poser bride intérieure taille;PIQ;0.28;https://ordnur.com/apparel/operation-breakdown-smv-layout-jogger-manufacturing/
+jogging;bas;Cuff join as a circleX2;Fermer bords-côtes bas de jambe en rond (x2);PIQ;0.28;https://ordnur.com/apparel/operation-breakdown-smv-layout-jogger-manufacturing/
+jogging;bas;Cuff fold into half;Plier bords-côtes bas de jambe;MAN;0.24;https://ordnur.com/apparel/operation-breakdown-smv-layout-jogger-manufacturing/
+jogging;bas;Cuff attach at leg opening;Poser bord-côte bas de jambe;SURJ;0.5;https://ordnur.com/apparel/operation-breakdown-smv-layout-jogger-manufacturing/
+jogging;finition;Sticker remove n GMTs turn;Retirer étiquettes de repérage et retourner;MAN;0.26;https://ordnur.com/apparel/operation-breakdown-smv-layout-jogger-manufacturing/
+jogging;ceinture;Waist band topstitch;Recouvrir ceinture;RECOUV;0.46;https://ordnur.com/apparel/operation-breakdown-smv-layout-jogger-manufacturing/
+jogging;poche passepoilée;Secure Pocket corners;Brider coins de poche;BRID;0.48;https://ordnur.com/apparel/operation-breakdown-smv-layout-jogger-manufacturing/
+jogging;ceinture;Drawstring insert through the waist channel;Passer cordon dans coulisse ceinture;MAN;0.3;https://ordnur.com/apparel/operation-breakdown-smv-layout-jogger-manufacturing/
+jogging;ceinture;Secure tie at CB waist band;Brider cordon milieu dos ceinture;BRID;0.18;https://ordnur.com/apparel/operation-breakdown-smv-layout-jogger-manufacturing/
+jogging;ceinture;Drawstring end knot make;Faire nœuds bouts de cordon;MAN;0.28;https://ordnur.com/apparel/operation-breakdown-smv-layout-jogger-manufacturing/
+jogging;finition;Thread trim;Couper fils (finition);MAN;0.35;https://ordnur.com/apparel/operation-breakdown-smv-layout-jogger-manufacturing/
+sous-vetement;fond;Gusset Preperation;Préparer fond (gousset);SURJ;0.46;https://doi.org/10.15406/jteft.2024.10.00386
+sous-vetement;fond;Gusset Coverall;Poser fond (gousset);PIQ;0.84;https://doi.org/10.15406/jteft.2024.10.00386
+sous-vetement;dos;Back Seam;Fermer couture dos;PIQ;0.257;https://doi.org/10.15406/jteft.2024.10.00386
+sous-vetement;entrejambe;Inside Seam;Fermer entrejambe;PIQ;0.336;https://doi.org/10.15406/jteft.2024.10.00386
+sous-vetement;bas;Hem Coverstitch;Ourler bas de jambes à la recouvreuse;RECOUV;0.495;https://doi.org/10.15406/jteft.2024.10.00386
+sous-vetement;ceinture;Elastic Ironing;Repasser élastique;FER;0.078;https://doi.org/10.15406/jteft.2024.10.00386
+sous-vetement;ceinture;Elastic Cutting;Couper élastique;MAN;0.246;https://doi.org/10.15406/jteft.2024.10.00386
+sous-vetement;ceinture;Elastic Joining;Fermer élastique en rond (bride);BRID;0.343;https://doi.org/10.15406/jteft.2024.10.00386
+sous-vetement;ceinture;Elastic Attachment;Poser élastique ceinture à la recouvreuse;RECOUV;0.519;https://doi.org/10.15406/jteft.2024.10.00386
+sous-vetement;ceinture;Elastic End Fastening;Brider extrémités élastique;BRID;0.249;https://doi.org/10.15406/jteft.2024.10.00386
+sous-vetement;finition;Thread Trimming;Couper fils (finition);MAN;0.455;https://doi.org/10.15406/jteft.2024.10.00386
+sous-vetement;finition;Ironing;Repasser le vêtement;FER;0.369;https://doi.org/10.15406/jteft.2024.10.00386
+sous-vetement;finition;Final Control;Contrôler le vêtement (contrôle final);MAN;0.482;https://doi.org/10.15406/jteft.2024.10.00386

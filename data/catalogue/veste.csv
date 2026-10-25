@@ -1,0 +1,151 @@
+vetement;section;operation_source;operation_fr;machine;sam_min;source_url
+blazer;poche plaquée;Pocket position mark;Marquer emplacement poches;MAN;0.48;https://ordnur.com/apparel/operation-breakdown-smv-layout-blazer-manufacturing
+blazer;poche plaquée;Fusing attach at pocket edge;Thermocoller bord de poche;FER;0.20;https://ordnur.com/apparel/operation-breakdown-smv-layout-blazer-manufacturing
+blazer;poche plaquée;Pocket edge neaten;Surjeter bord de poche;SURJ;0.32;https://ordnur.com/apparel/operation-breakdown-smv-layout-blazer-manufacturing
+blazer;poche plaquée;Pocket hem;Ourler haut de poche;RECOUV;0.38;https://ordnur.com/apparel/operation-breakdown-smv-layout-blazer-manufacturing
+blazer;poche plaquée;Pre Iron pocket edges;Préformer bords de poche au fer;FER;0.80;https://ordnur.com/apparel/operation-breakdown-smv-layout-blazer-manufacturing
+blazer;poche plaquée;Pocket attach X2;Poser poches plaquées (x2);PIQ;1.50;https://ordnur.com/apparel/operation-breakdown-smv-layout-blazer-manufacturing
+blazer;poche plaquée;Pocket extra rawedge cut;Recouper surplus bords de poche;MAN;0.60;https://ordnur.com/apparel/operation-breakdown-smv-layout-blazer-manufacturing
+blazer;montage;Front n back part match;Apparier devants et dos;MAN;0.28;https://ordnur.com/apparel/operation-breakdown-smv-layout-blazer-manufacturing
+blazer;montage;Shoulder Join with/ without tape;Assembler épaules (avec/sans ruban);SURJ;0.30;https://ordnur.com/apparel/operation-breakdown-smv-layout-blazer-manufacturing
+blazer;manche;Sleeve pannel attach;Assembler panneaux de manche;SURJ;0.52;https://ordnur.com/apparel/operation-breakdown-smv-layout-blazer-manufacturing
+blazer;manche;Sleeve n Body match;Apparier manches et corps;MAN;0.35;https://ordnur.com/apparel/operation-breakdown-smv-layout-blazer-manufacturing
+blazer;manche;Insert Sleeves;Monter manches;SURJ;0.56;https://ordnur.com/apparel/operation-breakdown-smv-layout-blazer-manufacturing
+blazer;manche;Fusing attach at sleeves opening;Thermocoller bas de manche;FER;0.20;https://ordnur.com/apparel/operation-breakdown-smv-layout-blazer-manufacturing
+blazer;manche;Sleeve edge neaten;Surjeter bas de manche;SURJ;0.36;https://ordnur.com/apparel/operation-breakdown-smv-layout-blazer-manufacturing
+blazer;manche;Sleeve hems- Flat;Ourler bas de manche;RECOUV;0.40;https://ordnur.com/apparel/operation-breakdown-smv-layout-blazer-manufacturing
+blazer;manche;Sleeve hems Inner tack;Bridger intérieur ourlet de manche;PIQ;0.36;https://ordnur.com/apparel/operation-breakdown-smv-layout-blazer-manufacturing
+blazer;étiquette;Care Label Make;Préparer étiquette d'entretien;PIQ;0.24;https://ordnur.com/apparel/operation-breakdown-smv-layout-blazer-manufacturing
+blazer;montage;Side/sleeve seams ins care label- LS;Fermer côtés et dessous de manche avec étiquette;SURJ;0.80;https://ordnur.com/apparel/operation-breakdown-smv-layout-blazer-manufacturing
+blazer;montage;Fusing attach at bottom n front opening,neckline;Thermocoller bas, bord devant et encolure;FER;0.60;https://ordnur.com/apparel/operation-breakdown-smv-layout-blazer-manufacturing
+blazer;finition;Bottom edge neaten;Surjeter bas de veste;SURJ;0.40;https://ordnur.com/apparel/operation-breakdown-smv-layout-blazer-manufacturing
+blazer;finition;Bottom hem;Ourler bas de veste;RECOUV;0.45;https://ordnur.com/apparel/operation-breakdown-smv-layout-blazer-manufacturing
+blazer;col;Fusing attach at collar/collar stand;Thermocoller col et pied de col;FER;0.20;https://ordnur.com/apparel/operation-breakdown-smv-layout-blazer-manufacturing
+blazer;col;Collar make;Assembler col;SURJ;0.35;https://ordnur.com/apparel/operation-breakdown-smv-layout-blazer-manufacturing
+blazer;col;Bluffstitch collar;Piquer col en bordure;PIQ;0.35;https://ordnur.com/apparel/operation-breakdown-smv-layout-blazer-manufacturing
+blazer;parementure;Fusing attach at facing;Thermocoller parementures;THERMO;0.28;https://ordnur.com/apparel/operation-breakdown-smv-layout-blazer-manufacturing
+blazer;parementure;Facing edge neaten;Surjeter bord de parementure;SURJ;0.45;https://ordnur.com/apparel/operation-breakdown-smv-layout-blazer-manufacturing
+blazer;parementure;Facing edge secure;Arrêter bord de parementure;SURJ;0.20;https://ordnur.com/apparel/operation-breakdown-smv-layout-blazer-manufacturing
+blazer;parementure;Facing attach at front part;Assembler parementure sur devant;SURJ;0.60;https://ordnur.com/apparel/operation-breakdown-smv-layout-blazer-manufacturing
+blazer;montage;Facing n body mark;Marquer parementure et corps;MAN;0.32;https://ordnur.com/apparel/operation-breakdown-smv-layout-blazer-manufacturing
+blazer;parementure;Bluffstitch facing join seam;Surpiquer bord devant (couture parementure);PIQ;1.20;https://ordnur.com/apparel/operation-breakdown-smv-layout-blazer-manufacturing
+blazer;montage;Facing tack to body;Bâtir parementure sur corps;PIQ;0.30;https://ordnur.com/apparel/operation-breakdown-smv-layout-blazer-manufacturing
+blazer;col;Collar mark;Marquer col;MAN;0.20;https://ordnur.com/apparel/operation-breakdown-smv-layout-blazer-manufacturing
+blazer;col;Collar stand edge close/ rolling stitch;Fermer pied de col / piqûre de roulé;PIQ;0.32;https://ordnur.com/apparel/operation-breakdown-smv-layout-blazer-manufacturing
+blazer;montage;Body mark;Marquer corps;MAN;0.22;https://ordnur.com/apparel/operation-breakdown-smv-layout-blazer-manufacturing
+blazer;col;Collar tack at neck;Bâtir col à l'encolure;PIQ;0.28;https://ordnur.com/apparel/operation-breakdown-smv-layout-blazer-manufacturing
+blazer;col;Collar attach at neck;Monter col;PIQ;0.45;https://ordnur.com/apparel/operation-breakdown-smv-layout-blazer-manufacturing
+parka;capuche;Hood panel joint (shell);Assembler panneaux de capuche (tissu);PIQ;0.80;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-jacket-manufacturing
+parka;capuche;Hood panel 1/4 T/S;Surpiquer panneaux de capuche 6 mm;DBL;0.75;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-jacket-manufacturing
+parka;capuche;Inner side Hood panel joint(sherpa);Assembler panneaux intérieurs capuche (sherpa);PIQ;0.70;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-jacket-manufacturing
+parka;capuche;Facing jnt with lining psn at hood mouth opening;Assembler parementure et doublure à l'ouverture de capuche;PIQ;0.90;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-jacket-manufacturing
+parka;capuche;Hood mouth opening ruling;Piquer bord ouverture de capuche;PIQ;0.50;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-jacket-manufacturing
+parka;capuche;Hood placket mark for make & decoration;Marquer patte de capuche;MAN;0.90;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-jacket-manufacturing
+parka;capuche;Hood placket  make & decoration S/T;Confectionner et surpiquer patte de capuche;PIQ;0.85;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-jacket-manufacturing
+parka;capuche;Hood mark for 4 points snap button attach;Marquer 4 boutons-pression capuche;MAN;0.40;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-jacket-manufacturing
+parka;capuche;Hood mouth opening 1/16 T/S;Surpiquer ouverture de capuche 1,5 mm;PIQ;0.70;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-jacket-manufacturing
+parka;capuche;Hood eye hole 2 points for dawcode insert;Faire 2 œillets pour cordon de capuche;BOUT;0.55;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-jacket-manufacturing
+parka;doublure;Lining 2 part middle joint;Assembler milieu doublure;PIQ;0.65;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-jacket-manufacturing
+parka;doublure;Hanger loop make & joint at back neck;Faire et poser attache de suspension;PIQ;0.50;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-jacket-manufacturing
+parka;doublure;Patch label iron & Bon Fusing;Repasser et thermocoller écusson;FER;0.80;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-jacket-manufacturing
+parka;doublure;Lining back yoke joint;Assembler empiècement dos doublure;PIQ;0.70;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-jacket-manufacturing
+parka;doublure;Patch & main label joint;Poser écusson et étiquette marque;PIQ;0.95;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-jacket-manufacturing
+parka;poche passepoilée;Inner chest pocket & side H/pocket facing joint;Poser garnitures poche poitrine intérieure et poches côté;PIQ;0.60;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-jacket-manufacturing
+parka;poche passepoilée;Inner chest pkt bone mark;Marquer passepoil poche intérieure;MAN;0.35;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-jacket-manufacturing
+parka;poche passepoilée;Inner chest pkt bone make;Faire passepoil poche intérieure;DBL;0.35;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-jacket-manufacturing
+parka;poche passepoilée;Inner chest pkt  bone cutt & turn;Cranter et retourner poche intérieure;MAN;0.35;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-jacket-manufacturing
+parka;poche passepoilée;Inner chest pkt bone 1/16 T/S (upper & lower);Surpiquer passepoils poche intérieure;PIQ;0.75;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-jacket-manufacturing
+parka;doublure;Inner front panel joint;Assembler panneaux devant doublure;PIQ;0.85;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-jacket-manufacturing
+parka;doublure;Lining sleeve panel joint;Assembler panneaux manche doublure;PIQ;0.75;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-jacket-manufacturing
+parka;poche passepoilée;Front side H/pocket Mark & bone mark for snp btn attach;Marquer poches côté et pressions;MAN;0.50;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-jacket-manufacturing
+parka;poche passepoilée;Front side H/pocket bone make;Faire passepoil poche côté;DBL;0.80;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-jacket-manufacturing
+parka;poche passepoilée;Front H/pkt bone cutt& turn;Cranter et retourner poche côté;MAN;0.75;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-jacket-manufacturing
+parka;poche passepoilée;Front H/pkt bone 1/16 T/S (upper);Surpiquer passepoil haut poche côté;PIQ;0.60;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-jacket-manufacturing
+parka;poche passepoilée;Front  H/pkt bone decoration S/T;Faire piqûre décorative poche côté;PIQ;0.55;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-jacket-manufacturing
+parka;devant;Twill tap joint chest & waist psn;Poser ruban sergé poitrine et taille;PIQ;0.85;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-jacket-manufacturing
+parka;dos;Back part middle 2 part joint;Assembler milieu dos;PIQ;0.85;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-jacket-manufacturing
+parka;dos;Back part middle 2 part 1/16 T/S;Surpiquer milieu dos;PIQ;1.00;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-jacket-manufacturing
+parka;montage;Shoulder jnt (Lining);Assembler épaules doublure;PIQ;0.40;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-jacket-manufacturing
+parka;montage;Sleeve jnt (Lininig);Monter manches doublure;PIQ;0.80;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-jacket-manufacturing
+parka;montage;Side seam jnt (Lining);Fermer côtés doublure;PIQ;0.90;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-jacket-manufacturing
+parka;manche;Sleeve panel jnt (Shell);Assembler panneaux de manche;PIQ;1.00;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-jacket-manufacturing
+parka;manche;Sleeve jnt (Shell);Monter manches;PIQ;0.85;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-jacket-manufacturing
+parka;manche;Armhole 1/4 T/S;Surpiquer emmanchure 6 mm;DBL;0.80;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-jacket-manufacturing
+parka;capuche;Hood joint;Monter capuche;PIQ;1.00;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-jacket-manufacturing
+parka;montage;Side joint (Shell);Fermer côtés;PIQ;0.90;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-jacket-manufacturing
+parka;fermeture;Placket make & 1/16 T/S;Confectionner et surpiquer patte de boutonnage;PIQ;0.90;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-jacket-manufacturing
+parka;fermeture;Zipper jnt (Right side);Poser fermeture éclair côté droit;PIQ;0.70;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-jacket-manufacturing
+parka;fermeture;Punch &attach  for snp btn 18 points;Poser 18 boutons-pression;BOUTON;1.00;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-jacket-manufacturing
+parka;manche;Sleeve cuff with elastick jnt;Monter poignet élastiqué;PIQ;0.60;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-jacket-manufacturing
+parka;finition;Shell & lining joint with front opening psn ( right);Assembler tissu et doublure au bord devant droit;PIQ;0.75;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-jacket-manufacturing
+parka;finition;Btm hem;Ourler bas;PIQ;0.50;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-jacket-manufacturing
+blouson;poignet;Run stitch with lining;Piquer poignet avec doublure;PIQ;0.70;https://textileengineering.net/operation-breakdown-and-smv-of-a-jacket
+blouson;poignet;Trim and Turn;Recouper et retourner poignet;MAN;0.45;https://textileengineering.net/operation-breakdown-and-smv-of-a-jacket
+blouson;poignet;Edge stitch;Piquer poignet en bordure;PIQ;0.65;https://textileengineering.net/operation-breakdown-and-smv-of-a-jacket
+blouson;poignet;Topstitch;Surpiquer poignet;PIQ;0.60;https://textileengineering.net/operation-breakdown-and-smv-of-a-jacket
+blouson;manche;Sleeve panel top;Surpiquer panneaux de manche;DBL;0.75;https://textileengineering.net/operation-breakdown-and-smv-of-a-jacket
+blouson;poche passepoilée;Bone ready with lining;Préparer passepoil avec doublure;PIQ;0.25;https://textileengineering.net/operation-breakdown-and-smv-of-a-jacket
+blouson;poche passepoilée;Welt pocket mark;Marquer poche passepoilée;MAN;0.30;https://textileengineering.net/operation-breakdown-and-smv-of-a-jacket
+blouson;poche passepoilée;Bone attach;Poser passepoil;PIQ;0.35;https://textileengineering.net/operation-breakdown-and-smv-of-a-jacket
+blouson;poche passepoilée;Trim, notch and turn;Recouper, cranter et retourner poche;PIQ;0.45;https://textileengineering.net/operation-breakdown-and-smv-of-a-jacket
+blouson;poche passepoilée;Welt edge stitch;Piquer passepoil en bordure;PIQ;0.30;https://textileengineering.net/operation-breakdown-and-smv-of-a-jacket
+blouson;poche passepoilée;Welt pocket bartack 2;Bridger poche passepoilée (x2);BRID;0.40;https://textileengineering.net/operation-breakdown-and-smv-of-a-jacket
+blouson;poche plaquée;Pocket hem;Ourler haut de poche;PIQ;0.60;https://textileengineering.net/operation-breakdown-and-smv-of-a-jacket
+blouson;rabat;Inner flap pc attach;Assembler dessous de rabat;PIQ;2.40;https://textileengineering.net/operation-breakdown-and-smv-of-a-jacket
+blouson;rabat;Flap edge stitch;Piquer rabat en bordure;PIQ;1.50;https://textileengineering.net/operation-breakdown-and-smv-of-a-jacket
+blouson;rabat;Flap top stitch;Surpiquer rabat;PIQ;1.20;https://textileengineering.net/operation-breakdown-and-smv-of-a-jacket
+blouson;parementure;Front facing lining attach;Assembler doublure sur parementure devant;PIQ;1.20;https://textileengineering.net/operation-breakdown-and-smv-of-a-jacket
+blouson;fermeture;Zipper attach 2;Poser fermeture éclair (x2);PIQ;0.80;https://textileengineering.net/operation-breakdown-and-smv-of-a-jacket
+blouson;fermeture;Zipper finish 2;Finir fermeture éclair (x2);PIQ;1.00;https://textileengineering.net/operation-breakdown-and-smv-of-a-jacket
+blouson;parementure;Facing top stitch 2;Surpiquer parementure (x2);PIQ;1.20;https://textileengineering.net/operation-breakdown-and-smv-of-a-jacket
+blouson;dos;Back panel attach;Assembler panneaux dos;PIQ;0.70;https://textileengineering.net/operation-breakdown-and-smv-of-a-jacket
+blouson;dos;Back panel top;Surpiquer panneaux dos;DBL;0.75;https://textileengineering.net/operation-breakdown-and-smv-of-a-jacket
+blouson;dos;Back yoke top;Surpiquer empiècement dos;DBL;0.45;https://textileengineering.net/operation-breakdown-and-smv-of-a-jacket
+blouson;montage;Shoulder topstitch;Surpiquer épaules;DBL;0.50;https://textileengineering.net/operation-breakdown-and-smv-of-a-jacket
+blouson;manche;Sleeve attaching;Monter manches;PIQ;0.85;https://textileengineering.net/operation-breakdown-and-smv-of-a-jacket
+blouson;montage;Side seam;Fermer côtés;PIQ;0.65;https://textileengineering.net/operation-breakdown-and-smv-of-a-jacket
+blouson;col;Collar run stitch;Piquer col endroit contre endroit;PIQ;0.45;https://textileengineering.net/operation-breakdown-and-smv-of-a-jacket
+blouson;col;Turn and iron;Retourner et repasser col;FER;0.35;https://textileengineering.net/operation-breakdown-and-smv-of-a-jacket
+blouson;col;Collar attach to body;Monter col;PIQ;0.50;https://textileengineering.net/operation-breakdown-and-smv-of-a-jacket
+blouson;col;Collar closing at neck;Fermer col à l'encolure;PIQ;0.40;https://textileengineering.net/operation-breakdown-and-smv-of-a-jacket
+blouson;bas;Bottom run stitch;Piquer ceinture bas;PIQ;0.60;https://textileengineering.net/operation-breakdown-and-smv-of-a-jacket
+blouson;bas;Bottom attach to body;Monter ceinture bas sur corps;PIQ;0.50;https://textileengineering.net/operation-breakdown-and-smv-of-a-jacket
+blouson;poignet;Cuff attach;Monter poignets;PIQ;1.00;https://textileengineering.net/operation-breakdown-and-smv-of-a-jacket
+blouson;doublure;Side seam OL3;Surjeter côtés doublure;SURJ;0.60;https://textileengineering.net/operation-breakdown-and-smv-of-a-jacket
+blouson;montage;Top and lining bottom attach;Assembler tissu et doublure au bas;PIQ;0.80;https://textileengineering.net/operation-breakdown-and-smv-of-a-jacket
+blouson;finition;Bottom top stitch;Surpiquer bas;DBL;1.00;https://textileengineering.net/operation-breakdown-and-smv-of-a-jacket
+blouson;finition;Button hole pocket 2, cuff 2;Faire boutonnières poches et poignets (x4);BOUT;0.40;https://textileengineering.net/operation-breakdown-and-smv-of-a-jacket
+blouson;finition;Button pocket 2, cuff 2;Poser boutons poches et poignets (x4);BOUTON;0.45;https://textileengineering.net/operation-breakdown-and-smv-of-a-jacket
+gilet;devant;Front Panel Join;Assembler panneaux devant;PIQ;0.35;https://shorabhossain.blogspot.com/2021/08/what-is-smv-of-puffer-vest.html
+gilet;devant;Front Padding Attach;Poser ouatine sur devant;PIQ;0.90;https://shorabhossain.blogspot.com/2021/08/what-is-smv-of-puffer-vest.html
+gilet;devant;Front Raw Edge Cut;Recouper bords devant;PIQ;0.50;https://shorabhossain.blogspot.com/2021/08/what-is-smv-of-puffer-vest.html
+gilet;devant;Front Decoration Stitch Mark;Marquer piqûres matelassage devant;MAN;0.35;https://shorabhossain.blogspot.com/2021/08/what-is-smv-of-puffer-vest.html
+gilet;devant;Front Decoration Stitch (Middle);Matelasser devant (milieu);PIQ;0.50;https://shorabhossain.blogspot.com/2021/08/what-is-smv-of-puffer-vest.html
+gilet;dos;Back Padding Attach;Poser ouatine sur dos;PIQ;0.80;https://shorabhossain.blogspot.com/2021/08/what-is-smv-of-puffer-vest.html
+gilet;dos;Back Raw Edge Cut;Recouper bords dos;PIQ;0.40;https://shorabhossain.blogspot.com/2021/08/what-is-smv-of-puffer-vest.html
+gilet;dos;Back Decoration Stitch (Top);Matelasser dos (haut);PIQ;0.35;https://shorabhossain.blogspot.com/2021/08/what-is-smv-of-puffer-vest.html
+gilet;capuche;Hood Padding Attach;Poser ouatine sur capuche;PIQ;0.70;https://shorabhossain.blogspot.com/2021/08/what-is-smv-of-puffer-vest.html
+gilet;capuche;Hood Two Part Join;Assembler capuche;SURJ;0.35;https://shorabhossain.blogspot.com/2021/08/what-is-smv-of-puffer-vest.html
+gilet;capuche;Sherpa Attach at Shell Part;Poser sherpa sur capuche;PIQ;0.50;https://shorabhossain.blogspot.com/2021/08/what-is-smv-of-puffer-vest.html
+gilet;capuche;Hood Lining Attach;Poser doublure de capuche;PIQ;0.40;https://shorabhossain.blogspot.com/2021/08/what-is-smv-of-puffer-vest.html
+gilet;doublure;Lining Shoulder Join;Assembler épaules doublure;PIQ;0.35;https://shorabhossain.blogspot.com/2021/08/what-is-smv-of-puffer-vest.html
+gilet;doublure;Lining Side Seam Join;Fermer côtés doublure;PIQ;0.40;https://shorabhossain.blogspot.com/2021/08/what-is-smv-of-puffer-vest.html
+gilet;étiquette;Size & Care Label Attach;Poser étiquettes taille et entretien;PIQ;0.35;https://shorabhossain.blogspot.com/2021/08/what-is-smv-of-puffer-vest.html
+gilet;patte;Placket Padding Attach;Poser ouatine sur patte;PIQ;0.40;https://shorabhossain.blogspot.com/2021/08/what-is-smv-of-puffer-vest.html
+gilet;patte;Placket Sewing;Piquer patte;PIQ;0.50;https://shorabhossain.blogspot.com/2021/08/what-is-smv-of-puffer-vest.html
+gilet;patte;Placket Raw Edge Cut & Turn;Recouper et retourner patte;PIQ;0.50;https://shorabhossain.blogspot.com/2021/08/what-is-smv-of-puffer-vest.html
+gilet;patte;Placket Top Stitch (1/4);Surpiquer patte 6 mm;PIQ;0.45;https://shorabhossain.blogspot.com/2021/08/what-is-smv-of-puffer-vest.html
+gilet;montage;Shoulder Join;Assembler épaules;PIQ;0.35;https://shorabhossain.blogspot.com/2021/08/what-is-smv-of-puffer-vest.html
+gilet;montage;Side Seam Join;Fermer côtés;PIQ;0.60;https://shorabhossain.blogspot.com/2021/08/what-is-smv-of-puffer-vest.html
+gilet;fermeture;Zipper Placement Mark;Marquer emplacement fermeture;MAN;0.35;https://shorabhossain.blogspot.com/2021/08/what-is-smv-of-puffer-vest.html
+gilet;fermeture;Zipper Attach (Left);Poser fermeture éclair côté gauche;PIQ;0.50;https://shorabhossain.blogspot.com/2021/08/what-is-smv-of-puffer-vest.html
+gilet;capuche;Hood Attach;Monter capuche;PIQ;0.55;https://shorabhossain.blogspot.com/2021/08/what-is-smv-of-puffer-vest.html
+gilet;montage;Shell & Lining Attach at Neck Side;Assembler tissu et doublure à l'encolure;PIQ;0.50;https://shorabhossain.blogspot.com/2021/08/what-is-smv-of-puffer-vest.html
+gilet;montage;Shell & Lining Attach at Arm Hole;Assembler tissu et doublure aux emmanchures;PIQ;0.65;https://shorabhossain.blogspot.com/2021/08/what-is-smv-of-puffer-vest.html
+gilet;montage;Shell & Lining Attach at Bottom Side;Assembler tissu et doublure au bas;PIQ;0.65;https://shorabhossain.blogspot.com/2021/08/what-is-smv-of-puffer-vest.html
+gilet;montage;Shell & Lining Attach at Zipper Side;Assembler tissu et doublure côté fermeture;PIQ;0.80;https://shorabhossain.blogspot.com/2021/08/what-is-smv-of-puffer-vest.html
+gilet;fermeture;Zipper Top Stitch.;Surpiquer fermeture éclair;PIQ;1.20;https://shorabhossain.blogspot.com/2021/08/what-is-smv-of-puffer-vest.html
+gilet;finition;Arm Hole Rolling;Piquer roulé d'emmanchure;PIQ;0.50;https://shorabhossain.blogspot.com/2021/08/what-is-smv-of-puffer-vest.html
+gilet;patte;Placket Attach;Poser patte;PIQ;0.40;https://shorabhossain.blogspot.com/2021/08/what-is-smv-of-puffer-vest.html
+gilet;finition;Bottom Rolling;Faire roulé du bas;MAN;0.55;https://shorabhossain.blogspot.com/2021/08/what-is-smv-of-puffer-vest.html
+gilet;finition;Final Trimming;Épluchage final;MAN;0.60;https://shorabhossain.blogspot.com/2021/08/what-is-smv-of-puffer-vest.html

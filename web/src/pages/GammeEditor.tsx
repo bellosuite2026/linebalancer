@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { api, fmt, post } from "../lib/api";
 import { canWrite, useSession } from "../lib/session";
@@ -7,6 +7,8 @@ import {
   MACHINES, check, emptyDraft, emptyOp, emptyWk, emptyWs, fromProblem, nextId, parsePasted, pasteOps, pasteWk, pasteWs, toProblem,
   type Draft, type OpRow, type WkRow, type WsRow,
 } from "../lib/gamme";
+import SuggestInput from "../components/SuggestInput";
+import { GARMENTS, aggregateHistory, loadCatalog, loadHistory, suggest, type Catalog, type HistoryEntry, type Suggestion } from "../lib/suggest";
 
 type Tab = "ops" | "ws" | "wk";
 const SEVERITY: Record<string, string> = { error: "Bloquant", warning: "Attention", info: "Info" };
@@ -58,6 +60,11 @@ export default function GammeEditor() {
   const [busy, setBusy] = useState("");
   const [msg, setMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
   const [savedId, setSavedId] = useState<string | null>(null);
+  const [catalog, setCatalog] = useState<Catalog | null>(null);
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
+
+  useEffect(() => { loadCatalog().then(setCatalog); }, []);
+  useEffect(() => { loadHistory(org.id).then(setHistory); }, [org.id]);
 
   useEffect(() => {
     api<Line[]>(`/v1/orgs/${org.id}/lines`).then(setLines).catch(() => {});
@@ -96,6 +103,26 @@ export default function GammeEditor() {
   const skills = useMemo(() => [...new Set([...d.ops, ...d.wk].flatMap((r) => r.skills.split(/[;,]/).map((s) => s.trim())).filter(Boolean))].sort(), [d]);
   const sections = useMemo(() => [...new Set([...d.ops, ...d.ws].map((r) => r.section.trim()).filter(Boolean))], [d]);
 
+  const getSuggestions = useCallback((q: string, rowIndex: number) => suggest(q, {
+    history, catalog, garment: d.garment,
+    local: aggregateHistory(toProblem({ ...d, ops: d.ops.filter((_, j) => j !== rowIndex) }).operations),
+  }), [history, catalog, d]);
+
+  const applySuggestion = (i: number, s: Suggestion) => update((x) => ({
+    ...x, ops: x.ops.map((o, j) => {
+      if (j !== i) return o;
+      const fillTime = !o.duration.trim() || o.est;
+      return {
+        ...o, name: s.name,
+        duration: fillTime && s.duration ? String(s.duration) : o.duration,
+        est: fillTime && s.duration ? s.kind === "catalogue" : o.est,
+        machine_type: o.machine_type.trim() || s.machine_type,
+        section: o.section.trim() || s.section,
+        skills: o.skills.trim() || s.skills,
+      };
+    }),
+  }));
+
   const verify = async () => {
     setMsg(null);
     if (chk.errors.length) { setMsg({ kind: "err", text: "Corrigez d'abord les erreurs signalées." }); return; }
@@ -111,6 +138,7 @@ export default function GammeEditor() {
     try {
       const row = savedId ? { id: savedId } : await post<ProblemRow>(`/v1/orgs/${org.id}/problems`, { problem: toProblem(d), line_id: d.lineId || null });
       setSavedId(row.id);
+      loadHistory(org.id, true).then(setHistory);
       if (thenRun) { nav(`/calcul?gamme=${row.id}`); return; }
       setMsg({ kind: "ok", text: "Gamme enregistrée. Elle est disponible dans « Nouveau calcul »." });
       api<ProblemRow[]>(`/v1/orgs/${org.id}/problems?limit=100`).then(setSaved).catch(() => {});
@@ -187,6 +215,12 @@ export default function GammeEditor() {
               {lines.map((l) => <option key={l.id} value={l.id}>{l.name}{l.product ? ` · ${l.product}` : ""}</option>)}
             </select>
           </label>
+          <label>Type de vêtement
+            <select value={d.garment ?? ""} onChange={(e) => update((x) => ({ ...x, garment: e.target.value }))}>
+              {GARMENTS.map((g) => <option key={g.value} value={g.value}>{g.label}</option>)}
+            </select>
+            <small className="muted">Oriente les propositions d'opérations.</small>
+          </label>
           <label>Cadence cible (min / pièce)
             <input type="number" step="0.01" min="0" value={d.cycle} onChange={(e) => update((x) => ({ ...x, cycle: e.target.value }))} />
             <small className="muted">{cyc > 0 ? `Une pièce toutes les ${fmt.n(cyc)} min = ${fmt.n(60 / cyc, 0)} pièces/h, ${fmt.n(480 / cyc, 0)} par journée de 8 h.` : "Temps disponible ÷ quantité à produire."}</small>
@@ -221,7 +255,19 @@ export default function GammeEditor() {
         {tab === "ops" && <Grid prefix="op" cols={OP_COLS} rows={d.ops} cells={chk.cells}
           onChange={(rows) => update((x) => ({ ...x, ops: rows }))}
           make={(rows) => emptyOp(nextId(rows.map((r) => r.id), "OP", 3, 10))}
-          hint="Prédécesseurs : laissez vide si l'opération peut démarrer tout de suite. Plusieurs prédécesseurs : séparez-les par des virgules." />}
+          custom={{
+            name: (r, i, set, bad, addRow) => (
+              <SuggestInput className={bad ? "bad" : ""} value={r.name} placeholder="Tapez : ourlet, poche, col…"
+                onChange={(v) => set({ name: v })} onPick={(s) => applySuggestion(i, s)}
+                getSuggestions={(q) => getSuggestions(q, i)} onEnterEmpty={addRow} />
+            ),
+            duration: (r, _i, set, bad) => (
+              <input className={`${bad ? "bad" : ""} ${r.est ? "est" : ""}`} value={r.duration} inputMode="decimal"
+                title={r.est ? "Temps estimé d'après le catalogue (valeur publiée) : à confirmer par chronométrage" : undefined}
+                onChange={(e) => set({ duration: e.target.value, est: false })} />
+            ),
+          }}
+          hint="Désignation : les propositions viennent de vos gammes puis du catalogue de temps publiés (temps en orange = estimé, à confirmer). Prédécesseurs : laissez vide si l'opération peut démarrer tout de suite. Plusieurs prédécesseurs : séparez-les par des virgules." />}
         {tab === "ws" && <Grid prefix="ws" cols={WS_COLS} rows={d.ws} cells={chk.cells}
           onChange={(rows) => update((x) => ({ ...x, ws: rows }))}
           make={(rows) => emptyWs(nextId(rows.map((r) => r.id), "WS", 2, 1))}
@@ -268,8 +314,11 @@ export default function GammeEditor() {
   );
 }
 
-function Grid<R extends { id: string }>({ prefix, cols, rows, cells, onChange, make, hint }: {
+type CellRenderer<R> = (row: R, i: number, set: (patch: Partial<R>) => void, bad: boolean, addRow: () => void) => ReactNode;
+
+function Grid<R extends { id: string }>({ prefix, cols, rows, cells, onChange, make, hint, custom }: {
   prefix: string; cols: Col<R>[]; rows: R[]; cells: Set<string>; onChange: (rows: R[]) => void; make: (rows: R[]) => R; hint: string;
+  custom?: Partial<Record<keyof R & string, CellRenderer<R>>>;
 }) {
   const template = `2rem ${cols.map((c) => c.width ?? "1fr").join(" ")} 5.5rem`;
   const set = (i: number, key: keyof R, value: unknown) => onChange(rows.map((r, j) => (j === i ? { ...r, [key]: value } : r)));
@@ -295,6 +344,8 @@ function Grid<R extends { id: string }>({ prefix, cols, rows, cells, onChange, m
               {cols.map((c) => {
                 const v = r[c.key] as unknown;
                 const bad = cells.has(`${prefix}:${i}:${c.key}`);
+                const render = custom?.[c.key];
+                if (render) return <div key={c.key} className="ecell">{render(r, i, (patch) => onChange(rows.map((x, j) => (j === i ? { ...x, ...patch } : x))), bad, () => { if (i === rows.length - 1) add(); })}</div>;
                 return c.type === "check" ? (
                   <div key={c.key} className="ecell center-cell"><input type="checkbox" checked={!!v} onChange={(e) => set(i, c.key, e.target.checked)} /></div>
                 ) : (

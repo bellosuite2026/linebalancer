@@ -1,4 +1,6 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { loadCatalog, type Catalog } from "../lib/suggest";
 
 type Row = [string, boolean, string, string];
 
@@ -68,6 +70,23 @@ export default function FileHelp() {
       <Spec title="1. Gamme opératoire (SAM)" rows={SAM} base="modele_gamme_SAM" example="exemple_chemise_SAM.csv" required />
       <Spec title="2. Postes / machines" rows={WS} base="modele_postes" example="exemple_chemise_postes.csv" />
       <Spec title="3. Ouvriers / compétences" rows={WK} base="modele_ouvriers" example="exemple_chemise_ouvriers.csv" />
+      <CatalogSources />
     </div>
+  );
+}
+
+function CatalogSources() {
+  const [c, setC] = useState<Catalog | null>(null);
+  useEffect(() => { loadCatalog().then(setC); }, []);
+  if (!c) return null;
+  return (
+    <section className="card" id="catalogue">
+      <h2>Catalogue d'opérations</h2>
+      <p>En saisissant une désignation dans l'éditeur de gamme, l'application propose d'abord les opérations déjà utilisées dans vos gammes, avec vos propres temps, puis {c.operations.length} opérations d'un catalogue de temps publiés.
+        Ces temps sont indicatifs : ils varient avec le tissu, la longueur de couture, la machine et l'opératrice. Ils apparaissent en orange dans l'éditeur tant que vous ne les avez pas confirmés.</p>
+      <details><summary>Sources du catalogue ({c.sources.length})</summary>
+        <ul className="small">{c.sources.map((s) => <li key={s.id}><a href={s.url} target="_blank" rel="noreferrer">{s.titre}</a></li>)}</ul>
+      </details>
+    </section>
   );
 }

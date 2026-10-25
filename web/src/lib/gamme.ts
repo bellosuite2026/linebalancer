@@ -1,15 +1,15 @@
 // Modèle d'édition d'une gamme (valeurs en texte pour une saisie naturelle) et conversions.
 import type { Problem } from "./types";
 
-export interface OpRow { id: string; name: string; duration: string; predecessors: string; machine_type: string; skills: string; section: string; optional: boolean }
+export interface OpRow { id: string; name: string; duration: string; predecessors: string; machine_type: string; skills: string; section: string; optional: boolean; est?: boolean }
 export interface WsRow { id: string; name: string; machine_type: string; max_workers: string; section: string; available: boolean }
 export interface WkRow { id: string; name: string; skills: string; efficiency: string; assigned_station: string; available: boolean }
-export interface Draft { name: string; cycle: string; lineId: string; ops: OpRow[]; ws: WsRow[]; wk: WkRow[] }
+export interface Draft { name: string; cycle: string; lineId: string; garment?: string; ops: OpRow[]; ws: WsRow[]; wk: WkRow[] }
 
 export const MACHINES = [
   "piqueuse_plate", "piqueuse_2_aiguilles", "surjeteuse_3_fils", "surjeteuse_4_fils", "surjeteuse_5_fils",
   "recouvreuse", "piqueuse_boutonniere", "piqueuse_bouton", "bride", "zigzag", "presse_vapeur", "fer_repassage",
-  "table_repassage", "presse_thermocollage", "table_travail", "table_controle", "manuel",
+  "table_repassage", "presse_thermocollage", "chainette", "table_travail", "table_controle", "manuel",
 ];
 
 const list = (s: string) => s.split(/[;,]/).map((x) => x.trim()).filter(Boolean);
@@ -104,6 +104,8 @@ export function check(d: Draft): Check {
       warnings.push(`Ouvrier ${id} : poste « ${w.assigned_station} » inconnu.`); cells.add(`wk:${i}:assigned_station`);
     }
   });
+  const est = ops.filter((o) => o.est).length;
+  if (est) warnings.push(`${est} temps ${est > 1 ? "proviennent" : "provient"} du catalogue (valeurs publiées, indicatives) : à confirmer par chronométrage dans votre atelier.`);
   if (wsIds.size) {
     const types = new Set(d.ws.filter((w) => w.available).map((w) => w.machine_type.trim()).filter(Boolean));
     const missing = [...new Set(ops.map((o) => o.machine_type.trim()).filter((m) => m && !types.has(m)))];

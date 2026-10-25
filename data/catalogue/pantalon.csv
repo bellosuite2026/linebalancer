@@ -1,0 +1,186 @@
+vetement;section;operation_source;operation_fr;machine;sam_min;source_url
+cargo;braguette;Buttonhole on left flybox;Faire boutonnière patte de braguette gauche;BOUT;0.315;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;fourche;Front rise overlocks;Surjeter fourche devant;SURJ;0.283;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;devant;Knee patch attaches;Poser renfort genou;PIQ;0.929;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;poche avant;Side pocket flatlock;Recouvrir poche côté;RECOUV;0.352;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;poche avant;Side pocket overlocks;Surjeter poche côté;SURJ;0.198;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;braguette;Right flybox overlock;Surjeter patte de braguette droite;SURJ;0.334;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;poche avant;Side pocket attaches;Monter poche côté;PIQ;0.577;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;poche avant;Side pocket topstitches;Surpiquer poche côté;PIQ;0.691;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;braguette;Right flybox attach;Monter patte de braguette droite;PIQ;0.701;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;braguette;Fly attach;Monter braguette;PIQ;0.695;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;préparation;Front prep bundling;Mettre en paquet devants;MAN;0.373;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;dos;Back marking;Marquer dos;MAN;0.214;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;repassage;Back patch pressing;Repasser renfort dos;MAN;1.356;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;dos;Back patch attaches;Poser renfort dos;PIQ;0.534;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;poche arrière;Hip pocket cutting;Ouvrir poche arrière (passepoil auto);AUTRE;0.247;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;poche arrière;Hip pocket overlocks;Surjeter poche arrière;SURJ;0.927;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;poche arrière;Hip flap folding;Plier rabat poche arrière;MAN;0.216;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;poche arrière;Buttonhole on hip flap;Faire boutonnière rabat poche arrière;BOUT;0.187;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;poche arrière;Hip flap runstitch;Piquer contour rabat poche arrière;PIQ;0.331;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;poche arrière;Hip flap turning;Retourner rabat poche arrière;AUTRE;0.24;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;poche arrière;Hip flap topstitches;Surpiquer rabat poche arrière;PIQ;0.421;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;poche arrière;Hip pocket finish &;Finir poche arrière;PIQ;0.73;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;poche arrière;Hip flap attaches;Monter rabat poche arrière;PIQ;0.582;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;préparation;Back prep bundling;Mettre en paquet dos;MAN;0.359;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;préparation;Front & back matching;Assortir devant et dos;MAN;0.432;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;côtés;Side seam overlocks;Surjeter côtés;SURJ;1.531;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;côtés;Side seam topstitches;Surpiquer côtés;CHAIN;1.091;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;poche cargo;Knee pocket marking;Marquer emplacement poche genou;MAN;0.362;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;poche cargo;Knee pocket folding;Plier poche genou;MAN;0.235;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;poche cargo;Knee pocket topstitch;Surpiquer poche genou;PIQ;1.163;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;poche cargo;Knee pocket tacking;Arrêter poche genou;PIQ;0.558;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;poche cargo;Knee pocket overlocks;Surjeter poche genou;SURJ;0.238;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;poche cargo;Knee pocket hemming;Ourler poche genou;PIQ;1.27;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;repassage;Knee pocket ironing;Repasser poche genou;FER;1.652;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;poche cargo;Knee pocket attaches;Poser poche genou;PIQ;1.251;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;poche cargo;Knee flap folding;Plier rabat poche genou;MAN;0.403;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;poche cargo;Buttonhole on k. flap;Faire boutonnière rabat poche genou;BOUT;0.202;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;poche cargo;Knee flap runstitch;Piquer contour rabat poche genou;PIQ;0.221;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;poche cargo;Knee flap turning;Retourner rabat poche genou;AUTRE;0.349;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;poche cargo;Knee flap topstitches;Surpiquer rabat poche genou;PIQ;0.392;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;poche cargo;Knee flap attaches;Monter rabat poche genou;PIQ;1.721;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;finition;Bar tacking;Faire brides;BRID;1.56;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;fourche;Back rise overlocks;Surjeter fourche dos;SURJ;0.658;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;fourche;Back rise topstitches;Surpiquer fourche dos;DBL;0.576;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;passants;Big loop matching;Assortir grands passants;MAN;0.076;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;passants;Big loop runstitch;Piquer grands passants;PIQ;0.26;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;passants;Big loop turning;Retourner grands passants;AUTRE;0.151;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;passants;Big loop topstitches;Surpiquer grands passants;PIQ;0.233;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;passants;Big loop button hole;Faire boutonnière grands passants;BOUT;0.095;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;passants;Small loop runstitch;Piquer petits passants;AUTRE;0.149;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;ceinture;Small, big loop, and waist band attach;Monter ceinture avec passants;PIQ;1.819;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;ceinture;Waist band topstitch;Surpiquer ceinture;PIQ;1.129;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;ceinture;Waist band closing;Fermer bouts de ceinture;PIQ;1.474;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;passants;Small loop tacking;Arrêter petits passants;PIQ;1.685;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;entrejambe;Inseam overlock;Surjeter entrejambe;SURJ;0.548;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;finition;Trouser turning;Retourner pantalon;MAN;0.355;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;entrejambe;inseam topstitch;Surpiquer entrejambe;CHAIN;0.671;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;bas;Adjustable prep;Préparer pattes de serrage;MAN;0.142;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;bas;1st adjustable attach;Poser première patte de serrage;PIQ;1.252;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;bas;Button hole on bottom;Faire boutonnière bas;BOUT;0.523;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;bas;Adjustable hemming;Ourler patte de serrage;PIQ;0.164;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;bas;second adjustable attach;Poser deuxième patte de serrage;PIQ;0.688;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;bas;Bottom rope attach;Poser cordon bas;MAN;0.884;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;ourlet;Bottom hemming;Ourler bas;PIQ;0.913;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+cargo;finition;Final bar tacking;Faire brides finales;BRID;0.895;https://onlinelibrary.wiley.com/doi/full/10.1002/eng2.12157
+jean;poche arrière;pocket hemming;Ourler haut poche arrière;AUTRE;0.07;https://onlineclothingstudy.com/operation-breakdown-and-smvs-of-basic
+jean;poche arrière;pocket o/l;Surjeter poche arrière;SURJ;0.3;https://onlineclothingstudy.com/operation-breakdown-and-smvs-of-basic
+jean;poche arrière;pocket creasing;Plier/marquer poche arrière;AUTRE;0.4;https://onlineclothingstudy.com/operation-breakdown-and-smvs-of-basic
+jean;poche arrière;pocket attaching;Poser poche arrière;AUTRE;0.74;https://onlineclothingstudy.com/operation-breakdown-and-smvs-of-basic
+jean;poche arrière;second stitch @ back pocket;Surpiquer 2e piqûre poche arrière;PIQ;0.65;https://onlineclothingstudy.com/operation-breakdown-and-smvs-of-basic
+jean;dos;back yoke attach;Monter empiècement dos;CHAIN;0.41;https://onlineclothingstudy.com/operation-breakdown-and-smvs-of-basic
+jean;fourche;back rise join;Fermer fourche dos;CHAIN;0.24;https://onlineclothingstudy.com/operation-breakdown-and-smvs-of-basic
+jean;étiquette;size label attach;Poser étiquette taille;PIQ;0.2;https://onlineclothingstudy.com/operation-breakdown-and-smvs-of-basic
+jean;poche avant;coin pocket hemming;Ourler haut poche ticket;AUTRE;0.015;https://onlineclothingstudy.com/operation-breakdown-and-smvs-of-basic
+jean;poche avant;coin pocket attach @ jet piece (right);Poser poche ticket sur garniture droite;PIQ;0.2;https://onlineclothingstudy.com/operation-breakdown-and-smvs-of-basic
+jean;poche avant;pocket bag attach with jet piece;Monter garniture sur fond de poche;RECOUV;0.42;https://onlineclothingstudy.com/operation-breakdown-and-smvs-of-basic
+jean;poche avant;o/l @ pocket bag;Surjeter fond de poche;SURJ;0.68;https://onlineclothingstudy.com/operation-breakdown-and-smvs-of-basic
+jean;poche avant;top stitch @ pocket bag;Surpiquer fond de poche;PIQ;0.4;https://onlineclothingstudy.com/operation-breakdown-and-smvs-of-basic
+jean;braguette;o/l @ zipper fly;Surjeter patte de braguette;SURJ;0.3;https://onlineclothingstudy.com/operation-breakdown-and-smvs-of-basic
+jean;fourche;o/l front panels @ crotch;Surjeter fourche devant;SURJ;0.26;https://onlineclothingstudy.com/operation-breakdown-and-smvs-of-basic
+jean;braguette;zipper attach @ left fly;Poser fermeture éclair sur patte gauche;DBL;0.32;https://onlineclothingstudy.com/operation-breakdown-and-smvs-of-basic
+jean;braguette;left fly attach @ front panel (inseam & top stitch);Monter patte gauche sur devant;PIQ;0.34;https://onlineclothingstudy.com/operation-breakdown-and-smvs-of-basic
+jean;braguette;J-stitch @ left fly;Surpiquer J braguette;AUTRE;0.58;https://onlineclothingstudy.com/operation-breakdown-and-smvs-of-basic
+jean;poche avant;front pocket mouth hemming;Surpiquer entrée de poche avant;DBL;0.3;https://onlineclothingstudy.com/operation-breakdown-and-smvs-of-basic
+jean;poche avant;pocket bag stitch to front panel @side & top (wt w/c label@lt.);Fixer fond de poche au devant (côté et taille);PIQ;0.46;https://onlineclothingstudy.com/operation-breakdown-and-smvs-of-basic
+jean;braguette;right fly attach with zipper & crotch join;Monter patte droite avec fermeture et fermer fourche;PIQ;0.25;https://onlineclothingstudy.com/operation-breakdown-and-smvs-of-basic
+jean;passants;loop preparation;Préparer passants;RECOUV;0.15;https://onlineclothingstudy.com/operation-breakdown-and-smvs-of-basic
+jean;ceinture;main label attach @ waist band, & w/b joining in chain;Poser étiquette sur ceinture et raccorder ceinture;PIQ;0.3;https://onlineclothingstudy.com/operation-breakdown-and-smvs-of-basic
+jean;entrejambe;top stitch @ inseam;Fermer et surpiquer entrejambe;CHAIN;0.55;https://onlineclothingstudy.com/operation-breakdown-and-smvs-of-basic
+jean;côtés;side seam join (attach front & back panels);Fermer côtés;SURJ;0.65;https://onlineclothingstudy.com/operation-breakdown-and-smvs-of-basic
+jean;côtés;top stitch @ side seam;Surpiquer côtés;PIQ;0.38;https://onlineclothingstudy.com/operation-breakdown-and-smvs-of-basic
+jean;ceinture;waist band stitch;Monter ceinture;AUTRE;0.38;https://onlineclothingstudy.com/operation-breakdown-and-smvs-of-basic
+jean;ceinture;waist band corners finish;Finir bouts de ceinture;PIQ;0.72;https://onlineclothingstudy.com/operation-breakdown-and-smvs-of-basic
+jean;passants;loop attach;Poser passants;AUTRE;0.65;https://onlineclothingstudy.com/operation-breakdown-and-smvs-of-basic
+jean;ourlet;bottom hemming;Ourler bas;AUTRE;0.33;https://onlineclothingstudy.com/operation-breakdown-and-smvs-of-basic
+pantalon;poche avant;Facing OL;Surjeter garniture;SURJ;0.35;https://www.textileblog.com/operation-breakdown-and-smv-of-a-trouser/
+pantalon;poche avant;Facing attachment to pocket bag;Poser garniture sur fond de poche;PIQ;0.45;https://www.textileblog.com/operation-breakdown-and-smv-of-a-trouser/
+pantalon;poche avant;Pocket bag close;Fermer fond de poche;PIQ;0.55;https://www.textileblog.com/operation-breakdown-and-smv-of-a-trouser/
+pantalon;poche avant;Turn and top stitch on pocket bag;Retourner et surpiquer fond de poche;PIQ;0.5;https://www.textileblog.com/operation-breakdown-and-smv-of-a-trouser/
+pantalon;poche avant;Pocket bag mark and attachment front;Marquer et monter fond de poche sur devant;PIQ;0.6;https://www.textileblog.com/operation-breakdown-and-smv-of-a-trouser/
+pantalon;poche avant;Trim and turn;Recouper et retourner poche;MAN;0.4;https://www.textileblog.com/operation-breakdown-and-smv-of-a-trouser/
+pantalon;poche avant;Top stitch;Surpiquer entrée de poche;DBL;0.55;https://www.textileblog.com/operation-breakdown-and-smv-of-a-trouser/
+pantalon;poche avant;Dummy stitch;Faire piqûre de maintien poche;PIQ;0.5;https://www.textileblog.com/operation-breakdown-and-smv-of-a-trouser/
+pantalon;braguette;Inside fly run and ready;Surjeter sous-patte;SURJ;0.35;https://www.textileblog.com/operation-breakdown-and-smv-of-a-trouser/
+pantalon;braguette;Zip attachment to fly;Poser fermeture éclair sur patte;PIQ;0.45;https://www.textileblog.com/operation-breakdown-and-smv-of-a-trouser/
+pantalon;braguette;Inside fly attachment;Monter sous-patte;PIQ;0.4;https://www.textileblog.com/operation-breakdown-and-smv-of-a-trouser/
+pantalon;braguette;Zip finish;Finir fermeture éclair;PIQ;0.45;https://www.textileblog.com/operation-breakdown-and-smv-of-a-trouser/
+pantalon;braguette;J fly attachment and top stitch;Monter et surpiquer patte J;PIQ;0.55;https://www.textileblog.com/operation-breakdown-and-smv-of-a-trouser/
+pantalon;braguette;J stitch;Surpiquer J braguette;DBL;0.45;https://www.textileblog.com/operation-breakdown-and-smv-of-a-trouser/
+pantalon;fourche;Front rise attachment;Fermer fourche devant;SURJ;0.4;https://www.textileblog.com/operation-breakdown-and-smv-of-a-trouser/
+pantalon;braguette;Bar tack fly;Faire bride braguette;BRID;0.1;https://www.textileblog.com/operation-breakdown-and-smv-of-a-trouser/
+pantalon;contrôle;FR trim and inspection;Ébouillanter et contrôler devants;MAN;0.45;https://www.textileblog.com/operation-breakdown-and-smv-of-a-trouser/
+pantalon;ceinture;W/B joint;Raccorder ceinture;PIQ;0.35;https://www.textileblog.com/operation-breakdown-and-smv-of-a-trouser/
+pantalon;ceinture;WB iron;Repasser ceinture;MAN;0.45;https://www.textileblog.com/operation-breakdown-and-smv-of-a-trouser/
+pantalon;ceinture;WB run stitch;Piquer ceinture;PIQ;0.6;https://www.textileblog.com/operation-breakdown-and-smv-of-a-trouser/
+pantalon;ceinture;Trim and turn;Recouper et retourner ceinture;MAN;0.4;https://www.textileblog.com/operation-breakdown-and-smv-of-a-trouser/
+pantalon;passants;Loop ready;Préparer passants;RECOUV;0.35;https://www.textileblog.com/operation-breakdown-and-smv-of-a-trouser/
+pantalon;ceinture;Mark and trim;Marquer et recouper ceinture;MAN;0.45;https://www.textileblog.com/operation-breakdown-and-smv-of-a-trouser/
+pantalon;dos;Dart stitch;Piquer pinces dos;PIQ;0.45;https://www.textileblog.com/operation-breakdown-and-smv-of-a-trouser/
+pantalon;poche arrière;Welt attachment;Poser passepoil poche arrière;DBL;0.5;https://www.textileblog.com/operation-breakdown-and-smv-of-a-trouser/
+pantalon;poche arrière;Pocket bag attachment;Poser fond de poche arrière;PIQ;0.45;https://www.textileblog.com/operation-breakdown-and-smv-of-a-trouser/
+pantalon;poche arrière;Notch and turn;Cranter et retourner poche arrière;MAN;0.6;https://www.textileblog.com/operation-breakdown-and-smv-of-a-trouser/
+pantalon;poche arrière;Side tacking;Arrêter côtés poche passepoilée;PIQ;0.65;https://www.textileblog.com/operation-breakdown-and-smv-of-a-trouser/
+pantalon;poche arrière;Welt close;Fermer passepoil;PIQ;0.45;https://www.textileblog.com/operation-breakdown-and-smv-of-a-trouser/
+pantalon;poche arrière;Bottom edge stitch;Surpiquer bord bas passepoil;PIQ;0.65;https://www.textileblog.com/operation-breakdown-and-smv-of-a-trouser/
+pantalon;poche arrière;Pocket bag close;Fermer fond de poche arrière;PIQ;0.6;https://www.textileblog.com/operation-breakdown-and-smv-of-a-trouser/
+pantalon;poche arrière;Bag top stitch;Surpiquer fond de poche arrière;PIQ;0.55;https://www.textileblog.com/operation-breakdown-and-smv-of-a-trouser/
+pantalon;poche arrière;Welt top edge stitch;Surpiquer bord haut passepoil;PIQ;0.65;https://www.textileblog.com/operation-breakdown-and-smv-of-a-trouser/
+pantalon;fourche;BK rise;Fermer fourche dos;SURJ;0.45;https://www.textileblog.com/operation-breakdown-and-smv-of-a-trouser/
+pantalon;contrôle;Trim and inspect;Ébouillanter et contrôler dos;MAN;0.45;https://www.textileblog.com/operation-breakdown-and-smv-of-a-trouser/
+pantalon;côtés;FR and BK attachment (side);Fermer côtés;SURJ;0.75;https://www.textileblog.com/operation-breakdown-and-smv-of-a-trouser/
+pantalon;entrejambe;Inseam;Fermer entrejambe;SURJ;0.7;https://www.textileblog.com/operation-breakdown-and-smv-of-a-trouser/
+pantalon;passants;Loop attachment;Poser passants;PIQ;0.65;https://www.textileblog.com/operation-breakdown-and-smv-of-a-trouser/
+pantalon;ceinture;WB and body no set;Assortir ceinture et corps;MAN;0.45;https://www.textileblog.com/operation-breakdown-and-smv-of-a-trouser/
+pantalon;ceinture;WB attachment;Monter ceinture;PIQ;0.6;https://www.textileblog.com/operation-breakdown-and-smv-of-a-trouser/
+pantalon;ceinture;WB finish;Finir ceinture;PIQ;1;https://www.textileblog.com/operation-breakdown-and-smv-of-a-trouser/
+pantalon;passants;Loop finish;Fixer haut des passants;PIQ;0.7;https://www.textileblog.com/operation-breakdown-and-smv-of-a-trouser/
+pantalon;passants;Bar tack on loop;Faire brides passants;BRID;1.1;https://www.textileblog.com/operation-breakdown-and-smv-of-a-trouser/
+pantalon;ourlet;Bottom hem;Ourler bas;PIQ;0.8;https://www.textileblog.com/operation-breakdown-and-smv-of-a-trouser/
+pantalon;ceinture;Hook and eye attachment;Poser crochet de ceinture;AUTRE;0.5;https://www.textileblog.com/operation-breakdown-and-smv-of-a-trouser/
+pantalon;poche arrière;Back pocket button attachment;Coudre bouton poche arrière;BOUTON;0.26;https://www.textileblog.com/operation-breakdown-and-smv-of-a-trouser/
+pantalon;poche arrière;Button hole sew;Faire boutonnière poche arrière;BOUT;0.26;https://www.textileblog.com/operation-breakdown-and-smv-of-a-trouser/
+pantalon;finition;Trimming and checking;Ébouillanter et contrôler;MAN;2;https://www.textileblog.com/operation-breakdown-and-smv-of-a-trouser/
+short;fourche;Match n rise join;Fermer fourche;SURJ;0.7;https://www.textileindustry.net/operation-bulletin-smv-and-layout-of-short-pant/
+short;braguette;Mark n staystitch front fly;Marquer et piquer braguette (fausse);PIQ;0.32;https://www.textileindustry.net/operation-bulletin-smv-and-layout-of-short-pant/
+short;braguette;Mark n J stitch front fly;Marquer et surpiquer J braguette;RECOUV;0.35;https://www.textileindustry.net/operation-bulletin-smv-and-layout-of-short-pant/
+short;braguette;Secure J stitch edge;Arrêter bout du J;PIQ;0.18;https://www.textileindustry.net/operation-bulletin-smv-and-layout-of-short-pant/
+short;fourche;Front n back rise topstitch;Surpiquer fourche devant et dos;RECOUV;0.65;https://www.textileindustry.net/operation-bulletin-smv-and-layout-of-short-pant/
+short;poche avant;Mark N pocket linner attach at front part;Marquer et poser fond de poche sur devant;PIQ;0.65;https://www.textileindustry.net/operation-bulletin-smv-and-layout-of-short-pant/
+short;poche avant;Pocket corner snip;Cranter coins de poche;MAN;0.4;https://www.textileindustry.net/operation-bulletin-smv-and-layout-of-short-pant/
+short;poche avant;Pocket turn n topstitch;Retourner et surpiquer entrée de poche;PIQ;0.5;https://www.textileindustry.net/operation-bulletin-smv-and-layout-of-short-pant/
+short;poche avant;Pocket bag match n attach;Assortir et fermer fond de poche;SURJ;0.65;https://www.textileindustry.net/operation-bulletin-smv-and-layout-of-short-pant/
+short;poche avant;Pocket bag tack at side n waist;Fixer fond de poche au côté et à la taille;PIQ;0.48;https://www.textileindustry.net/operation-bulletin-smv-and-layout-of-short-pant/
+short;poche arrière;Back pocket position mark;Marquer emplacement poche arrière;MAN;0.48;https://www.textileindustry.net/operation-bulletin-smv-and-layout-of-short-pant/
+short;poche arrière;Fusing attach at pocket edge;Thermocoller bord de poche arrière;FER;0.24;https://www.textileindustry.net/operation-bulletin-smv-and-layout-of-short-pant/
+short;poche arrière;Pocket Top edges Hem;Ourler haut poche arrière;RECOUV;0.4;https://www.textileindustry.net/operation-bulletin-smv-and-layout-of-short-pant/
+short;poche arrière;Pre iron Pocket edges;Repasser bords poche arrière;MAN;0.8;https://www.textileindustry.net/operation-bulletin-smv-and-layout-of-short-pant/
+short;poche arrière;Pocket attach;Poser poche plaquée arrière;PIQ;1.2;https://www.textileindustry.net/operation-bulletin-smv-and-layout-of-short-pant/
+short;poche arrière;Secure Pocket corners;Faire brides coins de poche;BRID;0.48;https://www.textileindustry.net/operation-bulletin-smv-and-layout-of-short-pant/
+short;poche arrière;Pocket extra rawedge cut;Recouper bords poche;MAN;0.6;https://www.textileindustry.net/operation-bulletin-smv-and-layout-of-short-pant/
+short;préparation;Front n back part sticker match;Assortir devant et dos;MAN;0.28;https://www.textileindustry.net/operation-bulletin-smv-and-layout-of-short-pant/
+short;entrejambe;Inseam join;Fermer entrejambe;SURJ;0.4;https://www.textileindustry.net/operation-bulletin-smv-and-layout-of-short-pant/
+short;entrejambe;Inseam topstitch;Surpiquer entrejambe;RECOUV;0.35;https://www.textileindustry.net/operation-bulletin-smv-and-layout-of-short-pant/
+short;fourche;Tape measure,cut n position mark;Mesurer, couper et marquer ruban fourche;MAN;0.3;https://www.textileindustry.net/operation-bulletin-smv-and-layout-of-short-pant/
+short;fourche;Tape attach at crotch;Poser ruban à la fourche;PIQ;0.5;https://www.textileindustry.net/operation-bulletin-smv-and-layout-of-short-pant/
+short;côtés;Side mark n tack;Marquer et épingler côtés;PIQ;0.48;https://www.textileindustry.net/operation-bulletin-smv-and-layout-of-short-pant/
+short;côtés;Sideseam join;Fermer côtés;SURJ;0.5;https://www.textileindustry.net/operation-bulletin-smv-and-layout-of-short-pant/
+short;ceinture;Elastic press,measure & cut;Mesurer et couper élastique;FER;0.2;https://www.textileindustry.net/operation-bulletin-smv-and-layout-of-short-pant/
+short;ceinture;Elastic join as a circle & mark;Fermer élastique en anneau;DBL;0.3;https://www.textileindustry.net/operation-bulletin-smv-and-layout-of-short-pant/
+short;ceinture;Waist band join as a circle n mark;Fermer ceinture en anneau;PIQ;0.3;https://www.textileindustry.net/operation-bulletin-smv-and-layout-of-short-pant/
+short;ceinture;Elastic attach;Poser élastique sur ceinture;SURJ;0.35;https://www.textileindustry.net/operation-bulletin-smv-and-layout-of-short-pant/
+short;ceinture;Sandwich elastic with waist band & tack;Enfermer élastique dans ceinture;PIQ;0.48;https://www.textileindustry.net/operation-bulletin-smv-and-layout-of-short-pant/
+short;ceinture;Bottom mark n make hole;Marquer et percer œillets;BOUTON;0.28;https://www.textileindustry.net/operation-bulletin-smv-and-layout-of-short-pant/
+short;ceinture;Eyelet attach;Poser œillets;BOUTON;0.36;https://www.textileindustry.net/operation-bulletin-smv-and-layout-of-short-pant/
+short;ceinture;Waist band lower edge close n mark;Fermer bord bas ceinture;CHAIN;0.45;https://www.textileindustry.net/operation-bulletin-smv-and-layout-of-short-pant/
+short;ceinture;Waist band attach to body;Monter ceinture;SURJ;0.5;https://www.textileindustry.net/operation-bulletin-smv-and-layout-of-short-pant/
+short;étiquette;Care label make;Préparer étiquette d'entretien;PIQ;0.24;https://www.textileindustry.net/operation-bulletin-smv-and-layout-of-short-pant/
+short;étiquette;Label attach at back waist;Poser étiquette dos taille;PIQ;0.48;https://www.textileindustry.net/operation-bulletin-smv-and-layout-of-short-pant/
+short;ceinture;Waist Band topstitch;Surpiquer ceinture;CHAIN;0.5;https://www.textileindustry.net/operation-bulletin-smv-and-layout-of-short-pant/
+short;finition;Sticker remove & GMTs turn;Retirer étiquettes et retourner;MAN;0.26;https://www.textileindustry.net/operation-bulletin-smv-and-layout-of-short-pant/
+short;ceinture;Insert tie through the waist channel;Passer cordon dans ceinture;MAN;0.3;https://www.textileindustry.net/operation-bulletin-smv-and-layout-of-short-pant/
+short;ceinture;Secure tie at CB waist band;Arrêter cordon milieu dos;BRID;0.18;https://www.textileindustry.net/operation-bulletin-smv-and-layout-of-short-pant/
+short;poche avant;Secure Pocket corners;Faire brides poches;BRID;0.48;https://www.textileindustry.net/operation-bulletin-smv-and-layout-of-short-pant/
+short;ourlet;Leg hems;Ourler bas;RECOUV;0.55;https://www.textileindustry.net/operation-bulletin-smv-and-layout-of-short-pant/
+short;finition;Thread trim;Ébouillanter;MAN;0.45;https://www.textileindustry.net/operation-bulletin-smv-and-layout-of-short-pant/

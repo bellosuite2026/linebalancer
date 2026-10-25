@@ -36,4 +36,5 @@ Thumbs.db
 !web/package.json
 !web/package-lock.json
 !web/tsconfig.json
+!web/public/catalogue/operations.json
 !web/public/modeles/*.xlsx

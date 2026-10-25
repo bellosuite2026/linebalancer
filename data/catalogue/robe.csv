@@ -1,0 +1,151 @@
+vetement;section;operation_source;operation_fr;machine;sam_min;source_url
+robe;corsage;Front Top Bottom Join;Assembler haut et bas devant;SURJ;0.3;https://shorabhossain.blogspot.com/2021/07/operation-bulletin-of-frock.html
+robe;encolure;Front Neck Edge Overlock;Surjeter bord encolure devant;SURJ;0.25;https://shorabhossain.blogspot.com/2021/07/operation-bulletin-of-frock.html
+robe;encolure;Neck Rolling;Rouler bord encolure;PIQ;0.25;https://shorabhossain.blogspot.com/2021/07/operation-bulletin-of-frock.html
+robe;corsage;Front Yoke Join;Monter empiècement devant;SURJ;0.25;https://shorabhossain.blogspot.com/2021/07/operation-bulletin-of-frock.html
+robe;corsage;Front Yoke Top Stitch;Surpiquer empiècement devant;PIQ;0.3;https://shorabhossain.blogspot.com/2021/07/operation-bulletin-of-frock.html
+robe;finition;Care Label Attach;Poser étiquette d'entretien;PIQ;0.25;https://shorabhossain.blogspot.com/2021/07/operation-bulletin-of-frock.html
+robe;corsage;Back Top Bottom Join;Assembler haut et bas dos;SURJ;0.3;https://shorabhossain.blogspot.com/2021/07/operation-bulletin-of-frock.html
+robe;préparation;Back & Front Number Match;Appairer devant et dos (numéros);MAN;0.25;https://shorabhossain.blogspot.com/2021/07/operation-bulletin-of-frock.html
+robe;corsage;Shoulder Join;Assembler épaules;SURJ;0.25;https://shorabhossain.blogspot.com/2021/07/operation-bulletin-of-frock.html
+robe;manche;Sleeve Attach;Monter manches;SURJ;0.45;https://shorabhossain.blogspot.com/2021/07/operation-bulletin-of-frock.html
+robe;assemblage;Side Seam Join;Fermer côtés;SURJ;0.7;https://shorabhossain.blogspot.com/2021/07/operation-bulletin-of-frock.html
+robe;manche;Cuff Rib Edge Sewing;Piquer bord bande poignet;PIQ;0.3;https://shorabhossain.blogspot.com/2021/07/operation-bulletin-of-frock.html
+robe;manche;Cuff Rib Attach;Monter bande poignet;SURJ;0.45;https://shorabhossain.blogspot.com/2021/07/operation-bulletin-of-frock.html
+robe;encolure;Neck Rib Sewing;Fermer bande d'encolure;PIQ;0.35;https://shorabhossain.blogspot.com/2021/07/operation-bulletin-of-frock.html
+robe;encolure;Neck Rib Attach;Monter bande d'encolure;SURJ;0.35;https://shorabhossain.blogspot.com/2021/07/operation-bulletin-of-frock.html
+robe;finition;Bow Sewing;Piquer nœud décoratif;PIQ;0.25;https://shorabhossain.blogspot.com/2021/07/operation-bulletin-of-frock.html
+robe;finition;Bow Tack at Body;Fixer nœud sur corps;PIQ;0.25;https://shorabhossain.blogspot.com/2021/07/operation-bulletin-of-frock.html
+robe;encolure;Neck Band Attach & Setting;Monter et ajuster bande d'encolure;PIQ;0.3;https://shorabhossain.blogspot.com/2021/07/operation-bulletin-of-frock.html
+robe;ourlet;Bottom Rolling;Ourler bas;DBL;0.6;https://shorabhossain.blogspot.com/2021/07/operation-bulletin-of-frock.html
+robe;ourlet;Bottom Raw edge Cut;Couper bord brut ourlet;MAN;0.25;https://shorabhossain.blogspot.com/2021/07/operation-bulletin-of-frock.html
+robe;finition;Main Label Tack &  Attach;Poser étiquette principale;PIQ;0.3;https://shorabhossain.blogspot.com/2021/07/operation-bulletin-of-frock.html
+robe;finition;Final Trimming;Couper fils finition;MAN;0.5;https://shorabhossain.blogspot.com/2021/07/operation-bulletin-of-frock.html
+robe;col;Join inner & outer collar at outer edges;Assembler dessus et dessous de col;SURJ;0.667;https://ordnur.com/apparel/operation-breakdown-smv-layout-shimmer-dress/
+robe;corsage;Shoulders with / without tape;Assembler épaules (avec/sans ruban);SURJ;0.625;https://ordnur.com/apparel/operation-breakdown-smv-layout-shimmer-dress/
+robe;manche;Insert sleeves;Monter manches;SURJ;0.92;https://ordnur.com/apparel/operation-breakdown-smv-layout-shimmer-dress/
+robe;col;Mark & attach outer collar onto neck edges;Monter col sur encolure;SURJ;0.75;https://ordnur.com/apparel/operation-breakdown-smv-layout-shimmer-dress/
+robe;poche;Snip, turn & l/s topstitch front pocket openings to form welt effect;Cranter, retourner et surpiquer ouverture poche passepoilée;PIQ;0.85;https://ordnur.com/apparel/operation-breakdown-smv-layout-shimmer-dress/
+robe;poche;Close frt linner to bk pkt bags;Fermer fonds de poche;SURJ;0.5;https://ordnur.com/apparel/operation-breakdown-smv-layout-shimmer-dress/
+robe;assemblage;Sides/sleeves long wrap inc labels;Fermer côtés et dessous de manches avec étiquettes;SURJ;1.5;https://ordnur.com/apparel/operation-breakdown-smv-layout-shimmer-dress/
+robe;ourlet;Hem wrap;Ourler bas;RECOUV;0.917;https://ordnur.com/apparel/operation-breakdown-smv-layout-shimmer-dress/
+robe;fermeture;Mark & l/s attach zip to CF inside;Poser fermeture milieu devant;PIQ;2.5;https://ordnur.com/apparel/operation-breakdown-smv-layout-shimmer-dress/
+robe;fermeture;Topstitch zip into pos;Surpiquer fermeture;PIQ;0.66;https://ordnur.com/apparel/operation-breakdown-smv-layout-shimmer-dress/
+robe;manche;Cuffs (circular) long slv dress;Monter poignets (manche longue);RECOUV;0.819;https://ordnur.com/apparel/operation-breakdown-smv-layout-shimmer-dress/
+robe;repassage;iron fleece/toweling/ knitted long wrap;Repasser robe (maille);FER;1.167;https://ordnur.com/apparel/operation-breakdown-smv-layout-shimmer-dress/
+jupe;ourlet;Bottom binding n trims;Border bas et couper;AUTRE;0.33;https://ordnur.com/apparel/operation-breakdown-smv-layout-brooke-skirt/
+jupe;préparation;Front n back part match;Appairer devant et dos;MAN;0.26;https://ordnur.com/apparel/operation-breakdown-smv-layout-brooke-skirt/
+jupe;assemblage;Side seam;Fermer côtés;SURJ;0.45;https://ordnur.com/apparel/operation-breakdown-smv-layout-brooke-skirt/
+jupe;finition;Binding at one side to another around n trim;Border pourtour et couper;AUTRE;0.9;https://ordnur.com/apparel/operation-breakdown-smv-layout-brooke-skirt/
+jupe;assemblage;Mark and side seam topstitch;Marquer et surpiquer côtés;PIQ;1;https://ordnur.com/apparel/operation-breakdown-smv-layout-brooke-skirt/
+jupe;ceinture;Elastic press,measure & cut;Mesurer, presser et couper élastique;FER;0.2;https://ordnur.com/apparel/operation-breakdown-smv-layout-brooke-skirt/
+jupe;ceinture;Waistband join as a circle n mark;Fermer ceinture en anneau et marquer;PIQ;0.3;https://ordnur.com/apparel/operation-breakdown-smv-layout-brooke-skirt/
+jupe;ceinture;Elastic join as a circle & mark;Fermer élastique en anneau et marquer;DBL;0.3;https://ordnur.com/apparel/operation-breakdown-smv-layout-brooke-skirt/
+jupe;ceinture;Eyelet attach;Poser œillets;AUTRE;0.35;https://ordnur.com/apparel/operation-breakdown-smv-layout-brooke-skirt/
+jupe;ceinture;Waistband topstitch form channel;Surpiquer ceinture (coulisse);CHAIN;0.5;https://ordnur.com/apparel/operation-breakdown-smv-layout-brooke-skirt/
+jupe;ceinture;Attach waistband to the body;Monter ceinture sur jupe;SURJ;0.5;https://ordnur.com/apparel/operation-breakdown-smv-layout-brooke-skirt/
+jupe;finition;Label attach at WB;Poser étiquette sur ceinture;PIQ;0.35;https://ordnur.com/apparel/operation-breakdown-smv-layout-brooke-skirt/
+jupe;ceinture;Drawsting insert through the waist channel;Passer cordon dans coulisse;MAN;0.3;https://ordnur.com/apparel/operation-breakdown-smv-layout-brooke-skirt/
+jupe;ceinture;Drawsting secure at CB waistband;Brider cordon milieu dos;BRID;0.18;https://ordnur.com/apparel/operation-breakdown-smv-layout-brooke-skirt/
+jupe;finition;Thread trims;Couper fils;MAN;0.35;https://ordnur.com/apparel/operation-breakdown-smv-layout-brooke-skirt/
+jupe;ceinture;Front Waist Belt & Tape Fusing Attach;Thermocoller ceinture devant;THERMO;0.35;https://shorabhossain.blogspot.com/2021/06/operation-breakdown-of-skirt.html
+jupe;ceinture;Waist Tape Iron;Repasser ruban de ceinture;FER;0.3;https://shorabhossain.blogspot.com/2021/06/operation-breakdown-of-skirt.html
+jupe;ceinture;Front Waistband Two Part Sewing;Assembler ceinture devant (2 parties);PIQ;0.35;https://shorabhossain.blogspot.com/2021/06/operation-breakdown-of-skirt.html
+jupe;ceinture;Front Waistband Attach;Monter ceinture devant;PIQ;0.35;https://shorabhossain.blogspot.com/2021/06/operation-breakdown-of-skirt.html
+jupe;assemblage;Side Seam Join;Fermer côtés;SURJ;0.4;https://shorabhossain.blogspot.com/2021/06/operation-breakdown-of-skirt.html
+jupe;finition;Label Attach;Poser étiquette;PIQ;0.25;https://shorabhossain.blogspot.com/2021/06/operation-breakdown-of-skirt.html
+jupe;ceinture;Elastic Mark & Cut;Marquer et couper élastique;MAN;0.3;https://shorabhossain.blogspot.com/2021/06/operation-breakdown-of-skirt.html
+jupe;ceinture;Elastic Tack at Belt;Fixer élastique sur ceinture;PIQ;0.35;https://shorabhossain.blogspot.com/2021/06/operation-breakdown-of-skirt.html
+jupe;ceinture;Front Waistband Top Stitch;Surpiquer ceinture devant;DBL;0.35;https://shorabhossain.blogspot.com/2021/06/operation-breakdown-of-skirt.html
+jupe;ceinture;Back Waistband Top Stitch;Surpiquer ceinture dos;CHAIN;0.4;https://shorabhossain.blogspot.com/2021/06/operation-breakdown-of-skirt.html
+jupe;ourlet;Bottom Rolling;Ourler bas (roulotté);PIQ;0.5;https://shorabhossain.blogspot.com/2021/06/operation-breakdown-of-skirt.html
+jupe;finition;Waist Twill Tape Bartack (Bow);Brider ruban de ceinture (nœud);BRID;0.1;https://shorabhossain.blogspot.com/2021/06/operation-breakdown-of-skirt.html
+jupe;finition;Final Trimming;Couper fils finition;MAN;0.6;https://shorabhossain.blogspot.com/2021/06/operation-breakdown-of-skirt.html
+top;corsage;Front Two-part O/L;Surjeter devant (2 parties);SURJ;0.1;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-blouse-manufacturing/
+top;corsage;Front two-part joint;Assembler devant (2 parties);PIQ;0.15;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-blouse-manufacturing/
+top;patte;Btn placket making mark & Make;Marquer et confectionner patte de boutonnage;PIQ;0.25;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-blouse-manufacturing/
+top;finition;Ticket tack at back part;Fixer étiquette au dos;PIQ;0.16;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-blouse-manufacturing/
+top;corsage;Solder joint;Assembler épaules;SURJ;0.15;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-blouse-manufacturing/
+top;manche;Slv rolling;Ourler manches (roulotté);PIQ;0.25;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-blouse-manufacturing/
+top;manche;Slv joint;Monter manches;SURJ;0.3;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-blouse-manufacturing/
+top;assemblage;Side joint;Fermer côtés;SURJ;0.2;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-blouse-manufacturing/
+top;finition;Hanger loop, Btn loop measure & Cut;Mesurer et couper attaches (cintre, bouton);MAN;0.22;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-blouse-manufacturing/
+top;fermeture;Btn loop Make & joint;Confectionner et poser bride de boutonnage;PIQ;0.2;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-blouse-manufacturing/
+top;encolure;Neck tape joint with the body;Poser biais d'encolure;PIQ;0.45;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-blouse-manufacturing/
+top;encolure;Neck top stt.;Surpiquer encolure;PIQ;0.35;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-blouse-manufacturing/
+top;ourlet;Front Hem tape joint with the body;Poser biais d'ourlet devant;PIQ;0.5;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-blouse-manufacturing/
+top;ourlet;Front Hem tape Top stt.;Surpiquer biais d'ourlet devant;PIQ;0.45;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-blouse-manufacturing/
+top;manche;Tack at underarm;Arrêter dessous de bras;PIQ;0.1;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-blouse-manufacturing/
+top;finition;Main lbl joint;Poser étiquette principale;PIQ;0.1;https://ordnur.com/apparel/operation-breakdown-smv-and-layout-of-blouse-manufacturing/
+lingerie;bonnets;Join Cups;Assembler bonnets;PIQ;0.57;https://onlineclothingstudy.com/operation-breakdown-and-machine-layout/
+lingerie;bonnets;Attach Tape to Cups;Poser ruban sur bonnets;DBL;0.73;https://onlineclothingstudy.com/operation-breakdown-and-machine-layout/
+lingerie;bonnets;attach Elastic to side cups;Poser élastique côtés bonnets;AUTRE;0.44;https://onlineclothingstudy.com/operation-breakdown-and-machine-layout/
+lingerie;devant;Set support Panels;Poser panneaux de maintien;PIQ;0.39;https://onlineclothingstudy.com/operation-breakdown-and-machine-layout/
+lingerie;devant;Serge support panels;Surjeter panneaux de maintien;SURJ;0.62;https://onlineclothingstudy.com/operation-breakdown-and-machine-layout/
+lingerie;devant;Join support panels, cup and front;Assembler panneaux, bonnets et pont;PIQ;1.52;https://onlineclothingstudy.com/operation-breakdown-and-machine-layout/
+lingerie;devant;Attach coverstitch tape to front;Poser ruban recouvrement devant;DBL;0.61;https://onlineclothingstudy.com/operation-breakdown-and-machine-layout/
+lingerie;dos;Join backs to cups;Assembler dos aux bonnets;PIQ;0.55;https://onlineclothingstudy.com/operation-breakdown-and-machine-layout/
+lingerie;dos;Attach coverstitch tape to sides;Poser ruban recouvrement côtés;DBL;0.47;https://onlineclothingstudy.com/operation-breakdown-and-machine-layout/
+lingerie;bonnets;Attach lace and tape to cups;Poser dentelle et ruban sur bonnets;DBL;0.76;https://onlineclothingstudy.com/operation-breakdown-and-machine-layout/
+lingerie;dos;Attach elastic to band;Poser élastique dessous de bande;AUTRE;0.9;https://onlineclothingstudy.com/operation-breakdown-and-machine-layout/
+lingerie;bretelles;Attach upper elastic & straps ;Poser élastique haut et bretelles;AUTRE;0.91;https://onlineclothingstudy.com/operation-breakdown-and-machine-layout/
+lingerie;devant;Cover support panels edges;Recouvrir bords panneaux de maintien;SURJ;0.54;https://onlineclothingstudy.com/operation-breakdown-and-machine-layout/
+lingerie;fermeture;Attach hooks and eyes to straps;Poser agrafes sur attaches;PIQ;1.39;https://onlineclothingstudy.com/operation-breakdown-and-machine-layout/
+lingerie;fermeture;Set eye to back;Poser portes d'agrafe au dos;AUTRE;0.36;https://onlineclothingstudy.com/operation-breakdown-and-machine-layout/
+lingerie;fermeture;Set hook to back;Poser agrafes au dos;PIQ;0.5;https://onlineclothingstudy.com/operation-breakdown-and-machine-layout/
+lingerie;finition;Attach trimming to front;Poser ornement devant;PIQ;0.25;https://onlineclothingstudy.com/operation-breakdown-and-machine-layout/
+lingerie;contrôle;Trim thread and inspect;Couper fils et contrôler;MAN;1;https://onlineclothingstudy.com/operation-breakdown-and-machine-layout/
+combinaison;assemblage;Rise join keeping front rise upto cutmark open;Assembler fourches;SURJ;0.65;https://ordnur.com/apparel/operation-breakdown-smv-layout-ladies-overall/
+combinaison;assemblage;Side seam join inserting care label;Fermer côtés avec étiquette d'entretien;SURJ;0.8;https://ordnur.com/apparel/operation-breakdown-smv-layout-ladies-overall/
+combinaison;manche;Insert raglan sleeve to body;Monter manches raglan;SURJ;1.1;https://ordnur.com/apparel/operation-breakdown-smv-layout-ladies-overall/
+combinaison;col;Collar attach to body;Monter col;SURJ;0.3;https://ordnur.com/apparel/operation-breakdown-smv-layout-ladies-overall/
+combinaison;encolure;Neck topstitch;Surpiquer encolure;RECOUV;0.42;https://ordnur.com/apparel/operation-breakdown-smv-layout-ladies-overall/
+combinaison;ceinture;Tunnel part attach;Assembler haut et bas (coulisse taille);SURJ;0.9;https://ordnur.com/apparel/operation-breakdown-smv-layout-ladies-overall/
+combinaison;fermeture;Zipper attach;Poser fermeture;PIQ;1;https://ordnur.com/apparel/operation-breakdown-smv-layout-ladies-overall/
+combinaison;fermeture;Zipper topstitch;Surpiquer fermeture;PIQ;1.1;https://ordnur.com/apparel/operation-breakdown-smv-layout-ladies-overall/
+combinaison;ourlet;Cuff attach at leg;Monter bord-côte bas de jambe;SURJ;0.5;https://ordnur.com/apparel/operation-breakdown-smv-layout-ladies-overall/
+combinaison;manche;Sleeve hem;Ourler manches;RECOUV;0.5;https://ordnur.com/apparel/operation-breakdown-smv-layout-ladies-overall/
+combinaison;fermeture;Button attach to pocket & flap;Coudre boutons poches et rabats;BOUTON;1.2;https://ordnur.com/apparel/operation-breakdown-smv-layout-ladies-overall/
+combinaison;finition;Thread trim, Zipper & button close;Couper fils, fermer zip et boutons;MAN;0.65;https://ordnur.com/apparel/operation-breakdown-smv-layout-ladies-overall/
+combinaison;pinces;Front Bib Dart Sewing;Piquer pinces bavette devant;PIQ;0.25;https://shorabhossain.blogspot.com/2021/05/operation-breakdown-of-ladies-dungaree.html
+combinaison;bretelles;Suspender Attach;Poser bretelles;PIQ;0.35;https://shorabhossain.blogspot.com/2021/05/operation-breakdown-of-ladies-dungaree.html
+combinaison;ceinture;Waist Belt Attach;Monter ceinture;CHAIN;0.5;https://shorabhossain.blogspot.com/2021/05/operation-breakdown-of-ladies-dungaree.html
+combinaison;assemblage;Side Seam Join;Fermer côtés;SURJ;0.65;https://shorabhossain.blogspot.com/2021/05/operation-breakdown-of-ladies-dungaree.html
+blouse-travail;col;Setrika dan tempel interlining ke daun kerah dalam;Thermocoller dessous de col;THERMO;0.417;https://ojstexere.stttekstil.ac.id/index.php/texere/article/download/159/pdf
+blouse-travail;col;Jahit gabung daun kerah luar dan dalam 3 sisi;Piquer col (3 côtés);PIQ;0.583;https://ojstexere.stttekstil.ac.id/index.php/texere/article/download/159/pdf
+blouse-travail;col;Gunting sisa tepi daun kerah dan balik daun kerah;Dégarnir et retourner col;MAN;1.15;https://ojstexere.stttekstil.ac.id/index.php/texere/article/download/159/pdf
+blouse-travail;col;Setrika kerah;Repasser col;FER;0.383;https://ojstexere.stttekstil.ac.id/index.php/texere/article/download/159/pdf
+blouse-travail;manche;Topstitch sleeves hem *2;Surpiquer ourlets de manches (x2);PIQ;0.583;https://ojstexere.stttekstil.ac.id/index.php/texere/article/download/159/pdf
+blouse-travail;poche;Lipat dan setrika kelim saku tempel 5 sisi sesuai pola jadi*2;Plier et repasser poches plaquées (x2);FER;0.417;https://ojstexere.stttekstil.ac.id/index.php/texere/article/download/159/pdf
+blouse-travail;poche;Topstitch pasang saku tempel ke panel badan depan*2;Poser poches plaquées (x2);PIQ;1.267;https://ojstexere.stttekstil.ac.id/index.php/texere/article/download/159/pdf
+blouse-travail;parementure;Obras 1 layer tepi facing badan depan*2;Surjeter parementures devant (x2);SURJ;0.95;https://ojstexere.stttekstil.ac.id/index.php/texere/article/download/159/pdf
+blouse-travail;parementure;Pasang facing ke badan depan 2 sisi*2 (jahitan sampai titik 4 cm dari bottom badan);Monter parementures devant (x2);PIQ;1.083;https://ojstexere.stttekstil.ac.id/index.php/texere/article/download/159/pdf
+blouse-travail;ceinture;Topstitch pasang ban pinggang*2;Poser martingale dos (x2);PIQ;1.9;https://ojstexere.stttekstil.ac.id/index.php/texere/article/download/159/pdf
+blouse-travail;assemblage;Jahit gabung bahu depan dan belakang*2;Assembler épaules (x2);PIQ;0.583;https://ojstexere.stttekstil.ac.id/index.php/texere/article/download/159/pdf
+blouse-travail;assemblage;Obras gabung bahu*2;Surjeter épaules (x2);SURJ;0.5;https://ojstexere.stttekstil.ac.id/index.php/texere/article/download/159/pdf
+blouse-travail;manche;Pasang sleeves ke lubang lengan*2 (1 cm dari tepi);Monter manches (x2);PIQ;1.733;https://ojstexere.stttekstil.ac.id/index.php/texere/article/download/159/pdf
+blouse-travail;manche;Obras armhole *2;Surjeter emmanchures (x2);SURJ;0.833;https://ojstexere.stttekstil.ac.id/index.php/texere/article/download/159/pdf
+blouse-travail;assemblage;Jahit gabung side sleeves sampai side seam *2;Fermer côtés et dessous de manches (x2);PIQ;2.333;https://ojstexere.stttekstil.ac.id/index.php/texere/article/download/159/pdf
+blouse-travail;assemblage;Obras side sleeves sampai side seam*2;Surjeter côtés et dessous de manches (x2);SURJ;1.667;https://ojstexere.stttekstil.ac.id/index.php/texere/article/download/159/pdf
+blouse-travail;col;Pasang kerah ke badan;Monter col;PIQ;1.467;https://ojstexere.stttekstil.ac.id/index.php/texere/article/download/159/pdf
+blouse-travail;encolure;Topstitch neck dan pasang size label;Surpiquer encolure et poser étiquette taille;PIQ;1.067;https://ojstexere.stttekstil.ac.id/index.php/texere/article/download/159/pdf
+blouse-travail;ourlet;Topstitch bottom hem ( bottom hem height 2,5 cm);Ourler bas (2,5 cm);PIQ;1.4;https://ojstexere.stttekstil.ac.id/index.php/texere/article/download/159/pdf
+blouse-travail;finition;Topstitch keliling dari facing badan depan kanan- collar-facing badan depan kiri (1 sepatu dari tepi);Surpiquer pourtour devant et col;PIQ;2.667;https://ojstexere.stttekstil.ac.id/index.php/texere/article/download/159/pdf
+blouse-travail;fermeture;Jahit lubang kancing*5;Faire boutonnières (x5);BOUT;0.833;https://ojstexere.stttekstil.ac.id/index.php/texere/article/download/159/pdf
+blouse-travail;fermeture;Jahit pasang kancing*5;Coudre boutons (x5);BOUTON;0.667;https://ojstexere.stttekstil.ac.id/index.php/texere/article/download/159/pdf
+blouse-travail;finition;Buang benang sisa ujung semua jahitan;Couper fils;MAN;0.833;https://ojstexere.stttekstil.ac.id/index.php/texere/article/download/159/pdf
+general;finition;Thread cut (top+in side+Side seam+Hem fray clean);Couper fils (complet);MAN;1.2;https://ordnur.com/apparel/layout-smv-operation-breakdown-garments-finishing-process/
+general;contrôle;Inside check;Contrôler envers;MAN;0.4;https://ordnur.com/apparel/layout-smv-operation-breakdown-garments-finishing-process/
+general;contrôle;Top side check;Contrôler endroit;MAN;0.4;https://ordnur.com/apparel/layout-smv-operation-breakdown-garments-finishing-process/
+general;repassage;Full Body Iron;Repasser vêtement complet;FER;0.7;https://ordnur.com/apparel/layout-smv-operation-breakdown-garments-finishing-process/
+general;contrôle;Measurement check 03 point;Contrôler mesures (3 points);MAN;0.4;https://ordnur.com/apparel/layout-smv-operation-breakdown-garments-finishing-process/
+general;emballage;Price Tag attach;Poser étiquette prix;MAN;0.15;https://ordnur.com/apparel/layout-smv-operation-breakdown-garments-finishing-process/
+general;emballage;Folding;Plier;MAN;0.3;https://ordnur.com/apparel/layout-smv-operation-breakdown-garments-finishing-process/
+general;emballage;Poly close.;Ensacher et fermer sachet;MAN;0.25;https://ordnur.com/apparel/layout-smv-operation-breakdown-garments-finishing-process/
+general;emballage;Carton Close;Fermer carton;MAN;0.25;https://ordnur.com/apparel/layout-smv-operation-breakdown-garments-finishing-process/
+general;repassage;Ironing;Repasser;FER;0.7;https://www.ajer.org/papers/Vol-7-issue-5/C07052125.pdf
+general;contrôle;Checking & Measuring;Contrôler et mesurer;MAN;0.28;https://www.ajer.org/papers/Vol-7-issue-5/C07052125.pdf
+general;emballage;Hangtag;Poser étiquette volante;MAN;0.05;https://www.ajer.org/papers/Vol-7-issue-5/C07052125.pdf
+general;contrôle;Final Checking;Contrôle final;MAN;0.23;https://www.ajer.org/papers/Vol-7-issue-5/C07052125.pdf
+general;emballage;Folding;Plier;MAN;0.2;https://www.ajer.org/papers/Vol-7-issue-5/C07052125.pdf
+general;emballage;Poly Packing;Ensacher;MAN;0.15;https://www.ajer.org/papers/Vol-7-issue-5/C07052125.pdf

@@ -157,3 +157,15 @@ tr.row-over td { background: #fdf6f5; }
 .doc code { background: var(--bg); padding: .05rem .3rem; border-radius: 4px; font-size: .84rem; }
 .doc .req { color: var(--err); font-weight: 700; }
 .dl-row { display: flex; gap: .5rem; flex-wrap: wrap; margin: .3rem 0 .8rem; }
+
+/* Propositions d'opérations */
+.suggest { position: fixed; z-index: 50; margin: 0; padding: .25rem; list-style: none; background: #fff; border: 1px solid var(--line);
+  border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,.12); max-height: 22rem; overflow-y: auto; }
+.suggest li { display: grid; grid-template-columns: auto 1fr; column-gap: .5rem; padding: .4rem .5rem; border-radius: 6px; cursor: pointer; }
+.suggest li.on { background: #f3f1ea; }
+.suggest .tag { grid-row: span 2; align-self: start; font-size: .68rem; font-weight: 700; padding: .1rem .4rem; border-radius: 99px; margin-top: .1rem; }
+.suggest .tag.atelier { background: #e7f5ee; color: var(--ok); }
+.suggest .tag.catalogue { background: #e6effa; color: var(--info); }
+.suggest .sname { font-weight: 600; }
+.suggest .sdetail { font-size: .75rem; color: var(--muted); }
+.egrid .ecell input.est { background: #fdf3e1; color: var(--warn); font-style: italic; }
