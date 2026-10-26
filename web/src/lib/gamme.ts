@@ -115,6 +115,9 @@ export function check(d: Draft): Check {
     const have = new Set(d.wk.filter((w) => w.available).flatMap((w) => list(w.skills)));
     const missing = [...new Set(ops.flatMap((o) => list(o.skills)).filter((s) => !have.has(s)))];
     if (missing.length) warnings.push(`Aucun ouvrier disponible n'a la compétence : ${missing.join(", ")}.`);
+    const avail = d.wk.filter((w) => w.available).map((w) => new Set(list(w.skills)));
+    const combo = ops.filter((o) => list(o.skills).length > 1 && list(o.skills).every((s) => have.has(s)) && !avail.some((w) => list(o.skills).every((s) => w.has(s))));
+    if (combo.length) warnings.push(`Aucun ouvrier ne cumule toutes les compétences de : ${combo.map((o) => o.id).join(", ")} (le calcul exige un même ouvrier).`);
   }
   return { errors, warnings, cells };
 }

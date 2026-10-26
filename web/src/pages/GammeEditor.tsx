@@ -8,6 +8,7 @@ import {
   type Draft, type OpRow, type WkRow, type WsRow,
 } from "../lib/gamme";
 import SuggestInput from "../components/SuggestInput";
+import SkillsInput from "../components/SkillsInput";
 import { GARMENTS, aggregateHistory, loadCatalog, loadHistory, suggest, type Catalog, type HistoryEntry, type Suggestion } from "../lib/suggest";
 
 type Tab = "ops" | "ws" | "wk";
@@ -22,7 +23,7 @@ const OP_COLS: Col<OpRow>[] = [
   { key: "duration", label: "SAM (min)", width: "6rem", type: "number" },
   { key: "predecessors", label: "Prédécesseurs", width: "9rem", placeholder: "OP010, OP020", title: "Opérations à terminer avant celle-ci, séparées par des virgules" },
   { key: "machine_type", label: "Machine", width: "10rem", list: "dl-machines" },
-  { key: "skills", label: "Compétences", width: "minmax(9rem,1fr)", list: "dl-skills", placeholder: "couture_droite, ourlet" },
+  { key: "skills", label: "Compétences", width: "minmax(12rem,1.4fr)", list: "dl-skills", placeholder: "couture_droite, ourlet" },
   { key: "section", label: "Section", width: "7rem", list: "dl-sections" },
   { key: "optional", label: "Opt.", width: "3rem", type: "check", title: "Opération optionnelle" },
 ];
@@ -101,6 +102,15 @@ export default function GammeEditor() {
   const cyc = Number(d.cycle.replace(",", ".")) || 0;
   const machines = useMemo(() => [...new Set([...MACHINES, ...d.ops.map((o) => o.machine_type), ...d.ws.map((w) => w.machine_type)].filter(Boolean))], [d]);
   const skills = useMemo(() => [...new Set([...d.ops, ...d.wk].flatMap((r) => r.skills.split(/[;,]/).map((s) => s.trim())).filter(Boolean))].sort(), [d]);
+  const splitS = (v: string) => v.split(/[;,]/).map((s) => s.trim()).filter(Boolean);
+  const coverage = useMemo(() => {
+    const avail = d.wk.filter((w) => w.available && w.id.trim()).map((w) => new Set(splitS(w.skills)));
+    const req = new Map<string, number>();
+    d.ops.filter((o) => o.id.trim()).forEach((o) => splitS(o.skills).forEach((s) => req.set(s, (req.get(s) ?? 0) + 1)));
+    const rows = [...req.entries()].sort((a, b) => b[1] - a[1]).map(([skill, ops]) => ({ skill, ops, wk: avail.filter((w) => w.has(skill)).length }));
+    const blocked = d.ops.filter((o) => o.id.trim() && splitS(o.skills).length > 1 && avail.length && !avail.some((w) => splitS(o.skills).every((s) => w.has(s))));
+    return { rows, required: rows.map((r) => r.skill), blocked, hasWk: avail.length > 0 };
+  }, [d]);
   const sections = useMemo(() => [...new Set([...d.ops, ...d.ws].map((r) => r.section.trim()).filter(Boolean))], [d]);
 
   const getSuggestions = useCallback((q: string, rowIndex: number) => suggest(q, {
@@ -266,16 +276,35 @@ export default function GammeEditor() {
                 title={r.est ? "Temps estimé d'après le catalogue (valeur publiée) : à confirmer par chronométrage" : undefined}
                 onChange={(e) => set({ duration: e.target.value, est: false })} />
             ),
+            skills: (r, _i, set, bad) => (
+              <SkillsInput value={r.skills} bad={bad} options={skills} placeholder="ourlet, couture_droite…" onChange={(v) => set({ skills: v })} />
+            ),
           }}
           hint="Désignation : les propositions viennent de vos gammes puis du catalogue de temps publiés (temps en orange = estimé, à confirmer). Prédécesseurs : laissez vide si l'opération peut démarrer tout de suite. Plusieurs prédécesseurs : séparez-les par des virgules." />}
         {tab === "ws" && <Grid prefix="ws" cols={WS_COLS} rows={d.ws} cells={chk.cells}
           onChange={(rows) => update((x) => ({ ...x, ws: rows }))}
           make={(rows) => emptyWs(nextId(rows.map((r) => r.id), "WS", 2, 1))}
           hint="Facultatif : sans postes, le calcul répartit les opérations sans vérifier le parc machines. Un poste par machine physique." />}
+        {tab === "wk" && coverage.rows.length > 0 && (
+          <div className="skill-cover">
+            <strong>Compétences requises par la gamme</strong>
+            <span className="small muted"> : chiffre = ouvriers disponibles qui la maîtrisent. En rouge, personne : le calcul échouera.</span>
+            <div className="row">{coverage.rows.map((r) => (
+              <span key={r.skill} className={`badge ${r.wk === 0 ? "err" : r.wk === 1 ? "warn" : "ok"}`} title={`${r.ops} opération(s)`}>{r.skill} · {r.wk}</span>
+            ))}</div>
+            {coverage.blocked.length > 0 && <p className="small" style={{ color: "var(--err)", margin: ".5rem 0 0" }}>
+              Aucun ouvrier ne cumule toutes les compétences de : {coverage.blocked.map((o) => `${o.id} (${splitS(o.skills).join(" + ")})`).join(", ")}.</p>}
+          </div>
+        )}
         {tab === "wk" && <Grid prefix="wk" cols={WK_COLS} rows={d.wk} cells={chk.cells}
           onChange={(rows) => update((x) => ({ ...x, wk: rows }))}
           make={(rows) => emptyWk(nextId(rows.map((r) => r.id), "W", 3, 1))}
-          hint="Facultatif : les compétences doivent reprendre les mots utilisés dans les opérations (ex. couture_droite)." />}
+          custom={{
+            skills: (r, _i, set, bad) => (
+              <SkillsInput value={r.skills} bad={bad} options={skills} priority={coverage.required} placeholder="choisir parmi les compétences requises…" onChange={(v) => set({ skills: v })} />
+            ),
+          }}
+          hint="Facultatif. Plusieurs compétences par ouvrier : tapez puis Entrée ou virgule. Les compétences requises par la gamme sont proposées en premier." />}
 
         <datalist id="dl-machines">{machines.map((m) => <option key={m} value={m} />)}</datalist>
         <datalist id="dl-skills">{skills.map((m) => <option key={m} value={m} />)}</datalist>

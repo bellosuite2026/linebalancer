@@ -169,3 +169,14 @@ tr.row-over td { background: #fdf6f5; }
 .suggest .sname { font-weight: 600; }
 .suggest .sdetail { font-size: .75rem; color: var(--muted); }
 .egrid .ecell input.est { background: #fdf3e1; color: var(--warn); font-style: italic; }
+.skills-input { position: relative; display: flex; flex-wrap: wrap; gap: .25rem; align-items: center; min-height: 2.1rem; padding: .2rem .3rem; border: 1px solid var(--line, #d9d6cf); border-radius: 6px; background: #fff; cursor: text; }
+.skills-input.bad { border-color: var(--err); }
+.skills-input input { flex: 1; min-width: 5rem; border: 0 !important; outline: 0; padding: .15rem; background: transparent; box-shadow: none !important; }
+.chip { display: inline-flex; align-items: center; gap: .15rem; font-size: .78rem; padding: .05rem .2rem .05rem .45rem; border-radius: 99px; background: #e6effa; color: var(--info); white-space: nowrap; }
+.chip.req { background: #e7f5ee; color: var(--ok); }
+.chip button { border: 0; background: none; color: inherit; cursor: pointer; padding: 0 .2rem; font-size: .9rem; line-height: 1; }
+.skills-pop { position: absolute; z-index: 30; top: 100%; left: 0; min-width: 100%; background: #fff; border: 1px solid #d9d6cf; border-radius: 6px; box-shadow: 0 6px 18px rgba(0,0,0,.12); display: flex; flex-direction: column; }
+.skills-pop button { text-align: left; border: 0; background: none; padding: .35rem .6rem; cursor: pointer; font-size: .85rem; }
+.skills-pop button:hover { background: #f3f1ec; }
+.skill-cover { margin: .5rem 0 .8rem; padding: .7rem .9rem; border-radius: 8px; background: #f7f6f2; }
+.skill-cover .row { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .4rem; }
