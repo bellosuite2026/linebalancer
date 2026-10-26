@@ -85,7 +85,15 @@ def register(app: FastAPI, settings: Settings, queue: JobQueue,
     # ------------------------------------------------------------ compte
     @app.get("/v1/me", tags=["compte"])
     def me(p: Principal = Depends(principal)):
-        return {"user_id": p.user_id, "email": p.email, "orgs": call(store.my_orgs, p.token, p.user_id)}
+        return {"user_id": p.user_id, "email": p.email, "orgs": call(store.my_orgs, p.token, p.user_id),
+                "is_super_admin": super_admin(p)}
+
+    def super_admin(p: Principal) -> bool:
+        try:
+            return store.is_super_admin(p.token)
+        except Exception as e:  # noqa: BLE001 — en cas de doute : pas de privilège
+            log.warning("Contrôle super admin impossible : %s", e)
+            return False
 
     @app.post("/v1/orgs", status_code=201, tags=["compte"])
     def create_org(body: OrgCreate, p: Principal = Depends(principal)):
@@ -118,7 +126,13 @@ def register(app: FastAPI, settings: Settings, queue: JobQueue,
         return Response(status_code=204)
 
     # ------------------------------------------------------------ gammes
+    # Super admin (propriétaire du SaaS) : aucune limite d'offre sur ses ateliers
+    # (seul le garde-fou CPU du serveur, settings.max_operations, s'applique).
+    UNLIMITED = {"code": "super_admin", "max_operations": None, "cpsat": True, "pdf_reports": True}
+
     def plan_limits(org_id: str, p: Principal) -> dict:
+        if super_admin(p):
+            return dict(UNLIMITED)
         sub = call(store.org_plan, p.token, org_id) or {}
         return sub.get("plan") or {}
 

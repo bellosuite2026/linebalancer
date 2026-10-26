@@ -80,6 +80,13 @@ class SupabaseStore:
         return self._req("GET", "/memberships", token, params={
             "select": "user_id,role,created_at", "org_id": f"eq.{org_id}", "order": "created_at.asc"})
 
+    # ------------------------------------------------------------ super admin (fonctions SQL contrôlées)
+    def rpc(self, token: str, name: str, args: Optional[dict] = None) -> Any:
+        return self._req("POST", f"/rpc/{name}", token, json=args or {})
+
+    def is_super_admin(self, token: str) -> bool:
+        return bool(self.rpc(token, "admin_whoami"))
+
     # ------------------------------------------------------------ lignes
     def list_lines(self, token: str, org_id: str) -> list[dict]:
         return self._req("GET", "/lines", token, params={
@@ -161,7 +168,9 @@ def _to_error(r: httpx.Response, single: bool) -> StoreError:
         return StoreError(402 if "Abonnement" in msg else 409, msg)
     if code == "42501" or r.status_code == 403:
         return StoreError(403, "Action non autorisée pour votre rôle dans cet atelier.")
-    if code in ("22P02", "23503", "23514", "23502"):
+    if code == "P0002":            # introuvable (fonctions d'administration)
+        return StoreError(404, msg)
+    if code in ("22P02", "23503", "23514", "23502", "22023"):
         return StoreError(422, msg)
     if r.status_code == 401:
         return StoreError(401, "Session invalide ou expirée.")

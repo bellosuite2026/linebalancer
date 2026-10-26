@@ -40,7 +40,8 @@ python scripts/balance.py --sam data/samples/... --cycle-time 1.5 --solver rpw
 - `api/` : API FastAPI du SaaS (adaptateur fin, **aucune logique métier** ; dépend de `engine/`, jamais de `gui/`). Lancer : `uvicorn api.main:app --reload`. Doc : `api/README.md`.
 - `tests/` : 72 tests moteur + 20 GUI + `tests/test_api.py` (API) + `tests/test_api_saas.py` (comptes, hors-ligne).
 - `supabase/migrations/` : schéma Postgres (ateliers, membres, offres, lignes, gammes, calculs) + RLS. Toute évolution de schéma = nouveau fichier horodaté, jamais de modification d'une migration appliquée.
-- `scripts/e2e_supabase.py` : test de bout en bout contre un vrai projet Supabase.
+- `scripts/e2e_supabase.py` : test de bout en bout contre un vrai projet Supabase ; `scripts/e2e_admin.py` : super admin (/v1/admin/*).
+- `api/routes_admin.py` + `web/src/pages/Admin.tsx` : espace super admin (rôle dans `private.platform_admins`).
 - `gui/assets/` : icônes machines (15 SVG), icônes UI (10 SVG), ATTRIBUTION.txt.
 
 ## Conventions

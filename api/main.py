@@ -218,6 +218,8 @@ def create_app(settings: Optional[Settings] = None, *, auth=None, store=None) ->
     if auth is not None and store is not None:
         from api import routes_saas
         routes_saas.register(app, settings, queue, auth, store)
+        from api import routes_admin
+        routes_admin.register(app, auth, store)
 
     return app
 

@@ -72,3 +72,25 @@ Variables : `TLB_SUPABASE_URL`, `TLB_SUPABASE_ANON_KEY`, optionnelles
 - File en mémoire : les calculs sont perdus au redémarrage (prod : Redis + arq ou Postgres).
 - CP-SAT peut, selon la solution trouvée, laisser une station sans poste physique
   (`CPSatSolver._assign_workstations`, affectation gloutonne). L'API le signale (`compliant=false`).
+
+## Super admin (propriétaire du SaaS) — `/v1/admin/*`
+
+Réservé aux comptes listés dans `private.platform_admins` (par e-mail, adresse confirmée).
+L'API vérifie le jeton Supabase puis `admin_whoami` ; chaque fonction SQL `private.admin_*`
+refait le contrôle. Aucune clé secrète : appels avec le jeton de l'utilisateur.
+
+| Méthode | Route | Rôle |
+|---|---|---|
+| GET | `/v1/admin/overview` | gains en TND (12 mois, par offre), abonnements actifs, essais, MRR |
+| GET | `/v1/admin/users` | utilisateurs : inscription, dernière connexion, nb de calculs, ateliers/offre, suspendu |
+| POST | `/v1/admin/users/{id}/suspend` | `{"suspended": true\|false}` (déconnexion + accès coupé immédiatement) |
+| DELETE | `/v1/admin/users/{id}` | `{"confirm_email": "..."}` ; supprime aussi ses ateliers sans autre propriétaire |
+| GET | `/v1/admin/orgs` | ateliers : offre, statut, échéance, membres, lignes, calculs, total payé |
+| PUT | `/v1/admin/orgs/{id}/plan` | `{"plan_code", "status", "trial_ends_at"?, "current_period_end"?}` |
+| DELETE | `/v1/admin/orgs/{id}` | `{"confirm_name": "..."}` |
+| GET/POST | `/v1/admin/payments` | liste / saisie manuelle d'un paiement (TND, période, mode, référence ; `activate` = passe l'atelier sur l'offre jusqu'à la fin de période) |
+| DELETE | `/v1/admin/payments/{id}` | suppression d'une saisie erronée |
+
+Le super admin n'a ni essai ni quota sur ses propres ateliers (seul le garde-fou CPU
+`TLB_MAX_OPERATIONS` s'applique) ; il n'accède pas aux données métier des autres ateliers.
+Test réel : `scripts/e2e_admin.py`.

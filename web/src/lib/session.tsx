@@ -8,6 +8,7 @@ interface Ctx {
   session: Session | null; loading: boolean; recovery: boolean; clearRecovery: () => void;
   orgs: Org[]; orgsLoaded: boolean; orgsError: string; refreshOrgs: () => Promise<Org[]>;
   currentOrg: Org | null; setCurrentOrgId: (id: string) => void;
+  isSuperAdmin: boolean;
 }
 const SessionCtx = createContext<Ctx>(null as unknown as Ctx);
 export const useSession = () => useContext(SessionCtx);
@@ -21,6 +22,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const [orgs, setOrgs] = useState<Org[]>([]);
   const [orgsLoaded, setOrgsLoaded] = useState(false);
   const [orgsError, setOrgsError] = useState("");
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [currentId, setCurrentId] = useState<string>(() => localStorage.getItem(ORG_KEY) || "");
 
   useEffect(() => {
@@ -28,7 +30,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     const { data } = supabase.auth.onAuthStateChange((event, s) => {
       setSession(s);
       if (event === "PASSWORD_RECOVERY") setRecovery(true);
-      if (event === "SIGNED_OUT") { setOrgs([]); setOrgsLoaded(false); }
+      if (event === "SIGNED_OUT") { setOrgs([]); setOrgsLoaded(false); setIsSuperAdmin(false); }
     });
     return () => data.subscription.unsubscribe();
   }, []);
@@ -36,8 +38,9 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const refreshOrgs = useCallback(async () => {
     setOrgsError("");
     try {
-      const me = await api<{ orgs: Org[] }>("/v1/me");
+      const me = await api<{ orgs: Org[]; is_super_admin?: boolean }>("/v1/me");
       setOrgs(me.orgs);
+      setIsSuperAdmin(!!me.is_super_admin);
       setOrgsLoaded(true);
       return me.orgs;
     } catch (e) {
@@ -55,7 +58,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
   return (
     <SessionCtx.Provider value={{ session, loading, recovery, clearRecovery: () => setRecovery(false),
-      orgs, orgsLoaded, orgsError, refreshOrgs, currentOrg, setCurrentOrgId }}>
+      orgs, orgsLoaded, orgsError, refreshOrgs, currentOrg, setCurrentOrgId, isSuperAdmin }}>
       {children}
     </SessionCtx.Provider>
   );

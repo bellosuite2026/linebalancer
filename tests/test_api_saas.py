@@ -45,6 +45,33 @@ class FakeStore:
 
     def __init__(self):
         self.orgs, self.members, self.lines, self.problems, self.runs = {}, {}, {}, {}, {}
+        self.admins: set[str] = set()
+        self.payments: list[dict] = []
+        self.rpc_calls: list[tuple[str, dict]] = []
+
+    # --- super admin : la base refait le contrôle (comme private.require_super_admin)
+    def is_super_admin(self, tok):
+        return self._uid(tok) in self.admins
+
+    def rpc(self, tok, name, args=None):
+        args = args or {}
+        if name == "admin_whoami":
+            return self.is_super_admin(tok)
+        if not self.is_super_admin(tok):
+            raise StoreError(403, "Action non autorisée")
+        self.rpc_calls.append((name, args))
+        if name == "admin_revenue":
+            return {"currency": "TND", "payments_count": len(self.payments),
+                    "total_tnd": sum(float(p["amount_tnd"]) for p in self.payments)}
+        if name == "admin_record_payment":
+            row = {"id": str(uuid.uuid4()), "amount_tnd": args["p_amount"], "plan_code": args["p_plan"]}
+            self.payments.append(row)
+            return row
+        if name == "admin_delete_user":
+            if args["p_confirm_email"] != "victime@test.tn":
+                raise StoreError(422, "Confirmation incorrecte")
+            return {"email": "victime@test.tn", "deleted_orgs": 1}
+        return {"ok": True}
 
     def _uid(self, tok):
         return jwt.decode(tok, options={"verify_signature": False})["sub"]
@@ -216,3 +243,60 @@ def test_run_requires_problem(ctx):
     c, _s, A, _B = ctx
     org = c.post("/v1/orgs", json={"name": "Atelier A"}, headers=A).json()["id"]
     assert c.post(f"/v1/orgs/{org}/runs", json={"kind": "balance"}, headers=A).status_code == 422
+
+
+# ------------------------------------------------------------------ super admin
+def test_admin_routes_forbidden_for_normal_user(ctx):
+    c, store, A, _B = ctx
+    assert c.get("/v1/admin/overview").status_code == 401
+    for method, path, body in [("get", "/v1/admin/overview", None), ("get", "/v1/admin/users", None),
+                               ("get", "/v1/admin/orgs", None), ("get", "/v1/admin/payments", None),
+                               ("post", f"/v1/admin/users/{uuid.uuid4()}/suspend", {"suspended": True})]:
+        r = c.request(method.upper(), path, json=body, headers=A)
+        assert r.status_code == 403, path
+    assert store.rpc_calls == []
+    assert c.get("/v1/me", headers=A).json()["is_super_admin"] is False
+
+
+def _admin(ctx):
+    c, store, A, B = ctx
+    store.admins.add(jwt.decode(A["Authorization"][7:], options={"verify_signature": False})["sub"])
+    return c, store, A, B
+
+
+def test_admin_overview_payments_and_actions(ctx):
+    c, store, A, _B = _admin(ctx)
+    assert c.get("/v1/me", headers=A).json()["is_super_admin"] is True
+    assert c.get("/v1/admin/overview", headers=A).json()["payments_count"] == 0
+    org = str(uuid.uuid4())
+    r = c.post("/v1/admin/payments", headers=A, json={"org_id": org, "plan_code": "atelier", "amount_tnd": "149",
+                                                       "period_start": "2026-11-01", "period_end": "2026-11-30"})
+    assert r.status_code == 201
+    name, args = store.rpc_calls[-1]
+    assert name == "admin_record_payment" and args["p_amount"] == "149" and args["p_activate"] is True
+    assert c.get("/v1/admin/overview", headers=A).json()["total_tnd"] == 149
+    bad = c.post("/v1/admin/payments", headers=A, json={"org_id": org, "plan_code": "atelier", "amount_tnd": -1})
+    assert bad.status_code == 422
+    bad = c.post("/v1/admin/payments", headers=A, json={"org_id": org, "plan_code": "inconnu", "amount_tnd": 1})
+    assert bad.status_code == 422
+    bad = c.post("/v1/admin/payments", headers=A, json={"org_id": org, "plan_code": "usine", "amount_tnd": 1,
+                                                         "period_start": "2026-11-30", "period_end": "2026-11-01"})
+    assert bad.status_code == 422
+    assert c.put(f"/v1/admin/orgs/{org}/plan", headers=A,
+                 json={"plan_code": "usine", "status": "active"}).status_code == 200
+    assert c.put(f"/v1/admin/orgs/{org}/plan", headers=A,
+                 json={"plan_code": "usine", "status": "gratuit"}).status_code == 422
+    u = str(uuid.uuid4())
+    assert c.post(f"/v1/admin/users/{u}/suspend", headers=A, json={"suspended": True}).status_code == 200
+    assert c.request("DELETE", f"/v1/admin/users/{u}", headers=A,
+                     json={"confirm_email": "autre@test.tn"}).status_code == 422
+    r = c.request("DELETE", f"/v1/admin/users/{u}", headers=A, json={"confirm_email": "victime@test.tn"})
+    assert r.status_code == 200 and r.json()["deleted_orgs"] == 1
+    assert c.post("/v1/admin/users/pas-un-uuid/suspend", headers=A, json={"suspended": True}).status_code == 404
+
+
+def test_super_admin_has_no_plan_cap(ctx):
+    c, _s, A, _B = _admin(ctx)
+    org = c.post("/v1/orgs", json={"name": "Atelier SA"}, headers=A).json()["id"]
+    big = dict(PROBLEM, operations=PROBLEM["operations"] + [{"id": "D", "duration": 0.1}])
+    assert c.post(f"/v1/orgs/{org}/runs", json={"problem": big}, headers=A).status_code == 202

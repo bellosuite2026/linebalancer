@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { useSession } from "./lib/session";
 import Layout from "./components/Layout";
 import Login from "./pages/Login";
@@ -11,9 +11,11 @@ import History from "./pages/History";
 import Account from "./pages/Account";
 import GammeEditor from "./pages/GammeEditor";
 import FileHelp from "./pages/FileHelp";
+import Admin from "./pages/Admin";
 
 export default function App() {
-  const { session, loading, recovery, orgs, orgsLoaded, orgsError, refreshOrgs } = useSession();
+  const { session, loading, recovery, orgs, orgsLoaded, orgsError, refreshOrgs, isSuperAdmin } = useSession();
+  const location = useLocation();
 
   if (loading) return <div className="center muted">Chargement…</div>;
   if (recovery) return <NewPassword />;
@@ -28,7 +30,7 @@ export default function App() {
       </div>
     </div>
   );
-  if (orgs.length === 0) return <Onboarding />;
+  if (orgs.length === 0 && !(isSuperAdmin && location.pathname.startsWith("/admin"))) return <Onboarding />;
 
   return (
     <Layout>
@@ -40,6 +42,7 @@ export default function App() {
         <Route path="/calculs" element={<History />} />
         <Route path="/calculs/:id" element={<RunDetail />} />
         <Route path="/atelier" element={<Account />} />
+        <Route path="/admin" element={isSuperAdmin ? <Admin /> : <Navigate to="/" replace />} />
         <Route path="/nouvel-atelier" element={<Onboarding inLayout />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
