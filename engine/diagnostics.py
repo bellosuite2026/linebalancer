@@ -98,6 +98,7 @@ def precheck(problem: LineBalancingProblem, allow_parallel: bool = True) -> list
                 issues.append(Issue("SKILL_MISSING", "error",
                                     f"Aucun ouvrier ne maîtrise {', '.join(o.required_skills)} ({o.id}).",
                                     "Former un ouvrier ou corriger les compétences requises."))
+        issues.extend(_skill_capacity(ops, avail_workers, C))
         total = sum(o.duration for o in ops)
         mini = math.ceil(total / C - EPS)
         if len(avail_workers) < mini:
@@ -107,11 +108,53 @@ def precheck(problem: LineBalancingProblem, allow_parallel: bool = True) -> list
     return issues
 
 
+def _skill_capacity(ops: list[Operation], workers: list, C: float) -> list[Issue]:
+    """Condition de Hall sur les compétences : un groupe d'opérations ne peut être
+    fait que par les ouvriers qualifiés pour au moins l'une d'elles ; si leur
+    nombre x cadence < travail du groupe, la cadence est intenable."""
+    from itertools import combinations
+    groups: dict[frozenset, list[Operation]] = defaultdict(list)
+    for o in ops:
+        if o.required_skills:
+            groups[frozenset(o.required_skills)].append(o)
+    keys = list(groups)
+    if not keys:
+        return []
+    wsk = [(w, set(w.skills)) for w in workers]
+    max_k = 3 if len(keys) <= 40 else 2
+    worst: dict[frozenset, tuple] = {}
+    for k in range(1, min(max_k, len(keys)) + 1):
+        for combo in combinations(keys, k):
+            work = sum(o.duration for g in combo for o in groups[g])
+            able = [w for w, s in wsk if any(g <= s for g in combo)]
+            if not able:
+                continue  # déjà signalé par SKILL_MISSING
+            need = math.ceil(work / C - EPS)
+            if len(able) < need:
+                key = frozenset(w.id for w in able)
+                deficit = need - len(able)
+                if key not in worst or deficit > worst[key][0]:
+                    worst[key] = (deficit, combo, work, able, need)
+    out = []
+    for deficit, combo, work, able, need in sorted(worst.values(), key=lambda t: -t[0])[:5]:
+        op_ids = sorted(o.id for g in combo for o in groups[g])
+        skills = sorted({s for g in combo for s in g})
+        out.append(Issue(
+            "SKILL_CAPACITY", "error",
+            f"{', '.join(op_ids)} ({work:.2f} min, compétences {', '.join(skills)}) ne peuvent être faites "
+            f"que par {len(able)} ouvrier(s) ({', '.join(w.name or w.id for w in able)}) ; il en faut ≥ {need} "
+            f"à la cadence {C:.2f}.",
+            f"Former {deficit} ouvrier(s) de plus sur {', '.join(skills)} ou allonger la cadence "
+            f"(au moins {work / len(able):.2f} min, davantage selon le découpage des opérations)."))
+    return out
+
+
 def line_kpis(problem: LineBalancingProblem, station_details: list[dict]) -> dict:
     """KPIs cohérents. `total_time` d'une station = temps par pièce et par poste
     (déjà divisé par le nombre de postes parallèles)."""
     C = problem.target_cycle_time
-    total_work = sum(o.duration for o in problem.operations)
+    placed = {o for sd in station_details for o in sd.get("operations", [])}
+    total_work = sum(o.duration for o in problem.operations if o.id in placed)
     operators = sum(int(sd.get("parallel", 1)) for sd in station_details)
     actual = max((sd["total_time"] for sd in station_details), default=0.0)
     eff_cycle = max(C, actual)
@@ -135,7 +178,9 @@ def validate_result(problem: LineBalancingProblem, station_details: list[dict]) 
                              f"Station {sd['station']} : {sd['total_time']:.2f} min > cycle {C:.2f} min."))
     if problem.workstations:
         for sd in station_details:
-            if not sd.get("workstation") and not sd.get("workstations"):
+            # Une station purement manuelle (aucune opération machine) n'exige pas de poste
+            needs_machine = any(problem_op(problem, o).machine_type for o in sd["operations"])
+            if needs_machine and not sd.get("workstation") and not sd.get("workstations"):
                 out.append(Issue("NO_WORKSTATION", "error",
                                  f"Station {sd['station']} : aucun poste physique compatible disponible."))
     if problem.workers:

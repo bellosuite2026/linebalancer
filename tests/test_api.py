@@ -126,23 +126,31 @@ def test_validation_rejects_bad_input(client):
 
 # --- Équilibrage ------------------------------------------------------------
 
-CPSAT_WS_BUG = pytest.mark.xfail(
-    strict=False,
-    reason="Bug moteur connu (CPSatSolver._assign_workstations) : une station sans type machine "
-           "prend une piqueuse_plate, une autre station peut rester sans poste (selon la solution CP-SAT, non déterministe). L'API le signale via violations.")
-
-
-@pytest.mark.parametrize("solver", ["rpw", pytest.param("cp_sat", marks=CPSAT_WS_BUG)])
+@pytest.mark.parametrize("solver", ["rpw", "cp_sat"])
 def test_balance_chemise(chemise, client, solver):
     r = client.post("/v1/balance", json={"problem": chemise["problem"], "solver": solver,
                                          "time_limit_seconds": 10})
     assert r.status_code == 200, r.text
     res = r.json()
     assert res["success"] is True
-    assert res["stations_used"] == 12
+    # postes multi-machines (v2.2) : au plus les 12 stations de l'ancien moteur
+    assert res["stations_used"] <= 12
     assert res["actual_cycle_time"] <= 4.5 + 1e-6
     assert res["violations"] == [] and res["compliant"] is True
     assert set(res["operation_assignments"]) == {o["id"] for o in chemise["problem"]["operations"]}
+    # chaque station machine a un poste par type de machine
+    for sd in res["station_details"]:
+        if sd["machine_types"]:
+            assert len(sd["workstations"]) == len(sd["machine_types"])
+
+
+@pytest.mark.parametrize("solver", ["rpw", "cp_sat"])
+def test_balance_chemise_one_machine_per_station(chemise, client, solver):
+    """Ancien comportement disponible : max_machines_per_station = 1, sections strictes."""
+    p = dict(chemise["problem"], max_machines_per_station=1, section_policy="strict")
+    res = client.post("/v1/balance", json={"problem": p, "solver": solver, "time_limit_seconds": 10}).json()
+    assert res["compliant"] is True
+    assert res["stations_used"] == 12
 
 
 def test_cp_sat_violation_is_surfaced(chemise, client):
@@ -177,8 +185,8 @@ def test_min_cycle_chemise(chemise, client):
     assert r.status_code == 200
     body = r.json()
     assert body["found"] is True
-    assert body["min_cycle_time"] == pytest.approx(4.41, abs=0.05)
-    assert body["result"]["stations_used"] == 12
+    assert body["min_cycle_time"] <= 4.41 + 0.05
+    assert body["result"]["stations_used"] <= 12
 
 
 # --- Export -----------------------------------------------------------------
@@ -199,7 +207,7 @@ def test_job_cp_sat(chemise, client):
     assert r.status_code == 202
     j = wait_job(client, r.json()["id"])
     assert j["status"] == "done", j["error"]
-    assert j["result"]["stations_used"] == 12
+    assert j["result"]["stations_used"] <= 12 and j["result"]["compliant"] is True
     e = client.get(f"/v1/jobs/{j['id']}/export.json")
     assert e.status_code == 200 and e.json()["result"]["success"] is True
 

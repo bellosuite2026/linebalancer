@@ -35,6 +35,8 @@ class WorkerIn(BaseModel):
     efficiency: float = Field(default=1.0, gt=0)
     assigned_station: Optional[str] = None
     available: bool = True
+    skill_levels: dict[str, float] = Field(default_factory=dict,
+                                           description="Matrice de polyvalence : rendement par compétence (ex. 0.85)")
 
 
 class ProblemIn(BaseModel):
@@ -47,6 +49,12 @@ class ProblemIn(BaseModel):
     forced_assignments: dict[str, int] = {}
     forbidden_assignments: dict[str, list[int]] = {}
     same_station_groups: list[list[str]] = []
+    max_machines_per_station: int = Field(default=3, ge=1, le=10,
+                                          description="Machines voisines qu'un ouvrier peut tenir (1 = une machine par poste)")
+    machine_change_time: float = Field(default=0.0, ge=0, description="Min/pièce ajoutées par machine supplémentaire (déplacement)")
+    section_policy: str = Field(default="prefer", pattern="^(prefer|strict)$")
+    split_mode: str = Field(default="share", pattern="^(share|parallel)$",
+                            description="Opération > cadence : share = parts + reliquat combinable ; parallel = postes égaux")
 
 
 class SolverName(str, Enum):

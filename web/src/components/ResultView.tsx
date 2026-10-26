@@ -40,11 +40,11 @@ export default function ResultView({ r }: { r: Result }) {
               {r.station_details.map((s) => (
                 <tr key={s.station} className={s.load_pct > 100.01 ? "row-over" : ""}>
                   <td><b>{s.station}</b>{(s.parallel ?? 1) > 1 && <span className="badge small">×{s.parallel}</span>}</td>
-                  <td>{s.operations.join(", ")}</td>
+                  <td>{s.operations.map((o) => s.shares?.[o] != null ? `${o} (part ${fmt.n(s.shares[o])} min)` : o).join(", ")}</td>
                   <td>{fmt.n(s.total_time)}</td>
                   <td><div className="meter"><div style={{ width: `${Math.min(100, s.load_pct)}%` }} className={s.load_pct > 100.01 ? "over" : ""} /></div>{fmt.n(s.load_pct, 0)} %</td>
-                  <td>{(s.workstations ?? (s.workstation ? [s.workstation] : [])).join(", ") || <span className="err-text">aucun</span>}</td>
-                  <td>{s.workers.join(", ") || "—"}</td>
+                  <td>{(s.workstations ?? (s.workstation ? [s.workstation] : [])).join(", ") || (s.machine_types && s.machine_types.length === 0 ? "manuel" : <span className="err-text">aucun</span>)}</td>
+                  <td>{s.workers.join(", ") || "—"}{s.worker_time != null && s.workers.length > 0 && Math.abs(s.worker_time - s.total_time) > 0.005 && <small className="muted"> · {fmt.n(s.worker_time)} min réels</small>}</td>
                 </tr>
               ))}
             </tbody>

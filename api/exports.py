@@ -133,7 +133,9 @@ def build_xlsx(run: dict, problem: Optional[dict], org_name: str = "") -> bytes:
             "Poste(s)", "Machine(s)", "Ouvrier(s)", "Section(s)"]
     header(ws, 1, cols)
     for i, s in enumerate(st, 2):
-        vals = [s.get("station"), ", ".join(s.get("operations", [])),
+        sh = s.get("shares") or {}
+        vals = [s.get("station"), ", ".join(f"{o} (part {sh[o]:.2f} min)" if o in sh else o
+                                             for o in s.get("operations", [])),
                 " ; ".join(ops.get(o, {}).get("name", "") for o in s.get("operations", [])),
                 s.get("total_time"), s.get("load_pct"), s.get("parallel", 1),
                 ", ".join(s.get("workstations") or ([s["workstation"]] if s.get("workstation") else [])),
@@ -284,7 +286,10 @@ def build_pdf(run: dict, problem: Optional[dict], org_name: str = "") -> bytes:
         story.append(Paragraph("Répartition des opérations", h2))
         data = [["Station", "Opérations", "Temps (min)", "Charge", "Poste(s)", "Ouvrier(s)"]]
         for s in st:
-            names = "<br/>".join(f"<b>{o}</b> {ops.get(o, {}).get('name', '')}" for o in s.get("operations", []))
+            sh = s.get("shares") or {}
+            names = "<br/>".join(f"<b>{o}</b> {ops.get(o, {}).get('name', '')}"
+                                 + (f" <i>(part {_fmt(sh[o])} min)</i>" if o in sh else "")
+                                 for o in s.get("operations", []))
             par = f" ×{s['parallel']}" if (s.get("parallel") or 1) > 1 else ""
             data.append([f"{s.get('station')}{par}", Paragraph(names, small), _fmt(s.get("total_time")),
                          f"{_fmt(s.get('load_pct'), 0)} %",

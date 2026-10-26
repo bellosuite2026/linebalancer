@@ -369,6 +369,7 @@ def test_rpw_handles_single_station_limit(sample_operations, sample_workstations
         name="p", target_cycle_time=100.0,
         operations=sample_operations, workstations=sample_workstations, workers=sample_workers,
         algorithm=SolverAlgorithm.RPW, objective=OptimizationObjective.MIN_STATIONS,
+        max_machines_per_station=1,  # ancien comportement : une machine par station
     )
     result = solve_rpw(problem)
     # Les opérations de types machine différents sont réparties dans des stations distinctes

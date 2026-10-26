@@ -20,6 +20,7 @@ except ImportError:
 from collections import Counter
 
 from engine.diagnostics import precheck, parallel_replicas, line_kpis, validate_result
+from engine.resources import expand_problem, collapse_details, assign_workstations, assign_workers
 from engine.models import (
     LineBalancingProblem, Operation, Workstation, Worker,
     BalancingResult, SolverAlgorithm, OptimizationObjective
@@ -37,7 +38,9 @@ class CPSatSolver:
     def __post_init__(self):
         if not ORTOOLS_AVAILABLE:
             raise RuntimeError("OR-Tools non installé: pip install ortools")
-        
+        self.original = self.problem
+        self.problem, self.origin = expand_problem(self.problem)
+
         self.operations = {op.id: op for op in self.problem.operations}
         self.workstations = {ws.id: ws for ws in self.problem.workstations}
         self.workers = {w.id: w for w in self.problem.workers}
@@ -94,7 +97,7 @@ class CPSatSolver:
         scale = 100
         station_cycle = {}
         for s in self.station_indices:
-            station_cycle[s] = model.NewIntVar(0, int(self.target_cycle * scale * 2), f"cycle_s{s}")
+            station_cycle[s] = model.NewIntVar(0, int(self.target_cycle * scale * 2) + 1, f"cycle_s{s}")
         
         # ============ CONTRAINTES DE BASE ============
         
@@ -110,30 +113,30 @@ class CPSatSolver:
                     for s in self.station_indices:
                         model.Add(x[op_id, s] <= sum(x[pred_id, sp] for sp in range(1, s + 1)))
         
+        # 3a. Stations utilisées contiguës (1..k)
+        for s in self.station_indices[1:]:
+            model.Add(y[s] <= y[s - 1])
+
         # 3. Station utilisée si au moins une opération
         for s in self.station_indices:
             model.Add(sum(x[op_id, s] for op_id in self.op_ids) >= 1).OnlyEnforceIf(y[s])
             model.Add(sum(x[op_id, s] for op_id in self.op_ids) == 0).OnlyEnforceIf(y[s].Not())
         
-        # 4. Temps de cycle par station <= target (durée par poste si dédoublée)
-        dur = {o: int(round(self.eff_dur[o] * scale)) for o in self.op_ids}
-        for s in self.station_indices:
-            model.Add(sum(dur[o] * x[o, s] for o in self.op_ids) <= int(round(self.target_cycle * scale)))
-            model.Add(station_cycle[s] == sum(dur[o] * x[o, s] for o in self.op_ids))
-            # Une opération dédoublée est seule sur sa station
-            for o in self.op_ids:
-                if self.replicas[o] > 1:
-                    model.Add(sum(x[q, s] for q in self.op_ids if q != o) == 0).OnlyEnforceIf(x[o, s])
-
-        # 4b. Un seul type machine par station + capacité en postes physiques par type
+        # 4b. Types de machine par station (z) : une station peut tenir jusqu'à
+        #     `max_machines_per_station` machines (poste multi-machines) ; chaque
+        #     type utilisé consomme un poste physique de ce type.
+        maxm = max(1, int(self.problem.max_machines_per_station or 1))
+        mct = int(round(max(0.0, float(self.problem.machine_change_time or 0.0)) * scale))
         z = {}
         for s in self.station_indices:
             for m in self.machine_types:
                 z[m, s] = model.NewBoolVar(f"z_{m}_s{s}")
-                for o in self.op_ids:
-                    if self.operations[o].machine_type == m:
-                        model.AddImplication(x[o, s], z[m, s])
-            model.Add(sum(z[m, s] for m in self.machine_types) <= 1)
+                ops_m = [o for o in self.op_ids if self.operations[o].machine_type == m]
+                for o in ops_m:
+                    model.AddImplication(x[o, s], z[m, s])
+                model.Add(z[m, s] <= sum(x[o, s] for o in ops_m))
+            if self.machine_types:
+                model.Add(sum(z[m, s] for m in self.machine_types) <= maxm)
         if self.ws_ids:
             for m in self.machine_types:
                 extra = [(self.replicas[o] - 1, o) for o in self.op_ids
@@ -143,7 +146,35 @@ class CPSatSolver:
                     + sum(k * x[o, s] for k, o in extra for s in self.station_indices)
                     <= self.ws_count.get(m, 0)
                 )
-        
+
+        # 4. Temps de cycle par station <= cadence (durée par poste si dédoublée,
+        #    + déplacement entre machines)
+        dur = {o: int(round(self.eff_dur[o] * scale)) for o in self.op_ids}
+        cap = int(round(self.target_cycle * scale))
+        for s in self.station_indices:
+            load = sum(dur[o] * x[o, s] for o in self.op_ids)
+            if mct and self.machine_types:
+                load = load + mct * (sum(z[m, s] for m in self.machine_types) - y[s])
+            model.Add(load <= cap)
+            model.Add(station_cycle[s] == load)
+            # Une opération dédoublée (mode parallel) est seule sur sa station
+            for o in self.op_ids:
+                if self.replicas[o] > 1:
+                    model.Add(sum(x[q, s] for q in self.op_ids if q != o) == 0).OnlyEnforceIf(x[o, s])
+
+        # 4c. Sections strictes (optionnel)
+        if (self.problem.section_policy or "prefer").lower() == "strict":
+            sections = sorted({self.operations[o].section for o in self.op_ids if self.operations[o].section})
+            if len(sections) > 1:
+                for s in self.station_indices:
+                    zs = {}
+                    for sec in sections:
+                        zs[sec] = model.NewBoolVar(f"sec_{sec}_s{s}")
+                        for o in self.op_ids:
+                            if self.operations[o].section == sec:
+                                model.AddImplication(x[o, s], zs[sec])
+                    model.Add(sum(zs.values()) <= 1)
+
         # 5. Disponibilité machines: globale - vérifier que chaque type requis existe
         if self.ws_ids:
             required_machines = set(op.machine_type for op in self.problem.operations if op.machine_type)
@@ -154,40 +185,35 @@ class CPSatSolver:
                         if self.operations[op_id].machine_type == m:
                             for s in self.station_indices:
                                 model.Add(x[op_id, s] == 0)
-        
-        # 6. Affectation ouvriers: chaque station utilisée a au moins 1 ouvrier
+
+        # 6. Ouvriers : 1 ouvrier par station (x postes parallèles), chacun maîtrisant
+        #    TOUTES les compétences des opérations de la station ; un ouvrier = 1 station.
         if self.worker_ids:
             for s in self.station_indices:
-                model.Add(sum(w_assign[w_id, s] for w_id in self.worker_ids) >= y[s])
-                max_w = 2
-                if self.ws_ids:
-                    max_w = max((ws.max_workers for ws in self.problem.workstations if ws.available), default=2)
-                max_w = max(max_w, max(self.replicas.values(), default=1))
-                model.Add(sum(w_assign[w_id, s] for w_id in self.worker_ids) <= max_w)
+                n_s = sum(w_assign[w_id, s] for w_id in self.worker_ids)
+                model.Add(n_s >= y[s])
+                model.Add(n_s <= y[s] + sum((self.replicas[o] - 1) * x[o, s]
+                                            for o in self.op_ids if self.replicas[o] > 1))
                 for o in self.op_ids:
                     if self.replicas[o] > 1:
-                        model.Add(sum(w_assign[w_id, s] for w_id in self.worker_ids) >= self.replicas[o]).OnlyEnforceIf(x[o, s])
-            
-            # Un ouvrier max 1 station
+                        model.Add(n_s >= self.replicas[o]).OnlyEnforceIf(x[o, s])
             for w_id in self.worker_ids:
                 model.Add(sum(w_assign[w_id, s] for s in self.station_indices) <= 1)
-            
-            # 7. Compétences: si station s a ops nécessitant skill S, au moins un ouvrier à s a skill S
-            for s in self.station_indices:
-                for skill in self.all_skills:
-                    ops_needing = [op_id for op_id in self.op_ids if skill in self.operations[op_id].required_skills]
-                    if ops_needing:
-                        need_skill = model.NewBoolVar(f"need_{skill}_s{s}")
-                        model.Add(sum(x[op_id, s] for op_id in ops_needing) >= 1).OnlyEnforceIf(need_skill)
-                        model.Add(sum(x[op_id, s] for op_id in ops_needing) == 0).OnlyEnforceIf(need_skill.Not())
-                        
-                        workers_with_skill = [w_id for w_id in self.worker_ids if skill in self.workers[w_id].skills]
-                        if workers_with_skill:
-                            model.Add(need_skill <= sum(w_assign[w_id, s] for w_id in workers_with_skill))
-                        else:
-                            for op_id in ops_needing:
-                                model.Add(x[op_id, s] == 0)
-        
+
+            # 7. Compétences strictes par ouvrier
+            for o in self.op_ids:
+                need = set(self.operations[o].required_skills)
+                if not need:
+                    continue
+                unq = [w_id for w_id in self.worker_ids if not need <= set(self.workers[w_id].skills)]
+                if len(unq) == len(self.worker_ids):
+                    for s in self.station_indices:
+                        model.Add(x[o, s] == 0)
+                    continue
+                for w_id in unq:
+                    for s in self.station_indices:
+                        model.AddBoolOr([w_assign[w_id, s].Not(), x[o, s].Not()])
+
         # 8. Assignments forcés
         for op_id, station in self.problem.forced_assignments.items():
             if op_id in self.op_ids and 1 <= station <= self.max_stations:
@@ -214,7 +240,12 @@ class CPSatSolver:
         posts = sum(y[s] for s in self.station_indices) + sum(
             (self.replicas[o] - 1) * x[o, s] for o in self.op_ids for s in self.station_indices if self.replicas[o] > 1)
         if self.problem.objective == OptimizationObjective.MIN_STATIONS:
-            model.Minimize(posts)
+            # À nombre de postes égal, préférer moins de machines par station
+            n_z = len(self.machine_types) * len(self.station_indices)
+            if n_z:
+                model.Minimize(posts * (n_z + 1) + sum(z.values()))
+            else:
+                model.Minimize(posts)
         
         elif self.problem.objective == OptimizationObjective.MIN_CYCLE_TIME:
             model.Minimize(sum(y[s] for s in self.station_indices))
@@ -265,7 +296,7 @@ class CPSatSolver:
         
         if status not in (cp_model.OPTIMAL, cp_model.FEASIBLE):
             return BalancingResult(
-                problem=self.problem,
+                problem=self.original,
                 success=False,
                 solver_used="CP-SAT",
                 solve_time_seconds=solve_time,
@@ -274,61 +305,52 @@ class CPSatSolver:
             )
         
         # ============ EXTRACTION ============
-        
-        operation_assignments = {}
+
+        raw_assign = {}
         for op_id in self.op_ids:
             for s in self.station_indices:
                 if solver.Value(x[op_id, s]) == 1:
-                    operation_assignments[op_id] = s
+                    raw_assign[op_id] = s
                     break
-        
-        stations_used = sum(1 for s in self.station_indices if solver.Value(y[s]) == 1)
-        
+
+        used = [s for s in self.station_indices if solver.Value(y[s]) == 1]
+        renum = {s: i + 1 for i, s in enumerate(used)}
         station_details = []
-        total_time = 0.0
-        max_station_time = 0.0
-        
-        for s in range(1, stations_used + 1):
-            ops_in_station = [op_id for op_id in self.op_ids if operation_assignments.get(op_id) == s]
-            st_time = sum(self.eff_dur[op_id] for op_id in ops_in_station)
+        for s in used:
+            ops_in_station = [op_id for op_id in self.op_ids if raw_assign.get(op_id) == s]
+            st_time = solver.Value(station_cycle[s]) / scale
             par = max((self.replicas[o] for o in ops_in_station), default=1)
-            total_time += st_time
-            max_station_time = max(max_station_time, st_time)
-            load_pct = (st_time / self.target_cycle * 100) if self.target_cycle > 0 else 0
-            
-            workers_assigned = []
-            if self.worker_ids:
-                for w_id in self.worker_ids:
-                    if solver.Value(w_assign[w_id, s]) == 1:
-                        workers_assigned.append(self.workers[w_id].name)
-            
             station_details.append({
-                "station": s,
+                "station": renum[s],
                 "total_time": round(st_time, 3),
-                "load_pct": round(load_pct, 1),
+                "load_pct": round(st_time / self.target_cycle * 100, 1) if self.target_cycle > 0 else 0,
                 "operations": ops_in_station,
-                "workers": workers_assigned,
+                "workers": [],
                 "workstation": "",
                 "parallel": par,
             })
-        
-        k = line_kpis(self.problem, station_details)
-        self._assign_workstations(station_details)
-        worker_assignments = {}
-        if self.worker_ids:
-            for w_id in self.worker_ids:
-                for s in self.station_indices:
-                    if solver.Value(w_assign[w_id, s]) == 1:
-                        worker_assignments[w_id] = f"WS{s}"
-                        break
-        
+
+        durations = {o.id: o.duration for o in self.problem.operations}
+        operation_assignments, split_msgs = collapse_details(station_details, self.origin, durations)
+        prob = self.original
+        ops = {o.id: o for o in prob.operations}
+        warnings = [str(i) for i in precheck(prob) if i.severity == "warning"]
+        assign_workstations(prob, station_details, ops, warnings)
+        wa = assign_workers(prob, station_details, ops, warnings)
+        worker_assignments = {wid: f"WS{st}" for wid, st in wa.items()}
+        k = line_kpis(prob, station_details)
+        violations = validate_result(prob, station_details)
+        warnings += split_msgs
+        if status != cp_model.OPTIMAL:
+            warnings.append("Solution feasible mais non prouvée optimale (timeout)")
+
         return BalancingResult(
-            problem=self.problem,
-            success=True,
+            problem=prob,
+            success=not violations,
             solver_used="CP-SAT",
             solve_time_seconds=solve_time,
-            status=status_str,
-            stations_used=stations_used,
+            status=status_str if not violations else "INFEASIBLE_CONSTRAINTS",
+            stations_used=len(station_details),
             actual_cycle_time=k["actual_cycle_time"],
             efficiency=k["efficiency"],
             balance_delay=k["balance_delay"],
@@ -336,27 +358,12 @@ class CPSatSolver:
             station_details=station_details,
             operation_assignments=operation_assignments,
             worker_assignments=worker_assignments,
-            warnings=[str(i) for i in precheck(self.problem) if i.severity == "warning"]
-            + ([] if status == cp_model.OPTIMAL else ["Solution feasible mais non prouvée optimale (timeout)"]),
+            warnings=warnings,
+            error_message=("Solution non conforme : " + " | ".join(str(v) for v in violations)) if violations else "",
         )
 
-    def _assign_workstations(self, station_details: list[dict]) -> None:
-        """Affecte les postes physiques (le modèle garantit la capacité par type)."""
-        used: set[str] = set()
-        for sd in station_details:
-            mts = {self.operations[o].machine_type for o in sd["operations"] if self.operations[o].machine_type}
-            par = int(sd.get("parallel", 1))
-            pool = [ws for ws in self.problem.workstations if ws.available and ws.id not in used
-                    and (not mts or ws.machine_type in mts)]
-            picked = [ws.id for ws in pool[:par]]
-            sd["machine_types"] = sorted(mts)
-            if len(picked) == par:
-                used.update(picked)
-                sd["workstation"] = picked[0]
-                sd["workstations"] = picked
-
     def _explain_failure(self, status_str: str) -> str:
-        issues = [i for i in precheck(self.problem) if i.severity == "error"]
+        issues = [i for i in precheck(self.original) if i.severity == "error"]
         if status_str == "UNKNOWN":
             head = f"Aucune solution trouvée dans la limite de {self.time_limit_seconds}s"
         else:

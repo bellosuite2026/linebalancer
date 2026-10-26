@@ -25,6 +25,7 @@ python scripts/balance.py --sam data/samples/... --cycle-time 1.5 --solver rpw
 ## Architecture
 
 - `engine/` : logique métier pure (modèles, solveurs, parsers, adaptateurs). **Aucune dépendance GUI.**
+  - `engine/resources.py` (v2.2) : postes multi-machines, fractionnement des opérations > cadence (parts + reliquat), affectation des postes et des ouvriers (compétences + rendement, méthode hongroise). Partagé par RPW et CP-SAT. Options du problème : `max_machines_per_station` (3), `machine_change_time` (0), `section_policy` (prefer|strict), `split_mode` (share|parallel) ; `Worker.skill_levels` = matrice de polyvalence. Voir `docs/saas/RECHERCHE_ALGO.md`.
 - `gui/` : présentation PySide6, découpée par responsabilité :
   - `main.py` — point d'entrée (< 30 lignes)
   - `main_window.py` — MainWindow : composition des vues, coordination (~660 lignes)
@@ -38,7 +39,7 @@ python scripts/balance.py --sam data/samples/... --cycle-time 1.5 --solver rpw
   - `layout_toolbar.py` — outils Implantation 2D
   - `svg_icons.py` — loader d'icônes SVG (machines + UI)
 - `api/` : API FastAPI du SaaS (adaptateur fin, **aucune logique métier** ; dépend de `engine/`, jamais de `gui/`). Lancer : `uvicorn api.main:app --reload`. Doc : `api/README.md`.
-- `tests/` : 72 tests moteur + 20 GUI + `tests/test_api.py` (API) + `tests/test_api_saas.py` (comptes, hors-ligne).
+- `tests/` : 72 tests moteur + 20 GUI + `tests/test_engine_multi.py` (moteur v2.2 : multi-machines, partage, ouvriers) + `tests/test_api.py` (API) + `tests/test_api_saas.py` (comptes, hors-ligne).
 - `supabase/migrations/` : schéma Postgres (ateliers, membres, offres, lignes, gammes, calculs) + RLS. Toute évolution de schéma = nouveau fichier horodaté, jamais de modification d'une migration appliquée.
 - `scripts/e2e_supabase.py` : test de bout en bout contre un vrai projet Supabase ; `scripts/e2e_admin.py` : super admin (/v1/admin/*).
 - `api/routes_admin.py` + `web/src/pages/Admin.tsx` : espace super admin (rôle dans `private.platform_admins`).

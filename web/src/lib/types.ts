@@ -22,6 +22,7 @@ export interface Precheck { feasible: boolean; issues: Issue[]; validation_error
 export interface StationDetail {
   station: number; total_time: number; load_pct: number; operations: string[]; workers: string[];
   workstation?: string; workstations?: string[]; parallel?: number; machine_types?: string[]; sections?: string[];
+  shares?: Record<string, number>; worker_time?: number; worker_efficiency?: number;
 }
 export interface Result {
   success: boolean; compliant: boolean; status: string; solver: string; solve_time_seconds: number;

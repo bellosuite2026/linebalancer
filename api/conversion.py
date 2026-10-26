@@ -36,6 +36,10 @@ def to_engine_problem(p: ProblemIn) -> LineBalancingProblem:
         forced_assignments=dict(p.forced_assignments),
         forbidden_assignments={k: list(v) for k, v in p.forbidden_assignments.items()},
         same_station_groups=[list(g) for g in p.same_station_groups],
+        max_machines_per_station=p.max_machines_per_station,
+        machine_change_time=p.machine_change_time,
+        section_policy=p.section_policy,
+        split_mode=p.split_mode,
     )
 
 
@@ -52,7 +56,8 @@ def workstations_out(wss: list[Workstation]) -> list[WorkstationIn]:
 
 def workers_out(ws: list[Worker]) -> list[WorkerIn]:
     return [WorkerIn(id=w.id, name=w.name, skills=w.skills, efficiency=w.efficiency,
-                     assigned_station=w.assigned_station, available=w.available) for w in ws]
+                     assigned_station=w.assigned_station, available=w.available,
+                     skill_levels=dict(w.skill_levels or {})) for w in ws]
 
 
 # --- Import de fichiers -----------------------------------------------------

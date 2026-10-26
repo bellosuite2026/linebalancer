@@ -75,10 +75,16 @@ class Worker:
     efficiency: float = 1.0            # Coefficient performance (0.8 - 1.2)
     assigned_station: Optional[str] = None
     available: bool = True
-    
+    # Matrice de polyvalence : rendement par compétence (ex. {"piquer": 1.1, "surjeter": 0.8}).
+    # Une compétence absente de `skills` reste interdite ; une compétence de `skills`
+    # sans niveau prend `efficiency`.
+    skill_levels: dict[str, float] = field(default_factory=dict)
+
     def __post_init__(self):
         if isinstance(self.skills, str):
             self.skills = [s.strip() for s in self.skills.split(";") if s.strip()]
+        if not isinstance(self.skill_levels, dict):
+            self.skill_levels = {}
 
 
 @dataclass
@@ -98,6 +104,12 @@ class LineBalancingProblem:
     forced_assignments: dict[str, int] = field(default_factory=dict)  # op_id -> station
     forbidden_assignments: dict[str, list[int]] = field(default_factory=dict)  # op_id -> [stations]
     same_station_groups: list[list[str]] = field(default_factory=list)  # ops qui doivent être ensemble
+
+    # Organisation des postes (v2.2)
+    max_machines_per_station: int = 3   # machines qu'un ouvrier peut tenir (1 = ancien comportement)
+    machine_change_time: float = 0.0    # min/pièce ajoutées par machine supplémentaire (déplacement)
+    section_policy: str = "prefer"      # "prefer" : regrouper par section si possible ; "strict" : jamais mélanger
+    split_mode: str = "share"           # op > cadence : "share" (parts + reliquat combinable) | "parallel" (n postes égaux)
     
     def get_operation(self, op_id: str) -> Optional[Operation]:
         for op in self.operations:
@@ -192,6 +204,10 @@ class LineBalancingProblem:
             forced_assignments=data.get("forced_assignments", {}),
             forbidden_assignments=data.get("forbidden_assignments", {}),
             same_station_groups=data.get("same_station_groups", []),
+            max_machines_per_station=data.get("max_machines_per_station", 3),
+            machine_change_time=data.get("machine_change_time", 0.0),
+            section_policy=data.get("section_policy", "prefer"),
+            split_mode=data.get("split_mode", "share"),
         )
 
 

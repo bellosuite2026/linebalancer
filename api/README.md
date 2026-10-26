@@ -70,8 +70,21 @@ Variables : `TLB_SUPABASE_URL`, `TLB_SUPABASE_ANON_KEY`, optionnelles
 ## Limites connues
 
 - File en mémoire : les calculs sont perdus au redémarrage (prod : Redis + arq ou Postgres).
-- CP-SAT peut, selon la solution trouvée, laisser une station sans poste physique
-  (`CPSatSolver._assign_workstations`, affectation gloutonne). L'API le signale (`compliant=false`).
+- (corrigé en moteur v2.2) CP-SAT ne laisse plus de station machine sans poste physique.
+
+## Options d'équilibrage (moteur v2.2, champs facultatifs de `problem`)
+
+| Champ | Défaut | Rôle |
+|---|---|---|
+| `max_machines_per_station` | 3 | Machines voisines qu'un ouvrier peut tenir (1 = ancien comportement) |
+| `machine_change_time` | 0 | Minutes/pièce ajoutées par machine supplémentaire dans une station |
+| `section_policy` | `prefer` | `strict` : jamais deux sections dans une station |
+| `split_mode` | `share` | Opération > cadence : parts pleines + reliquat combinable ; `parallel` : postes égaux |
+| `workers[].skill_levels` | `{}` | Rendement par compétence (matrice de polyvalence) |
+
+Chaque station du résultat porte aussi `machine_types`, `workstations` (un poste par type),
+`shares` (minutes d'une opération partagée tenues par la station), `worker_time` (temps réel au
+rendement de l'ouvrier) et `worker_efficiency`. Nouveau code de diagnostic : `SKILL_CAPACITY`.
 
 ## Super admin (propriétaire du SaaS) — `/v1/admin/*`
 
