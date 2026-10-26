@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { useSession } from "../lib/session";
 import { fmt } from "../lib/api";
@@ -7,9 +7,13 @@ import { fmt } from "../lib/api";
 export default function Layout({ children }: { children: ReactNode }) {
   const { orgs, currentOrg, setCurrentOrgId, session, isSuperAdmin } = useSession();
   const nav = useNavigate();
+  const location = useLocation();
   const sub = currentOrg?.subscription;
   const trialDays = !isSuperAdmin && sub?.status === "trialing" && sub.trial_ends_at
     ? Math.max(0, Math.ceil((new Date(sub.trial_ends_at).getTime() - Date.now()) / 86400000)) : null;
+
+  // Page tablette : plein écran, sans barre de navigation.
+  if (/^\/production\/[^/]+\/saisie/.test(location.pathname)) return <main key={currentOrg?.id}>{children}</main>;
 
   return (
     <div className="shell">
@@ -20,6 +24,7 @@ export default function Layout({ children }: { children: ReactNode }) {
           <NavLink to="/gamme">Gamme</NavLink>
           <NavLink to="/calcul">Nouveau calcul</NavLink>
           <NavLink to="/calculs">Historique</NavLink>
+          <NavLink to="/production">Production</NavLink>
           <NavLink to="/atelier">Atelier</NavLink>
           {isSuperAdmin && <NavLink to="/admin" className={({ isActive }) => `nav-admin${isActive ? " active" : ""}`}>Super admin</NavLink>}
         </nav>

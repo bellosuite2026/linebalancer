@@ -1,8 +1,10 @@
 """Schémas Pydantic de l'API (miroir des dataclasses de engine.models)."""
 from __future__ import annotations
 
+from datetime import date, datetime
 from enum import Enum
-from typing import Any, Optional
+from typing import Any, Literal, Optional
+from uuid import UUID
 
 from pydantic import BaseModel, Field
 
@@ -172,3 +174,60 @@ class RunCreate(BaseModel):
     save_problem: bool = True
     time_limit_seconds: int = Field(default=10, ge=1)
     precision: float = Field(default=0.05, gt=0, le=1, description="min_cycle uniquement")
+
+
+# ---------------------------------------------------------------- Suivi de production (tablette)
+DowntimeReason = Literal["panne", "manque_fourniture", "absence", "changement_modele", "autre"]
+
+
+class SessionCreate(BaseModel):
+    """Ouvre une session de production à partir d'un calcul d'équilibrage terminé."""
+    run_id: str
+    line_id: Optional[str] = None
+    model: str = Field(default="", max_length=120)
+    session_date: Optional[date] = None
+    shift_start: str = Field(default="08:00", pattern=r"^([01]\d|2[0-3]):[0-5]\d$")
+    shift_hours: float = Field(default=8, gt=0, le=24)
+    target_per_hour: Optional[float] = Field(default=None, gt=0, le=100000,
+                                             description="Par défaut : 60 / cycle réel du calcul")
+    timezone: str = Field(default="Africa/Tunis", max_length=64)
+
+
+class SessionUpdate(BaseModel):
+    status: Optional[Literal["open", "closed"]] = None
+    target_per_hour: Optional[float] = Field(default=None, gt=0, le=100000)
+    shift_start: Optional[str] = Field(default=None, pattern=r"^([01]\d|2[0-3]):[0-5]\d$")
+    shift_hours: Optional[float] = Field(default=None, gt=0, le=24)
+    model: Optional[str] = Field(default=None, max_length=120)
+
+
+class EntryIn(BaseModel):
+    client_id: Optional[UUID] = Field(default=None, description="Identifiant généré par la tablette (idempotence)")
+    station: int = Field(ge=1)
+    slot_hour: Optional[int] = Field(default=None, ge=0, le=23, description="Heure locale ; déduite de entered_at sinon")
+    worker_id: Optional[str] = Field(default=None, max_length=64)
+    pieces: int = Field(default=0, ge=0, le=10000)
+    defects: int = Field(default=0, ge=0, le=10000)
+    rework: int = Field(default=0, ge=0, le=10000)
+    downtime_reason: Optional[DowntimeReason] = None
+    downtime_start: Optional[datetime] = None
+    downtime_minutes: Optional[float] = Field(default=None, ge=0, le=1440)
+    comment: str = Field(default="", max_length=500)
+    voided: bool = False
+    entered_at: Optional[datetime] = None
+
+
+class EntriesBatch(BaseModel):
+    entries: list[EntryIn] = Field(min_length=1, max_length=500)
+
+
+class EntryPatch(BaseModel):
+    pieces: Optional[int] = Field(default=None, ge=0, le=10000)
+    defects: Optional[int] = Field(default=None, ge=0, le=10000)
+    rework: Optional[int] = Field(default=None, ge=0, le=10000)
+    downtime_reason: Optional[DowntimeReason] = None
+    downtime_minutes: Optional[float] = Field(default=None, ge=0, le=1440)
+    comment: Optional[str] = Field(default=None, max_length=500)
+    voided: Optional[bool] = None
+    station: Optional[int] = Field(default=None, ge=1)
+    slot_hour: Optional[int] = Field(default=None, ge=0, le=23)

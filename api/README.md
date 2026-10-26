@@ -107,3 +107,17 @@ refait le contrôle. Aucune clé secrète : appels avec le jeton de l'utilisateu
 Le super admin n'a ni essai ni quota sur ses propres ateliers (seul le garde-fou CPU
 `TLB_MAX_OPERATIONS` s'applique) ; il n'accède pas aux données métier des autres ateliers.
 Test réel : `scripts/e2e_admin.py`.
+
+## Suivi de production (tablette) — `/v1/orgs/{org}/production/sessions`
+Module `api/routes_production.py` (routes) + `api/production.py` (plan figé, indicateurs, exports). Tables `production_sessions` / `production_entries` (migration `20261027000005_production_tracking.sql`), RLS par atelier : membres en lecture, owner/admin/methodes/chef_ligne en écriture, aucun accès particulier du super admin.
+
+| Méthode | Route | Rôle |
+|---|---|---|
+| GET/POST | `/production/sessions` | lister / ouvrir une session depuis un calcul terminé (`run_id`, `model`, `line_id`, `session_date`, `shift_start` « HH:MM », `shift_hours`, `target_per_hour` = 60 / cycle réel par défaut) |
+| GET/PATCH | `/production/sessions/{id}` | détail + plan figé / `status` open\|closed, objectif, horaires |
+| GET/POST | `/production/sessions/{id}/entries` | saisies ; POST = envoi groupé idempotent (`client_id` généré par la tablette : renvoyer le même met à jour la saisie — fin d'arrêt, annulation `voided`) |
+| PATCH | `/production/sessions/{id}/entries/{eid}` | corriger une saisie |
+| GET | `/production/sessions/{id}/dashboard` | réalisé vs objectif par heure et par station, efficience, goulot observé/calculé, encours, arrêts par motif, alertes (< 80 %, arrêt > 15 min) |
+| GET | `/production/sessions/{id}/export.xlsx` \| `.pdf` | rapport de la journée |
+
+Motifs d'arrêt : `panne`, `manque_fourniture`, `absence`, `changement_modele`, `autre`. Une session fermée refuse toute saisie (déclencheur SQL). E2E : `scripts/e2e_production.py`.

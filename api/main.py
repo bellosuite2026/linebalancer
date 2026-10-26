@@ -220,6 +220,8 @@ def create_app(settings: Optional[Settings] = None, *, auth=None, store=None) ->
         routes_saas.register(app, settings, queue, auth, store)
         from api import routes_admin
         routes_admin.register(app, auth, store)
+        from api import routes_production
+        routes_production.register(app, auth, store)
 
     return app
 

@@ -24,6 +24,10 @@ _RUN_SUMMARY = ("id,org_id,problem_id,kind,solver,status,success,compliant,stati
                 "started_at,finished_at,params")
 
 
+_SESSION_SUMMARY = ("id,org_id,line_id,run_id,problem_id,line_name,model,session_date,timezone,shift_start,"
+                    "shift_hours,target_per_hour,cycle_time,takt_time,status,opened_by,closed_at,created_at")
+
+
 class SupabaseStore:
     def __init__(self, supabase_url: str, anon_key: str, *, service_key: str = "",
                  client: Optional[httpx.Client] = None, timeout: float = 15.0) -> None:
@@ -154,6 +158,46 @@ class SupabaseStore:
     def get_run(self, token: str, org_id: str, run_id: str) -> dict:
         return self._req("GET", "/runs", token, single=True, params={
             "select": _RUN_SUMMARY + ",result", "id": f"eq.{run_id}", "org_id": f"eq.{org_id}"})
+
+
+    # ------------------------------------------------------------ suivi de production
+    def list_sessions(self, token: str, org_id: str, limit: int = 50) -> list[dict]:
+        return self._req("GET", "/production_sessions", token, params={
+            "select": _SESSION_SUMMARY, "org_id": f"eq.{org_id}",
+            "order": "session_date.desc,created_at.desc", "limit": str(limit)})
+
+    def create_session(self, token: str, org_id: str, user_id: str, data: dict) -> dict:
+        rows = self._req("POST", "/production_sessions", token, prefer="return=representation",
+                         json={**data, "org_id": org_id, "opened_by": user_id})
+        return rows[0]
+
+    def get_session(self, token: str, org_id: str, session_id: str) -> dict:
+        return self._req("GET", "/production_sessions", token, single=True, params={
+            "select": "*", "id": f"eq.{session_id}", "org_id": f"eq.{org_id}"})
+
+    def update_session(self, token: str, org_id: str, session_id: str, fields: dict) -> dict:
+        rows = self._req("PATCH", "/production_sessions", token, prefer="return=representation",
+                         params={"id": f"eq.{session_id}", "org_id": f"eq.{org_id}"}, json=fields)
+        if not rows:
+            raise StoreError(404, "Session introuvable ou modification non autorisée.")
+        return rows[0]
+
+    def list_entries(self, token: str, org_id: str, session_id: str) -> list[dict]:
+        return self._req("GET", "/production_entries", token, params={
+            "select": "*", "org_id": f"eq.{org_id}", "session_id": f"eq.{session_id}",
+            "order": "entered_at.asc", "limit": "20000"})
+
+    def upsert_entries(self, token: str, session_id: str, entries: list[dict]) -> list[dict]:
+        return self._req("POST", "/rpc/production_upsert_entries", token,
+                         json={"p_session": session_id, "p_entries": entries}) or []
+
+    def update_entry(self, token: str, org_id: str, session_id: str, entry_id: str, fields: dict) -> dict:
+        rows = self._req("PATCH", "/production_entries", token, prefer="return=representation",
+                         params={"id": f"eq.{entry_id}", "org_id": f"eq.{org_id}",
+                                 "session_id": f"eq.{session_id}"}, json=fields)
+        if not rows:
+            raise StoreError(404, "Saisie introuvable.")
+        return rows[0]
 
 
 def _to_error(r: httpx.Response, single: bool) -> StoreError:
