@@ -163,7 +163,7 @@ function Gains({ ov, plans, onPay }: { ov: Overview; plans: Plan[]; onPay: () =>
 
 // ---------------------------------------------------------------- Confirmation
 function Confirm({ title, children, expected, label, action, onCancel, onConfirm }: {
-  title: string; children: ReactNode; expected: string; label: string; action: string;
+  title: string; children: ReactNode; expected?: string; label?: string; action: string;
   onCancel: () => void; onConfirm: (typed: string) => Promise<void>;
 }) {
   const [typed, setTyped] = useState("");
@@ -173,12 +173,12 @@ function Confirm({ title, children, expected, label, action, onCancel, onConfirm
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <h3>{title}</h3>
         <div className="small">{children}</div>
-        <label style={{ marginTop: ".8rem" }}>{label}
+        {expected && <label style={{ marginTop: ".8rem" }}>{label}
           <input autoFocus value={typed} onChange={(e) => setTyped(e.target.value)} placeholder={expected} />
-        </label>
-        <div className="row" style={{ justifyContent: "flex-end" }}>
+        </label>}
+        <div className="row" style={{ justifyContent: "flex-end", marginTop: ".8rem" }}>
           <button className="btn ghost" onClick={onCancel}>Annuler</button>
-          <button className="btn danger" disabled={busy || typed.trim().toLowerCase() !== expected.toLowerCase()}
+          <button className="btn danger" disabled={busy || (!!expected && typed.trim().toLowerCase() !== expected.toLowerCase())}
             onClick={async () => { setBusy(true); try { await onConfirm(typed.trim()); } finally { setBusy(false); } }}>{action}</button>
         </div>
       </div>
@@ -191,11 +191,11 @@ function Users({ users, onDone, onErr }: { users: AdminUser[]; onDone: (m: strin
   const [q, setQ] = useState("");
   const [del, setDel] = useState<AdminUser | null>(null);
   const [busy, setBusy] = useState("");
+  const [sus, setSus] = useState<AdminUser | null>(null);
   const list = useMemo(() => users.filter((u) => !q || u.email.toLowerCase().includes(q.toLowerCase())
     || u.orgs.some((o) => o.name.toLowerCase().includes(q.toLowerCase()))), [users, q]);
 
   const suspend = async (u: AdminUser, s: boolean) => {
-    if (s && !window.confirm(`Suspendre ${u.email} ? Il sera déconnecté et ne pourra plus accéder à l'application.`)) return;
     setBusy(u.id); onErr("");
     try { await post(`/v1/admin/users/${u.id}/suspend`, { suspended: s }); await onDone(`${u.email} ${s ? "suspendu" : "réactivé"}.`); }
     catch (e) { onErr((e as Error).message); } finally { setBusy(""); }
@@ -223,13 +223,19 @@ function Users({ users, onDone, onErr }: { users: AdminUser[]; onDone: (m: strin
                 <div key={o.id}>{o.name} <span className="muted small">({ROLE_LABEL[o.role] ?? o.role})</span> {statusBadge(o.plan_code, o.status)}</div>))}</td>
               <td>{!u.is_super_admin && (
                 <div className="row">
-                  <button className="btn small" disabled={busy === u.id} onClick={() => suspend(u, !u.suspended)}>{u.suspended ? "Réactiver" : "Suspendre"}</button>
+                  <button className="btn small" disabled={busy === u.id} onClick={() => (u.suspended ? suspend(u, false) : setSus(u))}>{u.suspended ? "Réactiver" : "Suspendre"}</button>
                   <button className="btn small ghost" style={{ color: "var(--err)" }} onClick={() => setDel(u)}>Supprimer</button>
                 </div>)}</td>
             </tr>))}</tbody>
         </table>
       </div>
       {list.length === 0 && <p className="muted empty">Aucun utilisateur ne correspond.</p>}
+      {sus && (
+        <Confirm title={`Suspendre ${sus.email} ?`} action="Suspendre" onCancel={() => setSus(null)}
+          onConfirm={async () => { const u = sus; setSus(null); await suspend(u, true); }}>
+          <p>Il est déconnecté tout de suite et ne peut plus se connecter ni accéder aux données de ses ateliers. Rien n'est supprimé : vous pourrez le réactiver à tout moment.</p>
+        </Confirm>
+      )}
       {del && (
         <Confirm title={`Supprimer ${del.email} ?`} expected={del.email} label="Pour confirmer, saisissez son e-mail" action="Supprimer définitivement"
           onCancel={() => setDel(null)}
@@ -359,8 +365,8 @@ function Payments({ payments, orgs, plans, initialOrg, onDone, onErr }: {
       setF((x) => ({ ...x, reference: "", note: "" }));
     } catch (er) { onErr((er as Error).message); } finally { setBusy(false); }
   };
+  const [delPay, setDelPay] = useState<Payment | null>(null);
   const remove = async (p: Payment) => {
-    if (!window.confirm(`Supprimer le paiement de ${tnd(p.amount_tnd)} (${p.org_name}, ${fmt.day(p.paid_at)}) ? L'offre de l'atelier n'est pas modifiée.`)) return;
     onErr("");
     try { await api(`/v1/admin/payments/${p.id}`, { method: "DELETE" }); await onDone("Paiement supprimé."); }
     catch (er) { onErr((er as Error).message); }
@@ -401,10 +407,16 @@ function Payments({ payments, orgs, plans, initialOrg, onDone, onErr }: {
                 <td>{plans.find((x) => x.code === p.plan_code)?.name ?? p.plan_code}</td><td><b>{tnd(p.amount_tnd)}</b></td>
                 <td>{p.period_start ? `${fmt.day(p.period_start)} → ${fmt.day(p.period_end)}` : "—"}</td>
                 <td>{METHODS[p.method] ?? p.method}</td><td className="wrap">{p.reference}{p.note && <span className="cell-sub">{p.note}</span>}</td>
-                <td><button className="btn small ghost" onClick={() => remove(p)}>Supprimer</button></td></tr>))}</tbody>
+                <td><button className="btn small ghost" onClick={() => setDelPay(p)}>Supprimer</button></td></tr>))}</tbody>
           </table></div>
         )}
       </section>
+      {delPay && (
+        <Confirm title="Supprimer ce paiement ?" action="Supprimer le paiement" onCancel={() => setDelPay(null)}
+          onConfirm={async () => { const p = delPay; setDelPay(null); await remove(p); }}>
+          <p>{tnd(delPay.amount_tnd)} reçus le {fmt.day(delPay.paid_at)} de « {delPay.org_name} ». Le montant sort des gains ; l'offre de l'atelier n'est pas modifiée.</p>
+        </Confirm>
+      )}
     </>
   );
 }
