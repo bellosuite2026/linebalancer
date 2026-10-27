@@ -136,6 +136,10 @@ class SupabaseStore:
         return rows[0]
 
     def update_run(self, token: str, run_id: str, fields: dict) -> None:
+        self._service_patch("/runs", token, run_id, fields)
+
+    def _service_patch(self, path: str, token: str, row_id: str, fields: dict) -> None:
+        """Mise à jour en fin de tâche de fond (clé service si fournie : le jeton peut expirer)."""
         headers = self._headers(token, "return=minimal")
         if self.service_key:
             headers["apikey"] = self.service_key
@@ -143,7 +147,7 @@ class SupabaseStore:
                 headers.pop("Authorization")
             else:                                           # ancienne clé service_role (JWT)
                 headers["Authorization"] = f"Bearer {self.service_key}"
-        r = self._http.patch("/runs", params={"id": f"eq.{run_id}"}, json=fields, headers=headers)
+        r = self._http.patch(path, params={"id": f"eq.{row_id}"}, json=fields, headers=headers)
         if r.status_code >= 400:
             raise _to_error(r, False)
 
@@ -198,6 +202,40 @@ class SupabaseStore:
         if not rows:
             raise StoreError(404, "Saisie introuvable.")
         return rows[0]
+
+    # ------------------------------------------------------------ jumeau numérique
+    def get_layout(self, token: str, org_id: str, run_id: str) -> Optional[dict]:
+        rows = self._req("GET", "/line_layouts", token, params={
+            "select": "*", "org_id": f"eq.{org_id}", "run_id": f"eq.{run_id}"})
+        return rows[0] if rows else None
+
+    def save_layout(self, token: str, org_id: str, run_id: str, kind: str, positions: dict) -> dict:
+        rows = self._req("PATCH", "/line_layouts", token, prefer="return=representation",
+                         params={"org_id": f"eq.{org_id}", "run_id": f"eq.{run_id}"},
+                         json={"kind": kind, "positions": positions})
+        if rows:
+            return rows[0]
+        rows = self._req("POST", "/line_layouts", token, prefer="return=representation",
+                         json={"org_id": org_id, "run_id": run_id, "kind": kind, "positions": positions})
+        return rows[0]
+
+    def create_simulation(self, token: str, org_id: str, user_id: str, data: dict) -> dict:
+        rows = self._req("POST", "/twin_simulations", token, prefer="return=representation",
+                         json={**data, "org_id": org_id, "created_by": user_id, "status": "queued"})
+        return rows[0]
+
+    def update_simulation(self, token: str, sim_id: str, fields: dict) -> None:
+        self._service_patch("/twin_simulations", token, sim_id, fields)
+
+    def get_simulation(self, token: str, org_id: str, sim_id: str) -> dict:
+        return self._req("GET", "/twin_simulations", token, single=True, params={
+            "select": "*", "id": f"eq.{sim_id}", "org_id": f"eq.{org_id}"})
+
+    def list_simulations(self, token: str, org_id: str, run_id: str, limit: int = 20) -> list[dict]:
+        return self._req("GET", "/twin_simulations", token, params={
+            "select": "id,org_id,run_id,name,status,scenarios,error,created_at,finished_at",
+            "org_id": f"eq.{org_id}", "run_id": f"eq.{run_id}", "order": "created_at.desc",
+            "limit": str(limit)})
 
 
 def _to_error(r: httpx.Response, single: bool) -> StoreError:

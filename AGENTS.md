@@ -43,6 +43,7 @@ python scripts/balance.py --sam data/samples/... --cycle-time 1.5 --solver rpw
 - `supabase/migrations/` : schéma Postgres (ateliers, membres, offres, lignes, gammes, calculs) + RLS. Toute évolution de schéma = nouveau fichier horodaté, jamais de modification d'une migration appliquée.
 - `scripts/e2e_supabase.py` : test de bout en bout contre un vrai projet Supabase ; `scripts/e2e_admin.py` : super admin (/v1/admin/*).
 - `api/routes_production.py` + `api/production.py` + `web/src/pages/Production*.tsx` : suivi de production en direct (sessions depuis un calcul, saisie tablette /production/:id/saisie avec file hors ligne, tableau de bord). `scripts/e2e_production.py`.
+- `api/routes_twin.py` + `api/twin.py` + `web/src/pages/Twin.tsx` (/jumeau/:runId) : jumeau numérique (plan 2D animé, implantation ligne/U/libre, scénarios « et si », réel vs simulé). Simulation = `engine/simulation.py` (`simulate_line_day`, `apply_scenario`, `lean_check`, ajout v2.3 sans toucher aux solveurs). Tables `line_layouts`, `twin_simulations`. `scripts/e2e_twin.py`.
 - `api/routes_admin.py` + `web/src/pages/Admin.tsx` : espace super admin (rôle dans `private.platform_admins`).
 - `gui/assets/` : icônes machines (15 SVG), icônes UI (10 SVG), ATTRIBUTION.txt.
 

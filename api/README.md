@@ -121,3 +121,20 @@ Module `api/routes_production.py` (routes) + `api/production.py` (plan figé, in
 | GET | `/production/sessions/{id}/export.xlsx` \| `.pdf` | rapport de la journée |
 
 Motifs d'arrêt : `panne`, `manque_fourniture`, `absence`, `changement_modele`, `autre`. Une session fermée refuse toute saisie (déclencheur SQL). E2E : `scripts/e2e_production.py`.
+
+## Jumeau numérique (v0.4.0)
+
+| Méthode | Route | Rôle |
+|---|---|---|
+| GET | `/v1/orgs/{org}/runs/{id}/twin` | plan de ligne (stations, opérations + compétences, ouvrières), implantation, sessions, simulations |
+| PUT | `/v1/orgs/{org}/runs/{id}/layout` | `{kind: line\|u\|free, positions: {"<station>": {x, y}}}` (mètres) |
+| POST | `/v1/orgs/{org}/runs/{id}/simulate` | 1–3 scénarios, tâche de fond → 202 + ligne `twin_simulations` |
+| GET | `/v1/orgs/{org}/runs/{id}/simulations` | historique |
+| GET | `/v1/orgs/{org}/simulations/{sid}` (+ `/export.xlsx`, `/export.pdf`) | statut, résultats, comparaison |
+| GET | `/v1/orgs/{org}/runs/{id}/twin/sync?session_id=&order_qty=&order_done=` | réel vs simulé, prévision fin de journée / commande |
+
+Scénario : `name`, `run_id` (autre modèle), `absent` [ids ouvrières], `reassign` (compétences), `operators` {station: n},
+`breakdowns` [{station, start_min, duration_min}], `bundle_size` (1–100), `efficiency_pct`, `variability_pct`,
+`shift_minutes` (≤ 600 : offre Render gratuite), `seed`.
+Modèle : ligne série dans l'ordre des stations, paquets d'encours, ouvrières = ressources SimPy (une ouvrière
+partagée sert deux postes), plafond d'encours CONWIP = Σ(opératrices + 1) paquets, transport = 0,1 min + distance / 50 m/min.

@@ -15,6 +15,7 @@ import Admin from "./pages/Admin";
 import Production from "./pages/Production";
 import ProductionEntry from "./pages/ProductionEntry";
 import ProductionDashboard from "./pages/ProductionDashboard";
+import Twin from "./pages/Twin";
 
 export default function App() {
   const { session, loading, recovery, orgs, orgsLoaded, orgsError, refreshOrgs, isSuperAdmin } = useSession();
@@ -47,6 +48,7 @@ export default function App() {
         <Route path="/production" element={<Production />} />
         <Route path="/production/:id" element={<ProductionDashboard />} />
         <Route path="/production/:id/saisie" element={<ProductionEntry />} />
+        <Route path="/jumeau/:runId" element={<Twin />} />
         <Route path="/atelier" element={<Account />} />
         <Route path="/admin" element={isSuperAdmin ? <Admin /> : <Navigate to="/" replace />} />
         <Route path="/nouvel-atelier" element={<Onboarding inLayout />} />

@@ -246,3 +246,39 @@ tr.row-over td { background: #fdf6f5; }
 .tbtn.choice.cancel { background: transparent; color: #fff; text-align: center; min-height: 44px; }
 .toast { position: fixed; bottom: 1.2rem; left: 50%; transform: translateX(-50%); background: var(--ink); color: #fff; padding: .7rem 1.3rem; border-radius: 99px; font-weight: 700; font-size: 1.05rem; z-index: 60; box-shadow: 0 8px 24px rgba(0,0,0,.25); }
 @media (orientation: landscape) and (max-height: 820px) { .tablet-grid { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); } .tbtn.plus { min-height: 70px; } }
+
+/* Jumeau numérique */
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: #fff; }
+.seg button { font: inherit; font-size: .85rem; border: 0; background: none; padding: .45rem .7rem; cursor: pointer; color: var(--ink); border-right: 1px solid var(--line); }
+.seg button:last-child { border-right: 0; } .seg button.on { background: var(--brand); color: #fff; font-weight: 700; } .seg button:disabled { color: var(--muted); cursor: default; }
+.seg button.on:disabled { color: #fff; }
+.twin-controls { display: flex; gap: .7rem; align-items: center; flex-wrap: wrap; margin-bottom: .6rem; }
+.twin-controls input[type=range] { flex: 1 1 220px; }
+.twin-clock { font-size: 1.35rem; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--brand); min-width: 4.2rem; }
+.twin-canvas { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: #fbfbf9; touch-action: none; }
+.twin-canvas svg { display: block; width: 100%; height: auto; user-select: none; }
+.twin-grid { stroke: #efede7; stroke-width: 1; }
+.twin-st { font-size: 15px; font-weight: 900; fill: #13202f; } .twin-small { font-size: 10px; fill: #13202f; font-weight: 600; }
+.twin-badge { font-size: 10px; font-weight: 800; fill: #fff; } .twin-bn { font-size: 10px; font-weight: 800; fill: #7a1f12; text-transform: uppercase; letter-spacing: .04em; }
+.twin-w { font-size: 8.5px; font-weight: 800; fill: #1f4e79; } .twin-w.on { fill: #fff; }
+.chipbtn { font: inherit; font-size: .8rem; border: 1px solid var(--line); background: #fff; border-radius: 99px; padding: .2rem .6rem; cursor: pointer; }
+.chipbtn.on { background: var(--brand); border-color: var(--brand); color: #fff; } .chipbtn.on.danger { background: var(--err); border-color: var(--err); }
+.chipbtn:disabled { opacity: .5; cursor: default; }
+.chips-wrap { display: flex; flex-wrap: wrap; gap: .3rem; margin-bottom: .4rem; }
+.scen-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: .8rem; }
+.scen { border: 1px solid var(--line); border-top: 4px solid var(--brand); border-radius: 10px; padding: .8rem; display: flex; flex-direction: column; gap: .35rem; }
+.scen > .row input { flex: 1; font-weight: 700; }
+.scen label { font-size: .82rem; font-weight: 600; color: var(--muted); margin: .2rem 0 0; }
+.row.tight { gap: .3rem; font-size: .85rem; } .row.tight input { width: 70px; } .row.tight select { width: auto; }
+.form-grid.tight3 { grid-template-columns: repeat(4, 1fr); gap: 0 .5rem; } .form-grid.tight3 input { width: 100%; }
+.cmp td, .cmp th { text-align: right; } .cmp td:first-child, .cmp th:first-child { text-align: left; }
+.cmp tr.strong td { font-weight: 800; font-size: 1rem; }
+.delta { font-weight: 700; } .delta.up { color: var(--ok); } .delta.down { color: var(--err); }
+.scen-detail { margin-top: .8rem; display: flex; flex-direction: column; gap: .6rem; }
+.spinner.inline { display: inline-block; width: 14px; height: 14px; border-width: 2px; margin: 0 .3rem -2px 0; }
+.hbars { display: flex; gap: .4rem; align-items: flex-end; height: 150px; border-bottom: 1px solid var(--line); padding-top: .4rem; }
+.hbar { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; min-width: 0; }
+.hbar-cols { flex: 1; width: 100%; display: flex; gap: 2px; align-items: flex-end; justify-content: center; }
+.hbar-cols div { width: 40%; max-width: 26px; border-radius: 3px 3px 0 0; } .hbar-cols .sim { background: #b9c9dc; } .hbar-cols .real { background: var(--brand); }
+.hbar span { font-size: .7rem; color: var(--muted); }
+@media (max-width: 700px) { .form-grid.tight3 { grid-template-columns: repeat(2, 1fr); } }

@@ -60,6 +60,7 @@ export default function ProductionDashboard() {
         </div>
         <div className="row">
           {open && canWrite(org) && <Link className="btn primary" to={`/production/${id}/saisie`}>Saisie tablette</Link>}
+          {session.run_id && <Link className="btn" to={`/jumeau/${session.run_id}`}>Jumeau numérique</Link>}
           <button className="btn" disabled={busy === "xlsx"} onClick={() => exportAs("xlsx")}>{busy === "xlsx" ? "Préparation…" : "Excel"}</button>
           <button className="btn" disabled={busy === "pdf"} onClick={() => exportAs("pdf")}>{busy === "pdf" ? "Préparation…" : "Rapport PDF"}</button>
           {canWrite(org) && (open

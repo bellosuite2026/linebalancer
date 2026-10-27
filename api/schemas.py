@@ -231,3 +231,42 @@ class EntryPatch(BaseModel):
     voided: Optional[bool] = None
     station: Optional[int] = Field(default=None, ge=1)
     slot_hour: Optional[int] = Field(default=None, ge=0, le=23)
+
+
+# ------------------------------------------------------------------ jumeau numérique
+class Point(BaseModel):
+    x: float = Field(ge=-500, le=500, description="mètres")
+    y: float = Field(ge=-500, le=500, description="mètres")
+
+
+class LayoutIn(BaseModel):
+    """Implantation 2D : positions des stations (mètres), ligne droite, cellule en U ou libre."""
+    kind: Literal["line", "u", "free"] = "line"
+    positions: dict[str, Point] = Field(default_factory=dict, max_length=300)
+
+
+class Breakdown(BaseModel):
+    station: int = Field(ge=1)
+    start_min: float = Field(default=60, ge=0, le=1440, description="minutes après le début du poste")
+    duration_min: float = Field(default=30, gt=0, le=1440)
+
+
+class TwinScenario(BaseModel):
+    """Scénario « et si » d'une journée simulée."""
+    name: str = Field(default="Scénario", max_length=60)
+    run_id: Optional[str] = Field(default=None, description="Autre calcul (nouveau modèle / gamme)")
+    absent: list[str] = Field(default_factory=list, max_length=100, description="Identifiants d'ouvrières absentes")
+    reassign: bool = Field(default=True, description="Réaffecter selon les compétences si un poste se vide")
+    operators: dict[str, int] = Field(default_factory=dict, description="Effectif imposé par station")
+    breakdowns: list[Breakdown] = Field(default_factory=list, max_length=20)
+    bundle_size: int = Field(default=10, ge=1, le=100, description="Pièces par paquet")
+    efficiency_pct: float = Field(default=100, ge=10, le=200, description="Efficience de la ligne (%)")
+    variability_pct: float = Field(default=10, ge=0, le=60, description="Variabilité des temps (CV, %)")
+    shift_minutes: float = Field(default=480, ge=30, le=600, description="Durée simulée (max 10 h)")
+    seed: int = Field(default=42, ge=0, le=10**6)
+
+
+class SimulateRequest(BaseModel):
+    name: str = Field(default="", max_length=120)
+    scenarios: list[TwinScenario] = Field(min_length=1, max_length=3)
+    layout: Optional[LayoutIn] = Field(default=None, description="Par défaut : implantation enregistrée")

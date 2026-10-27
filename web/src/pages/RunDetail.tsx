@@ -92,6 +92,7 @@ export default function RunDetail() {
           {run.kind === "balance" && <button className="btn" onClick={() => relaunch("min_cycle", run.solver)}>Chercher la cadence minimale</button>}
           {run.solver === "rpw" && <button className="btn" onClick={() => relaunch(run.kind, "cp_sat")}>Optimiser avec CP-SAT</button>}
           {bal && bal.stations_used > 0 && <Link className="btn primary" to={`/production?calcul=${run.id}`}>Suivre en production</Link>}
+          {bal && bal.stations_used > 0 && <Link className="btn" to={`/jumeau/${run.id}`}>Jumeau numérique</Link>}
           <Link className="btn ghost" to="/calcul">Nouveau calcul</Link>
         </div>
       )}
