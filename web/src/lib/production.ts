@@ -61,14 +61,20 @@ export function uuid(): string {
   });
 }
 
+function part(tz: string, d: Date, type: "hour" | "minute"): number | null {
+  try {
+    const p = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", hourCycle: "h23", timeZone: tz })
+      .formatToParts(d).find((x) => x.type === type);
+    const n = p ? parseInt(p.value, 10) : NaN;
+    return Number.isFinite(n) ? n : null;
+  } catch { return null; }
+}
 /** Heure locale de l'atelier (fuseau de la session), 0–23. */
 export function localHour(tz: string, d = new Date()): number {
-  try {
-    return Number(new Intl.DateTimeFormat("fr-FR", { hour: "numeric", hourCycle: "h23", timeZone: tz }).format(d)) % 24;
-  } catch { return d.getHours(); }
+  return (part(tz, d, "hour") ?? d.getHours()) % 24;
 }
 export function localMinute(tz: string, d = new Date()): number {
-  try { return Number(new Intl.DateTimeFormat("fr-FR", { minute: "numeric", timeZone: tz }).format(d)); } catch { return d.getMinutes(); }
+  return part(tz, d, "minute") ?? d.getMinutes();
 }
 export function clock(tz: string, d = new Date()): string {
   try { return new Intl.DateTimeFormat("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: tz }).format(d); } catch { return d.toLocaleTimeString(); }

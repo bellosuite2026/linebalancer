@@ -126,7 +126,7 @@ export default function ProductionEntry() {
           <b>{session.model || "Session"}</b>{session.line_name && <span> · {session.line_name}</span>}
           <span className="muted"> · objectif {session.target_per_hour} pcs/h</span>
         </div>
-        <div className="tablet-clock">{clock(tz)} <small>créneau {hour} h</small></div>
+        <div className="tablet-clock">{clock(tz)}{" "}<small>créneau {hour} h</small></div>
         <div className={`sync ${online ? (nPending ? "wait" : "ok") : "off"}`}>
           <i />{online ? (nPending ? `Envoi de ${nPending} saisie${nPending > 1 ? "s" : ""}…` : "En ligne · tout est envoyé")
             : `Hors ligne · ${nPending} saisie${nPending > 1 ? "s" : ""} en attente`}
