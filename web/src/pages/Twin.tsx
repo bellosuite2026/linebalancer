@@ -17,7 +17,13 @@ const SCEN_COLORS = ["#1f4e79", "#c0392b", "#b7791f"];
 const loadColor = (u: number) => (u >= 92 ? "#e4572e" : u >= 75 ? "#f0b429" : u >= 40 ? "#3fa66b" : "#a9b4c2");
 const initials = (n: string) => n.split(/[\s.-]+/).filter(Boolean).slice(0, 2).map((p) => p[0]?.toUpperCase()).join("") || "?";
 
-export default function Twin() {
+/** Une page par calcul : changer de calcul (ex. après « équilibrage sur ce plan ») repart d'un état neuf. */
+export default function TwinPage() {
+  const { runId = "" } = useParams();
+  return <Twin key={runId} />;
+}
+
+function Twin() {
   const { runId = "" } = useParams();
   const { currentOrg } = useSession();
   const org = currentOrg!;

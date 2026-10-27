@@ -65,6 +65,15 @@ export const emptyPlan = (name = "Atelier actuel"): WorkshopPlan => ({
   ],
 });
 
+/** Change la taille de la salle ; les murs posés sur l'ancien contour (droite / bas) suivent. */
+export function resizeRoom(p: WorkshopPlan, width: number, length: number): WorkshopPlan {
+  const W0 = p.width_m, L0 = p.length_m, W = Math.max(2, width), L = Math.max(2, length);
+  const fx = (v: number) => (Math.abs(v - W0) < 1e-6 ? W : v), fy = (v: number) => (Math.abs(v - L0) < 1e-6 ? L : v);
+  const onEdge = (w: Wall) => [w.x1, w.x2].some((v) => Math.abs(v - W0) < 1e-6 || Math.abs(v) < 1e-6) && [w.y1, w.y2].some((v) => Math.abs(v - L0) < 1e-6 || Math.abs(v) < 1e-6);
+  return { ...p, width_m: W, length_m: L, elements: p.elements.map((e) => (e.kind === "wall" && onEdge(e)
+    ? { ...e, x1: fx(e.x1), x2: fx(e.x2), y1: fy(e.y1), y2: fy(e.y2) } : e)) };
+}
+
 export function newMachine(type: string, x: number, y: number, label: string): Machine {
   const c = MACHINE_CATALOG[type] ?? MACHINE_CATALOG.piqueuse_plate;
   return { id: uid(), kind: "machine", type, x: r2(x), y: r2(y), w: c.w, d: c.d, rot: 0, label, operator: "front", status: "service" };
@@ -191,7 +200,7 @@ export function exitDistances(plan: WorkshopPlan): Map<string, number> | null {
     if (e.kind === "wall") mark(wallPoly({ ...e, thickness: Math.max(e.thickness, c * 1.2) }), 1);
     else if (e.kind === "pillar" || e.kind === "machine") mark(elPoly(e), 1);
   }
-  const dist = new Float32Array(nx * ny).fill(Infinity);
+  const dist = new Float64Array(nx * ny).fill(Infinity);
   const heap: [number, number][] = [];
   const push = (d: number, k: number) => { heap.push([d, k]); let i = heap.length - 1; while (i > 0) { const p = (i - 1) >> 1; if (heap[p][0] <= heap[i][0]) break; [heap[p], heap[i]] = [heap[i], heap[p]]; i = p; } };
   const pop = () => { const top = heap[0]; const last = heap.pop()!; if (heap.length) { heap[0] = last; let i = 0; for (;;) { const l = 2 * i + 1, r = l + 1; let m = i; if (l < heap.length && heap[l][0] < heap[m][0]) m = l; if (r < heap.length && heap[r][0] < heap[m][0]) m = r; if (m === i) break; [heap[m], heap[i]] = [heap[i], heap[m]]; i = m; } } return top; };

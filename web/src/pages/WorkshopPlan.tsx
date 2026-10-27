@@ -5,7 +5,7 @@ import { canManage, canWrite, useSession } from "../lib/session";
 import type { Problem, ProblemRow } from "../lib/types";
 import {
   MACHINE_CATALOG, STATUS_LABEL, ZONES, backgroundUrl, checkPlan, dxfToWalls, elCenter, emptyPlan, fileToImage, hitTest,
-  inventory, machineType, moveEl, nearestWallAngle, newMachine, nextLabel, operatorPoint, pngToPdf, r2, saveBlob, settingsOf,
+  inventory, machineType, moveEl, resizeRoom, nearestWallAngle, newMachine, nextLabel, operatorPoint, pngToPdf, r2, saveBlob, settingsOf,
   svgToPng, uid, uploadBackground,
   type Aisle, type Door, type El, type Machine, type MachineStatus, type OperatorSide, type P, type PlanSettings, type PlanSummary,
   type Wall, type WorkshopPlan, type Zone,
@@ -337,7 +337,7 @@ export default function WorkshopPlanPage() {
       if (/\.dxf$/i.test(file.name)) {
         const unit = (window.prompt("Unité du DXF (mm, cm, m) — laisser vide pour la lire dans le fichier :", "") || "auto").trim().toLowerCase();
         const r = await dxfToWalls(await file.text(), (["mm", "cm", "m"].includes(unit) ? unit : "auto") as "auto");
-        commit((p) => ({ ...p, width_m: Math.max(p.width_m, r.width), length_m: Math.max(p.length_m, r.length),
+        commit((p) => ({ ...resizeRoom(p, Math.max(p.width_m, r.width), Math.max(p.length_m, r.length)),
           elements: [...p.elements.filter((e) => !(e.kind === "wall" && plan.elements.length <= 4)), ...r.walls] }));
         setMsg({ kind: "ok", text: `${r.walls.length} murs importés du DXF (unité : ${r.unit}). Vérifiez les cotes avec l'outil Calibrer si besoin.` });
         return;
@@ -362,7 +362,7 @@ export default function WorkshopPlanPage() {
   };
   const fitRoomToBackground = () => {
     const bg = plan.background; if (!bg) return;
-    commit((p) => ({ ...p, width_m: r2(Math.max(2, bg.x + bg.width_m)), length_m: r2(Math.max(2, bg.y + bg.height_m)) }));
+    commit((p) => resizeRoom(p, r2(Math.max(2, bg.x + bg.width_m)), r2(Math.max(2, bg.y + bg.height_m))));
   };
 
   // ---------------------------------------------------------------- enregistrement
@@ -445,8 +445,8 @@ export default function WorkshopPlanPage() {
           <label>Nom<input value={plan.name} maxLength={120} onChange={(e) => commit((p) => ({ ...p, name: e.target.value }))} disabled={!writable} /></label>
           <label>Version<select value={plan.version} onChange={(e) => commit((p) => ({ ...p, version: e.target.value as WorkshopPlan["version"] }))} disabled={!writable}>
             <option value="actuel">Actuel</option><option value="projet">Projet</option><option value="archive">Archivé</option></select></label>
-          <label>Largeur (m)<input type="number" min={2} max={400} step={0.5} value={plan.width_m} onChange={(e) => commit((p) => ({ ...p, width_m: Math.max(2, +e.target.value || 2) }))} disabled={!writable} /></label>
-          <label>Longueur (m)<input type="number" min={2} max={400} step={0.5} value={plan.length_m} onChange={(e) => commit((p) => ({ ...p, length_m: Math.max(2, +e.target.value || 2) }))} disabled={!writable} /></label>
+          <label>Largeur (m)<input type="number" min={2} max={400} step={0.5} value={plan.width_m} onChange={(e) => commit((p) => resizeRoom(p, +e.target.value || 2, p.length_m))} disabled={!writable} /></label>
+          <label>Longueur (m)<input type="number" min={2} max={400} step={0.5} value={plan.length_m} onChange={(e) => commit((p) => resizeRoom(p, p.width_m, +e.target.value || 2))} disabled={!writable} /></label>
         </div>
         <div className="row small">
           {writable && planId && <button className="btn small" disabled={!!busy} onClick={() => duplicatePlan("projet")}>Dupliquer en version projet</button>}
