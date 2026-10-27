@@ -28,6 +28,7 @@ export default function Twin() {
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState("");
   const [scenarios, setScenarios] = useState<Scenario[]>([]);
+  const [saved, setSaved] = useState(false);
   const autoLaunched = useRef(false);
 
   const base = `/v1/orgs/${org.id}`;
@@ -87,7 +88,7 @@ export default function Twin() {
     setBusy("layout");
     try {
       const r = await api<{ layout: Layout }>(`${base}/runs/${runId}/layout`, { method: "PUT", body: JSON.stringify(layout) });
-      setLayout(r.layout); setData((d) => d && { ...d, layout_saved: true });
+      setLayout(r.layout); setData((d) => d && { ...d, layout_saved: true }); setSaved(true);
     } catch (e) { setErr((e as Error).message); } finally { setBusy(""); }
   };
 
@@ -110,19 +111,19 @@ export default function Twin() {
         <div className="row">
           <div className="seg">
             {(["line", "u"] as LayoutKind[]).map((k) => (
-              <button key={k} className={layout.kind === k ? "on" : ""} onClick={() => { setLayout(defaultLayout(ids, k)); setDirty(true); }}>
+              <button key={k} className={layout.kind === k ? "on" : ""} onClick={() => { setLayout(defaultLayout(ids, k)); setDirty(true); setSaved(false); }}>
                 {k === "line" ? "En ligne" : "En U"}</button>
             ))}
             <button className={layout.kind === "free" ? "on" : ""} disabled title="Faites glisser un poste">Libre</button>
           </div>
-          {writable && <button className="btn" disabled={busy === "layout"} onClick={saveLayout}>{busy === "layout" ? "Enregistrement…" : "Enregistrer l'implantation"}</button>}
+          {writable && <button className="btn" disabled={busy === "layout"} onClick={saveLayout}>{busy === "layout" ? "Enregistrement…" : saved ? "Implantation enregistrée ✓" : "Enregistrer l'implantation"}</button>}
         </div>
       </div>
       {err && <p className="notice err">{err}</p>}
       {dirty && items.length > 0 && <p className="notice warn">Implantation modifiée : relancez la simulation pour recalculer les transports et les déplacements.</p>}
 
       <div className="card">
-        <LinePlan data={data} layout={layout} setLayout={(l) => { setLayout(l); setDirty(true); }} res={current?.result ?? null}
+        <LinePlan data={data} layout={layout} setLayout={(l) => { setLayout(l); setDirty(true); setSaved(false); }} res={current?.result ?? null}
           startHHMM={session?.shift_start?.slice(0, 5) || "08:00"} editable={writable} />
         {busy === "sim" && <p className="muted small"><span className="spinner inline" /> Simulation de la journée en cours…</p>}
         {items.length > 1 && (
