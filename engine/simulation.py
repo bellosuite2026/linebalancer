@@ -353,6 +353,17 @@ def _dist(a: tuple[float, float], b: tuple[float, float]) -> float:
     return math.hypot(a[0] - b[0], a[1] - b[1])
 
 
+def _distance_fn(layout: Optional[dict], pos: dict[int, tuple[float, float]]):
+    """Distance entre deux stations : parcours réel fourni par le plan d'atelier
+    (layout["distances"] = {"a-b": mètres}, v2.4) sinon ligne droite."""
+    over = (layout or {}).get("distances") or {}
+
+    def d(a: int, b: int) -> float:
+        v = over.get(f"{a}-{b}", over.get(f"{b}-{a}"))
+        return _dist(pos[a], pos[b]) if v is None else _num(v, _dist(pos[a], pos[b]))
+    return d
+
+
 def _station_skills(st: dict) -> set:
     req: set = set()
     for op in st.get("operations", []):
@@ -492,9 +503,10 @@ def lean_check(plan: dict, layout: Optional[dict] = None) -> dict:
     order = [int(s["station"]) for s in plan.get("stations", [])]
     pos = _positions(plan, layout)
     kind = (layout or {}).get("kind", "line")
+    dist = _distance_fn(layout, pos)
     transfers, warnings = [], []
     for a, b in zip(order, order[1:]):
-        d = _dist(pos[a], pos[b])
+        d = dist(a, b)
         transfers.append({"from": a, "to": b, "meters": round(d, 2)})
         if d > LONG_TRANSFER_M:
             warnings.append({"kind": "long_transfer", "stations": [a, b],
@@ -534,7 +546,7 @@ def lean_check(plan: dict, layout: Optional[dict] = None) -> dict:
     for w, sts in seen.items():
         if len(sts) < 2:
             continue
-        d = max(_dist(pos[a], pos[b]) for a in sts for b in sts)
+        d = max(dist(a, b) for a in sts for b in sts)
         if d > FAR_SECOND_STATION_M:
             far.append(w)
             warnings.append({"kind": "far_second_station", "worker": w, "stations": sts,
@@ -561,6 +573,7 @@ class LineDaySimulator:
         self.env = simpy.Environment()
         self.order = [int(s["station"]) for s in plan.get("stations", [])]
         self.pos = _positions(plan, layout)
+        self.dist = _distance_fn(layout, self.pos)
         self.sw = station_workers(plan)
         # station_workers complète les postes vides : on respecte un effectif nul explicite
         for st in plan.get("stations", []):
@@ -661,7 +674,7 @@ class LineDaySimulator:
         for idx in range(start_index, len(self.order)):
             sid = self.order[idx]
             if prev is not None:
-                d = _dist(self.pos[prev], self.pos[sid])
+                d = self.dist(prev, sid)
                 self.transport_m += d
                 self.in_transit += size
                 yield self.env.timeout(self.cfg.handling_min + d / max(1e-6, self.cfg.walk_speed_m_per_min))
@@ -697,7 +710,7 @@ class LineDaySimulator:
             st["waiting"] -= 1
             st["waits"].append(self.env.now - arrive)
             if self.wlast.get(w) not in (None, sid):
-                self.wwalk[w] += _dist(self.pos[self.wlast[w]], self.pos[sid])
+                self.wwalk[w] += self.dist(self.wlast[w], sid)
             self.wlast[w] = sid
             work = self._duration(sid, size, w)
             total = self._extend_for_downtime(sid, self.env.now, work)

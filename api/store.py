@@ -24,6 +24,8 @@ _RUN_SUMMARY = ("id,org_id,problem_id,kind,solver,status,success,compliant,stati
                 "started_at,finished_at,params")
 
 
+_PLAN_SUMMARY = ("id,org_id,name,version,width_m,length_m,machine_count,background,created_at,updated_at")
+
 _SESSION_SUMMARY = ("id,org_id,line_id,run_id,problem_id,line_name,model,session_date,timezone,shift_start,"
                     "shift_hours,target_per_hour,cycle_time,takt_time,status,opened_by,closed_at,created_at")
 
@@ -209,15 +211,42 @@ class SupabaseStore:
             "select": "*", "org_id": f"eq.{org_id}", "run_id": f"eq.{run_id}"})
         return rows[0] if rows else None
 
-    def save_layout(self, token: str, org_id: str, run_id: str, kind: str, positions: dict) -> dict:
+    def save_layout(self, token: str, org_id: str, run_id: str, kind: str, positions: dict,
+                    plan_id: Optional[str] = None, assignment: Optional[dict] = None) -> dict:
+        fields = {"kind": kind, "positions": positions, "plan_id": plan_id, "assignment": assignment or {}}
         rows = self._req("PATCH", "/line_layouts", token, prefer="return=representation",
-                         params={"org_id": f"eq.{org_id}", "run_id": f"eq.{run_id}"},
-                         json={"kind": kind, "positions": positions})
+                         params={"org_id": f"eq.{org_id}", "run_id": f"eq.{run_id}"}, json=fields)
         if rows:
             return rows[0]
         rows = self._req("POST", "/line_layouts", token, prefer="return=representation",
-                         json={"org_id": org_id, "run_id": run_id, "kind": kind, "positions": positions})
+                         json={"org_id": org_id, "run_id": run_id, **fields})
         return rows[0]
+
+    # ------------------------------------------------------------ plans d'atelier
+    def list_plans(self, token: str, org_id: str) -> list[dict]:
+        return self._req("GET", "/workshop_plans", token, params={
+            "select": _PLAN_SUMMARY, "org_id": f"eq.{org_id}", "order": "updated_at.desc", "limit": "100"})
+
+    def get_plan(self, token: str, org_id: str, plan_id: str) -> dict:
+        return self._req("GET", "/workshop_plans", token, single=True, params={
+            "select": "*", "id": f"eq.{plan_id}", "org_id": f"eq.{org_id}"})
+
+    def create_plan(self, token: str, org_id: str, data: dict) -> dict:
+        rows = self._req("POST", "/workshop_plans", token, prefer="return=representation",
+                         json={**data, "org_id": org_id})
+        return rows[0]
+
+    def update_plan(self, token: str, org_id: str, plan_id: str, fields: dict) -> dict:
+        rows = self._req("PATCH", "/workshop_plans", token, prefer="return=representation",
+                         params={"id": f"eq.{plan_id}", "org_id": f"eq.{org_id}"}, json=fields)
+        if not rows:
+            raise StoreError(404, "Plan d'atelier introuvable (ou droits insuffisants).")
+        return rows[0]
+
+    def delete_plan(self, token: str, org_id: str, plan_id: str) -> bool:
+        rows = self._req("DELETE", "/workshop_plans", token, prefer="return=representation",
+                         params={"id": f"eq.{plan_id}", "org_id": f"eq.{org_id}"})
+        return bool(rows)
 
     def create_simulation(self, token: str, org_id: str, user_id: str, data: dict) -> dict:
         rows = self._req("POST", "/twin_simulations", token, prefer="return=representation",

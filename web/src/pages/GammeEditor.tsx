@@ -53,7 +53,7 @@ export default function GammeEditor() {
     try { const s = localStorage.getItem(draftKey(org.id)); if (s) return JSON.parse(s) as Draft; } catch { /* brouillon illisible */ }
     return emptyDraft();
   });
-  const [tab, setTab] = useState<Tab>("ops");
+  const [tab, setTab] = useState<Tab>(() => (params.get("onglet") === "postes" ? "ws" : "ops"));
   const [lines, setLines] = useState<Line[]>([]);
   const [saved, setSaved] = useState<ProblemRow[]>([]);
   const [precheck, setPrecheck] = useState<Precheck | null>(null);
@@ -88,6 +88,8 @@ export default function GammeEditor() {
       try { const { problem, lineId } = JSON.parse(imported); setD(fromProblem(problem, lineId || "")); setMsg({ kind: "ok", text: "Gamme importée : vous pouvez la corriger avant le calcul." }); } catch { /* ignore */ }
     } else if (from) {
       loadSaved(from);
+      setParams({}, { replace: true });
+    } else if (params.get("onglet")) {
       setParams({}, { replace: true });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -285,6 +287,7 @@ export default function GammeEditor() {
           onChange={(rows) => update((x) => ({ ...x, ws: rows }))}
           make={(rows) => emptyWs(nextId(rows.map((r) => r.id), "WS", 2, 1))}
           hint="Facultatif : sans postes, le calcul répartit les opérations sans vérifier le parc machines. Un poste par machine physique." />}
+        {tab === "ws" && <p className="muted small">Votre parc est dessiné sur le <Link to="/atelier/plan">plan de l'atelier</Link> ? Le bouton « Mettre à jour les postes de la gamme » du plan remplit ce tableau (une machine = un poste).</p>}
         {tab === "wk" && coverage.rows.length > 0 && (
           <div className="skill-cover">
             <strong>Compétences requises par la gamme</strong>

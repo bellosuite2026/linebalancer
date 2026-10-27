@@ -1,9 +1,23 @@
 // Jumeau numérique : types de l'API, implantations par défaut et lecture de la trace d'animation.
 import type { ProdSession } from "./production";
+import type { PlanSummary } from "./workshop";
 
 export type LayoutKind = "line" | "u" | "free";
 export interface Pt { x: number; y: number }
-export interface Layout { kind: LayoutKind; positions: Record<string, Pt> }
+export interface Layout {
+  kind: LayoutKind; positions: Record<string, Pt>;
+  plan_id?: string | null; assignment?: Record<string, string[]>; distances?: Record<string, number>;
+}
+/** Stations d'un calcul placées sur les machines d'un plan d'atelier (réponse de l'API). */
+export interface Placement {
+  plan_id: string; plan_name: string; layout: Layout; assignment: Record<string, string[]>;
+  missing: { station: number; type: string }[]; unused: string[]; notes: string[]; virtual: number[];
+  routes: Record<string, number[][]>;
+  flow: { transfers: { from: number; to: number; meters: number; straight: number }[]; meters_per_bundle: number;
+          backtracks: { from: number; to: number; meters: number }[]; u_cell: boolean; entry_exit_m: number; extent_m: number;
+          warnings: LeanWarning[] };
+  travel: { neighbour_m: number | null; minutes: number };
+}
 
 export interface TwinStation {
   station: number; minutes: number; operators: number; worker_ids: string[]; workers: string[];
@@ -17,8 +31,9 @@ export interface TwinPlan {
 export interface OtherRun { id: string; created_at: string; stations_used: number; actual_cycle_time: number | null; solver: string }
 export interface SimSummary { id: string; name: string; status: "queued" | "running" | "done" | "failed"; created_at: string; error: string; scenarios: Scenario[] }
 export interface Twin {
-  run: { id: string; created_at: string; solver: string; actual_cycle_time: number | null; stations_used: number | null };
+  run: { id: string; created_at: string; solver: string; actual_cycle_time: number | null; stations_used: number | null; problem_id?: string | null };
   plan: TwinPlan; problem_name: string; layout: Layout; layout_saved: boolean;
+  placement: Placement | null; workshop_plans: PlanSummary[];
   sessions: ProdSession[]; simulations: SimSummary[]; other_runs: OtherRun[];
 }
 

@@ -130,9 +130,13 @@ class TwinStore(ProdStore):
     def get_layout(self, tok, org, rid):
         return self.layouts.get((org, rid))
 
-    def save_layout(self, tok, org, rid, kind, positions):
-        self.layouts[(org, rid)] = {"org_id": org, "run_id": rid, "kind": kind, "positions": positions}
+    def save_layout(self, tok, org, rid, kind, positions, plan_id=None, assignment=None):
+        self.layouts[(org, rid)] = {"org_id": org, "run_id": rid, "kind": kind, "positions": positions,
+                                    "plan_id": plan_id, "assignment": assignment or {}}
         return self.layouts[(org, rid)]
+
+    def list_plans(self, tok, org):
+        return []
 
     def create_simulation(self, tok, org, uid, data):
         sid = str(uuid.uuid4())

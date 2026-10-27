@@ -3,4 +3,4 @@
 Couche fine au-dessus de `engine/` : aucune logique d'équilibrage ici,
 uniquement conversion JSON <-> modèles moteur, files de calcul et sécurité.
 """
-__version__ = "0.4.0"
+__version__ = "0.5.0"

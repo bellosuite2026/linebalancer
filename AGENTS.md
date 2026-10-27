@@ -44,6 +44,7 @@ python scripts/balance.py --sam data/samples/... --cycle-time 1.5 --solver rpw
 - `scripts/e2e_supabase.py` : test de bout en bout contre un vrai projet Supabase ; `scripts/e2e_admin.py` : super admin (/v1/admin/*).
 - `api/routes_production.py` + `api/production.py` + `web/src/pages/Production*.tsx` : suivi de production en direct (sessions depuis un calcul, saisie tablette /production/:id/saisie avec file hors ligne, tableau de bord). `scripts/e2e_production.py`.
 - `api/routes_twin.py` + `api/twin.py` + `web/src/pages/Twin.tsx` (/jumeau/:runId) : jumeau numérique (plan 2D animé, implantation ligne/U/libre, scénarios « et si », réel vs simulé). Simulation = `engine/simulation.py` (`simulate_line_day`, `apply_scenario`, `lean_check`, ajout v2.3 sans toucher aux solveurs). Tables `line_layouts`, `twin_simulations`. `scripts/e2e_twin.py`.
+- `engine/workshop.py` + `api/routes_workshop.py` + `web/src/pages/WorkshopPlan.tsx` (/atelier/plan) + `web/src/pages/TwinHome.tsx` (/jumeau) + `web/src/lib/workshop.ts` : plan d'atelier (cartographie : fond importé calibré, murs, allées, zones, machines, contrôles), stations placées sur les machines réelles, distances par les allées (`layout.distances` lu par la simulation). Table `workshop_plans`, bucket privé `workshop-plans`. `tests/test_workshop.py`.
 - `api/routes_admin.py` + `web/src/pages/Admin.tsx` : espace super admin (rôle dans `private.platform_admins`).
 - `gui/assets/` : icônes machines (15 SVG), icônes UI (10 SVG), ATTRIBUTION.txt.
 

@@ -224,6 +224,8 @@ def create_app(settings: Optional[Settings] = None, *, auth=None, store=None) ->
         routes_production.register(app, auth, store)
         from api import routes_twin
         routes_twin.register(app, queue, auth, store)
+        from api import routes_workshop
+        routes_workshop.register(app, auth, store)
 
     return app
 

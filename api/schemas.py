@@ -6,7 +6,7 @@ from enum import Enum
 from typing import Any, Literal, Optional
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class OperationIn(BaseModel):
@@ -243,6 +243,9 @@ class LayoutIn(BaseModel):
     """Implantation 2D : positions des stations (mètres), ligne droite, cellule en U ou libre."""
     kind: Literal["line", "u", "free"] = "line"
     positions: dict[str, Point] = Field(default_factory=dict, max_length=300)
+    plan_id: Optional[str] = Field(default=None, description="Plan d'atelier : stations placées sur ses machines")
+    assignment: dict[str, list[str]] = Field(default_factory=dict, max_length=300,
+                                             description="Station -> identifiants des machines du plan")
 
 
 class Breakdown(BaseModel):
@@ -270,3 +273,58 @@ class SimulateRequest(BaseModel):
     name: str = Field(default="", max_length=120)
     scenarios: list[TwinScenario] = Field(min_length=1, max_length=3)
     layout: Optional[LayoutIn] = Field(default=None, description="Par défaut : implantation enregistrée")
+
+
+# ------------------------------------------------------------------ plan d'atelier (cartographie)
+PLAN_ELEMENT_KINDS = {"wall", "pillar", "door", "aisle", "zone", "machine", "text"}
+
+
+class WorkshopPlanIn(BaseModel):
+    """Plan d'atelier : salle (m), fond importé et calibré, éléments dessinés (coordonnées en mètres)."""
+    name: str = Field(default="Plan de l'atelier", min_length=1, max_length=120)
+    version: Literal["actuel", "projet", "archive"] = "actuel"
+    width_m: float = Field(default=30, ge=2, le=400)
+    length_m: float = Field(default=20, ge=2, le=400)
+    background: Optional[dict[str, Any]] = None
+    elements: list[dict[str, Any]] = Field(default_factory=list, max_length=4000)
+    settings: dict[str, Any] = Field(default_factory=dict)
+
+    @field_validator("elements")
+    @classmethod
+    def _elements(cls, v: list[dict]) -> list[dict]:
+        ids = set()
+        for e in v:
+            if e.get("kind") not in PLAN_ELEMENT_KINDS:
+                raise ValueError(f"Élément de plan inconnu : {e.get('kind')!r}")
+            eid = str(e.get("id") or "")
+            if not eid or len(eid) > 64 or eid in ids:
+                raise ValueError("Chaque élément du plan doit avoir un identifiant unique.")
+            ids.add(eid)
+        return v
+
+    @field_validator("background")
+    @classmethod
+    def _background(cls, v: Optional[dict]) -> Optional[dict]:
+        if v and v.get("path") and (".." in str(v["path"]) or len(str(v["path"])) > 300):
+            raise ValueError("Chemin de fond de plan invalide.")
+        return v
+
+
+class WorkshopPlanPatch(BaseModel):
+    name: Optional[str] = Field(default=None, min_length=1, max_length=120)
+    version: Optional[Literal["actuel", "projet", "archive"]] = None
+    width_m: Optional[float] = Field(default=None, ge=2, le=400)
+    length_m: Optional[float] = Field(default=None, ge=2, le=400)
+    background: Optional[dict[str, Any]] = None
+    elements: Optional[list[dict[str, Any]]] = Field(default=None, max_length=4000)
+    settings: Optional[dict[str, Any]] = None
+    clear_background: bool = False
+
+    _elements = field_validator("elements")(WorkshopPlanIn._elements.__func__)
+    _background = field_validator("background")(WorkshopPlanIn._background.__func__)
+
+
+class PlanPlacementIn(BaseModel):
+    """Placer les stations d'un calcul sur les machines d'un plan (association auto + manuelle)."""
+    plan_id: str
+    assignment: dict[str, list[str]] = Field(default_factory=dict, max_length=300)

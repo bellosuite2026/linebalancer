@@ -138,3 +138,23 @@ Scénario : `name`, `run_id` (autre modèle), `absent` [ids ouvrières], `reassi
 `shift_minutes` (≤ 600 : offre Render gratuite), `seed`.
 Modèle : ligne série dans l'ordre des stations, paquets d'encours, ouvrières = ressources SimPy (une ouvrière
 partagée sert deux postes), plafond d'encours CONWIP = Σ(opératrices + 1) paquets, transport = 0,1 min + distance / 50 m/min.
+
+## Plan d'atelier / cartographie (v0.5.0)
+
+| Méthode | Route | Rôle |
+|---|---|---|
+| GET/POST | `/v1/orgs/{org}/workshop-plans` | plans de l'atelier (résumé) / créer `{name, version: actuel\|projet\|archive, width_m, length_m, background, elements, settings}` |
+| GET/PUT/DELETE | `/v1/orgs/{org}/workshop-plans/{pid}` | plan complet / modifier (`clear_background`) / supprimer (owner, admin, méthodes) |
+| GET | `/v1/orgs/{org}/workshop-plans/{pid}/inventory` | postes (WS) déduits des machines (une machine = un poste, chariots exclus), temps de déplacement dérivé |
+| GET | `/v1/orgs/{org}/workshop-catalog` | bibliothèque de machines (encombrements par défaut) et zones |
+| POST | `/v1/orgs/{org}/runs/{id}/twin/plan` | `{plan_id, assignment?}` → stations placées sur les machines du plan, distances par les allées, analyse du flux |
+| PUT | `/v1/orgs/{org}/runs/{id}/layout` | accepte aussi `{plan_id, assignment: {"<station>": [machine ids]}}` |
+
+Éléments (mètres, y vers le bas, rotation horaire) : `wall {x1,y1,x2,y2,thickness}`, `pillar {x,y,w,d}`, `door {x,y,width,rot,exit}`,
+`aisle {x,y,w,h,main}`, `zone {x,y,w,h,zone,name}`, `machine {type,x,y,w,d,rot,label,operator,status: service|panne|reserve,ws_id}`.
+Fond : image dans Supabase Storage, bucket privé `workshop-plans`, chemin `<org_id>/…` (RLS par atelier) ; PDF → 1re page rendue en PNG par pdf.js dans le navigateur ; DXF → murs (LINE / LWPOLYLINE).
+Géométrie : `engine/workshop.py` (A* sur grille, murs / poteaux / machines = obstacles, portes = passages). Association auto :
+poste WS lié → même type (ordre des n° de machine, puis la plus proche) → famille voisine (signalée) → station « virtuelle ».
+La simulation reçoit `layout.distances` ({"a-b": m}) : transport des paquets et déplacements des ouvrières au parcours réel.
+« Simuler l'équilibrage sur ce plan » (front) : nouveau calcul avec `workstations` = inventaire, `machine_change_time` = aller-retour
+vers la machine voisine (médiane) / 50 m/min, puis simulation comparée au calcul d'origine.

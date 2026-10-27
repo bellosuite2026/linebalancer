@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { api, download, fmt, post } from "../lib/api";
 import { canWrite, useSession } from "../lib/session";
 import {
   buildTracks, bundleAt, clock, defaultLayout, newScenario,
-  type Layout, type LayoutKind, type Scenario, type SimResult, type Simulation, type Sync, type Twin as TwinData,
+  type Layout, type LayoutKind, type Placement, type Scenario, type SimResult, type Simulation, type Sync, type Twin as TwinData,
 } from "../lib/twin";
+import type { ProblemRow, Run } from "../lib/types";
+import { MACHINE_CATALOG, ZONES, machineType, operatorPoint, type Machine, type WorkshopPlan } from "../lib/workshop";
 
 const SPEEDS = [1, 5, 10, 30, 60];
 const PX = 70;                       // pixels par mètre
@@ -29,6 +31,10 @@ export default function Twin() {
   const [busy, setBusy] = useState("");
   const [scenarios, setScenarios] = useState<Scenario[]>([]);
   const [saved, setSaved] = useState(false);
+  const [placement, setPlacement] = useState<Placement | null>(null);
+  const [wplan, setWplan] = useState<WorkshopPlan | null>(null);
+  const [params, setParams] = useSearchParams();
+  const nav = useNavigate();
   const autoLaunched = useRef(false);
 
   const base = `/v1/orgs/${org.id}`;
@@ -43,10 +49,12 @@ export default function Twin() {
     return null;
   }, [base]);
 
-  const launch = useCallback(async (list: Scenario[], name = "") => {
+  const launch = useCallback(async (list: Scenario[], name = "", lay?: Layout) => {
     setBusy("sim"); setErr("");
     try {
-      const body = { name, scenarios: list.map((s) => ({ ...s, run_id: s.run_id || null })), layout: layout ?? undefined };
+      const L = lay ?? layout;
+      const body = { name, scenarios: list.map((s) => ({ ...s, run_id: s.run_id || null })),
+        layout: L ? { kind: L.kind, positions: L.positions, plan_id: L.plan_id ?? null, assignment: L.assignment ?? {} } : undefined };
       const row = await post<Simulation>(`${base}/runs/${runId}/simulate`, body);
       setSim(row); setAnimIdx(0);
       const done = await pollSim(row.id);
@@ -59,7 +67,26 @@ export default function Twin() {
     (async () => {
       try {
         const d = await api<TwinData>(`${base}/runs/${runId}/twin`);
-        setData(d); setLayout(d.layout);
+        setData(d); setLayout(d.layout); setPlacement(d.placement);
+        const wantPlan = params.get("plan"), compare = params.get("compare");
+        if (wantPlan && canWrite(org) && !autoLaunched.current) {
+          // « Simuler sur un plan » : placement automatique, enregistrement, simulation
+          autoLaunched.current = true;
+          setParams({}, { replace: true });
+          setBusy("sim");
+          const pl = d.placement?.plan_id === wantPlan ? d.placement
+            : await post<Placement>(`${base}/runs/${runId}/twin/plan`, { plan_id: wantPlan, assignment: {} });
+          const r = await api<{ layout: Layout; placement: Placement }>(`${base}/runs/${runId}/layout`, { method: "PUT",
+            body: JSON.stringify({ kind: "free", positions: {}, plan_id: pl.plan_id, assignment: pl.assignment }) });
+          setPlacement(r.placement); setLayout(r.layout); setSaved(true);
+          setData((x) => x && { ...x, layout_saved: true });
+          const list = compare ? [newScenario("Équilibrage sur le plan"), newScenario("Calcul d'origine", { run_id: compare })]
+            : [newScenario(`Sur le plan ${pl.plan_name}`.slice(0, 60))];
+          const row = await post<Simulation>(`${base}/runs/${runId}/simulate`, { name: list.map((x) => x.name).join(" / ").slice(0, 120),
+            scenarios: list, layout: { kind: "free", positions: {}, plan_id: pl.plan_id, assignment: r.placement.assignment } });
+          setSim(row); await pollSim(row.id); setBusy("");
+          return;
+        }
         const bn = d.plan.bottleneck_station;
         const bnWorker = d.plan.stations.find((s) => s.station === bn)?.worker_ids?.[0];
         setScenarios([
@@ -81,14 +108,54 @@ export default function Twin() {
         }
       } catch (e) { setErr((e as Error).message); setBusy(""); }
     })();
-  }, [base, runId, org, pollSim]);
+  }, [base, runId, org, pollSim]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (!placement?.plan_id) { setWplan(null); return; }
+    if (wplan?.id === placement.plan_id) return;
+    api<WorkshopPlan>(`${base}/workshop-plans/${placement.plan_id}`).then(setWplan).catch((e) => setErr((e as Error).message));
+  }, [placement?.plan_id, base]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const applyPlan = async (planId: string, assignment: Record<string, string[]> = {}) => {
+    setBusy("plan"); setErr("");
+    try {
+      const pl = await post<Placement>(`${base}/runs/${runId}/twin/plan`, { plan_id: planId, assignment });
+      setPlacement(pl); setLayout(pl.layout); setDirty(true); setSaved(false);
+    } catch (e) { setErr((e as Error).message); } finally { setBusy(""); }
+  };
+
+  const balanceOnPlan = async (opts: { solver: string; mct: number; maxM: number }) => {
+    if (!placement || !data?.run.problem_id) { setErr("Gamme du calcul introuvable : relancez un calcul depuis la gamme."); return; }
+    setBusy("balance"); setErr("");
+    try {
+      const prob = await api<ProblemRow>(`${base}/problems/${data.run.problem_id}`);
+      const inv = await api<{ workstations: (Record<string, unknown> & { id: string; machine_id?: string })[] }>(`${base}/workshop-plans/${placement.plan_id}/inventory`);
+      const ws = inv.workstations.map(({ machine_id: _m, ...w }) => w);
+      if (!ws.length) throw new Error("Le plan ne contient aucune machine (hors chariots).");
+      const ids = new Set(ws.map((w) => w.id));
+      const payload = prob.payload!;
+      const problem = { ...payload, name: `${payload.name} · plan ${placement.plan_name}`.slice(0, 120), workstations: ws,
+        workers: (payload.workers ?? []).map((w) => ({ ...w, assigned_station: w.assigned_station && ids.has(w.assigned_station) ? w.assigned_station : null })),
+        machine_change_time: opts.mct, max_machines_per_station: opts.maxM };
+      const run = await post<Run>(`${base}/runs`, { kind: "balance", solver: opts.solver, problem, save_problem: true, time_limit_seconds: opts.solver === "cp_sat" ? 30 : 10 });
+      let r: Run = run;
+      for (let i = 0; i < 150 && r.status !== "done" && r.status !== "failed"; i++) {
+        await new Promise((ok) => setTimeout(ok, 1500));
+        r = await api<Run>(`${base}/runs/${run.id}`);
+      }
+      if (r.status !== "done") throw new Error(r.error ? `Calcul en échec : ${r.error}` : "Le calcul prend trop de temps : retrouvez-le dans l'historique.");
+      if (!r.stations_used) throw new Error("Aucune répartition trouvée avec les machines du plan : voir le détail du calcul (machines manquantes ?).");
+      nav(`/jumeau/${run.id}?plan=${placement.plan_id}&compare=${runId}`);
+    } catch (e) { setErr((e as Error).message); } finally { setBusy(""); }
+  };
 
   const saveLayout = async () => {
     if (!layout) return;
     setBusy("layout");
     try {
-      const r = await api<{ layout: Layout }>(`${base}/runs/${runId}/layout`, { method: "PUT", body: JSON.stringify(layout) });
-      setLayout(r.layout); setData((d) => d && { ...d, layout_saved: true }); setSaved(true);
+      const body = placement ? { kind: "free", positions: {}, plan_id: placement.plan_id, assignment: placement.assignment } : { kind: layout.kind, positions: layout.positions };
+      const r = await api<{ layout: Layout; placement: Placement | null }>(`${base}/runs/${runId}/layout`, { method: "PUT", body: JSON.stringify(body) });
+      setLayout(r.layout); setPlacement(r.placement); setData((d) => d && { ...d, layout_saved: true }); setSaved(true);
     } catch (e) { setErr((e as Error).message); } finally { setBusy(""); }
   };
 
@@ -111,11 +178,17 @@ export default function Twin() {
         <div className="row">
           <div className="seg">
             {(["line", "u"] as LayoutKind[]).map((k) => (
-              <button key={k} className={layout.kind === k ? "on" : ""} onClick={() => { setLayout(defaultLayout(ids, k)); setDirty(true); setSaved(false); }}>
+              <button key={k} className={!placement && layout.kind === k ? "on" : ""} onClick={() => { setPlacement(null); setLayout(defaultLayout(ids, k)); setDirty(true); setSaved(false); }}>
                 {k === "line" ? "En ligne" : "En U"}</button>
             ))}
-            <button className={layout.kind === "free" ? "on" : ""} disabled title="Faites glisser un poste">Libre</button>
+            <button className={!placement && layout.kind === "free" ? "on" : ""} disabled title="Faites glisser un poste">Libre</button>
           </div>
+          <select value={placement?.plan_id ?? ""} disabled={busy === "plan"} onChange={(e) => { if (e.target.value) applyPlan(e.target.value); else { setPlacement(null); setLayout(defaultLayout(ids, "line")); setDirty(true); setSaved(false); } }}
+            aria-label="Plan d'atelier" className={placement ? "on-select" : ""}>
+            <option value="">{data.workshop_plans.length ? "Sur un plan d'atelier…" : "Aucun plan d'atelier"}</option>
+            {data.workshop_plans.map((p) => <option key={p.id} value={p.id}>Plan : {p.name} ({p.version})</option>)}
+          </select>
+          {!data.workshop_plans.length && <Link to="/atelier/plan" className="small">Dessiner le plan</Link>}
           {writable && <button className="btn" disabled={busy === "layout"} onClick={saveLayout}>{busy === "layout" ? "Enregistrement…" : saved ? "Implantation enregistrée ✓" : "Enregistrer l'implantation"}</button>}
         </div>
       </div>
@@ -124,7 +197,8 @@ export default function Twin() {
 
       <div className="card">
         <LinePlan data={data} layout={layout} setLayout={(l) => { setLayout(l); setDirty(true); setSaved(false); }} res={current?.result ?? null}
-          startHHMM={session?.shift_start?.slice(0, 5) || "08:00"} editable={writable} />
+          startHHMM={session?.shift_start?.slice(0, 5) || "08:00"} editable={writable && !placement} placement={placement} wplan={wplan} />
+        {busy === "plan" && <p className="muted small"><span className="spinner inline" /> Placement des stations sur le plan…</p>}
         {busy === "sim" && <p className="muted small"><span className="spinner inline" /> Simulation de la journée en cours…</p>}
         {items.length > 1 && (
           <div className="row small" style={{ marginTop: ".5rem" }}>Animer :
@@ -132,6 +206,9 @@ export default function Twin() {
           </div>
         )}
       </div>
+
+      {placement && wplan && <PlanPanel data={data} placement={placement} wplan={wplan} writable={writable} busy={busy}
+        onAssign={(a) => applyPlan(placement.plan_id, a)} onBalance={balanceOnPlan} />}
 
       {writable && (
         <ScenarioEditor data={data} scenarios={scenarios} setScenarios={setScenarios} busy={busy === "sim"} onRun={() => launch(scenarios)} />
@@ -146,9 +223,11 @@ export default function Twin() {
 }
 
 // =================================================================== plan animé
-function LinePlan({ data, layout, setLayout, res, startHHMM, editable }: {
+function LinePlan({ data, layout, setLayout, res, startHHMM, editable, placement, wplan }: {
   data: TwinData; layout: Layout; setLayout: (l: Layout) => void; res: SimResult | null; startHHMM: string; editable: boolean;
+  placement?: Placement | null; wplan?: WorkshopPlan | null;
 }) {
+  const planMode = !!(placement && wplan && placement.plan_id === wplan.id);
   const [t, setT] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState(30);
@@ -179,10 +258,28 @@ function LinePlan({ data, layout, setLayout, res, startHHMM, editable }: {
 
   const pos = layout.positions;
   const xs = Object.values(pos).map((p) => p.x), ys = Object.values(pos).map((p) => p.y);
-  const minX = Math.min(...xs) - 1.2, maxX = Math.max(...xs) + SW + 1.2, minY = Math.min(...ys) - 1.4, maxY = Math.max(...ys) + SH + 1.6;
+  const [minX, maxX, minY, maxY] = planMode
+    ? [Math.min(-0.5, ...xs.map((v) => v - 1)), Math.max(Number(wplan!.width_m) + 0.5, ...xs.map((v) => v + 1)), Math.min(-0.5, ...ys.map((v) => v - 1)), Math.max(Number(wplan!.length_m) + 0.5, ...ys.map((v) => v + 1))]
+    : [Math.min(...xs) - 1.2, Math.max(...xs) + SW + 1.2, Math.min(...ys) - 1.4, Math.max(...ys) + SH + 1.6];
   const W = (maxX - minX) * PX, H = (maxY - minY) * PX;
   const X = (m: number) => (m - minX) * PX, Y = (m: number) => (m - minY) * PX;
-  const center = (sid: number | string) => { const p = pos[String(sid)] ?? { x: 0, y: 0 }; return { x: X(p.x + SW / 2), y: Y(p.y + SH / 2) }; };
+  const center = (sid: number | string) => {
+    const p = pos[String(sid)] ?? { x: 0, y: 0 };
+    return planMode ? { x: X(p.x), y: Y(p.y) } : { x: X(p.x + SW / 2), y: Y(p.y + SH / 2) };
+  };
+  const route = (a: number, b: number): { x: number; y: number }[] | null => {
+    const r = placement?.routes?.[`${a}-${b}`];
+    return planMode && r && r.length >= 2 ? r.map(([x, y]) => ({ x: X(x), y: Y(y) })) : null;
+  };
+  const along = (pts: { x: number; y: number }[], f: number) => {
+    const seg = pts.slice(1).map((p, i) => Math.hypot(p.x - pts[i].x, p.y - pts[i].y));
+    let L = seg.reduce((a, b) => a + b, 0) * Math.max(0, Math.min(1, f));
+    for (let i = 0; i < seg.length; i++) {
+      if (L <= seg[i] || i === seg.length - 1) { const k = seg[i] ? Math.min(1, L / seg[i]) : 0; return { x: pts[i].x + (pts[i + 1].x - pts[i].x) * k, y: pts[i].y + (pts[i + 1].y - pts[i].y) * k }; }
+      L -= seg[i];
+    }
+    return pts[pts.length - 1];
+  };
 
   const toMeters = (e: React.PointerEvent) => {
     const svg = svgRef.current!; const r = svg.getBoundingClientRect();
@@ -214,14 +311,17 @@ function LinePlan({ data, layout, setLayout, res, startHHMM, editable }: {
       const s = stState.get(st.st); if (s) s.queue += b.size;
       const k = queueIdx.get(st.st) ?? 0; queueIdx.set(st.st, k + 1);
       const c = center(st.st);
-      dots.push({ x: c.x - SW * PX / 2 - 9 - (k % 3) * 9, y: c.y - SH * PX / 2 + 6 + Math.floor(k / 3) * 9, size: b.size, kind: "q", key: b.id });
+      dots.push(planMode ? { x: c.x - 26 - (k % 3) * 9, y: c.y - 8 + Math.floor(k / 3) * 9, size: b.size, kind: "q", key: b.id }
+        : { x: c.x - SW * PX / 2 - 9 - (k % 3) * 9, y: c.y - SH * PX / 2 + 6 + Math.floor(k / 3) * 9, size: b.size, kind: "q", key: b.id });
     } else if (st.kind === "work") {
       stState.get(st.st)?.working.add(st.w);
       const c = center(st.st);
       dots.push({ x: c.x + 10, y: c.y - 4, size: b.size, kind: "w", key: b.id });
     } else {
       const a = center(st.from), z = center(st.to);
-      dots.push({ x: a.x + (z.x - a.x) * st.f, y: a.y + (z.y - a.y) * st.f - SH * PX / 2 - 6, size: b.size, kind: "m", key: b.id });
+      const rt = route(st.from, st.to);
+      if (rt) { const q = along(rt, st.f); dots.push({ x: q.x, y: q.y, size: b.size, kind: "m", key: b.id }); }
+      else dots.push({ x: a.x + (z.x - a.x) * st.f, y: a.y + (z.y - a.y) * st.f - (planMode ? 0 : SH * PX / 2 + 6), size: b.size, kind: "m", key: b.id });
     }
   }
   let done = 0; for (const [ft, n] of finishTimes) { if (ft <= t) done += n; else break; }
@@ -247,7 +347,18 @@ function LinePlan({ data, layout, setLayout, res, startHHMM, editable }: {
             <marker id="arrw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0L10,5L0,10z" fill="#c0392b" /></marker></defs>
           {Array.from({ length: Math.ceil(maxX - minX) }, (_, i) => <line key={`gx${i}`} x1={X(Math.ceil(minX) + i)} x2={X(Math.ceil(minX) + i)} y1={0} y2={H} className="twin-grid" />)}
           {Array.from({ length: Math.ceil(maxY - minY) }, (_, i) => <line key={`gy${i}`} y1={Y(Math.ceil(minY) + i)} y2={Y(Math.ceil(minY) + i)} x1={0} x2={W} className="twin-grid" />)}
-          {data.plan.stations.slice(0, -1).map((s, i) => {
+          {planMode && <PlanUnderlay wplan={wplan!} placement={placement!} X={X} Y={Y} colorOf={(sid) => {
+            const ss = simStations.get(sid); const st0 = data.plan.stations.find((x) => x.station === sid);
+            const u = ss?.worker_util_max ?? ss?.utilization_pct ?? st0?.load_pct ?? 0; return res ? loadColor(u) : "#dfe6ee";
+          }} />}
+          {planMode && data.plan.stations.slice(0, -1).map((s, i) => {
+            const nx = data.plan.stations[i + 1]; const rt = route(s.station, nx.station);
+            if (!rt) return null;
+            const bad = warnPairs.has(`${s.station}-${nx.station}`) || placement!.flow.backtracks.some((b) => b.from === s.station && b.to === nx.station);
+            return <polyline key={`r${i}`} points={rt.map((p) => `${p.x},${p.y}`).join(" ")} fill="none" stroke={bad ? "#c0392b" : "#6f8fb3"}
+              strokeWidth={bad ? 2.5 : 2} strokeDasharray={bad ? "6 4" : undefined} markerEnd={bad ? "url(#arrw)" : "url(#arr)"} opacity={0.85} />;
+          })}
+          {!planMode && data.plan.stations.slice(0, -1).map((s, i) => {
             const nx = data.plan.stations[i + 1]; const a = center(s.station), z = center(nx.station);
             const bad = warnPairs.has(`${s.station}-${nx.station}`);
             const dx = z.x - a.x, dy = z.y - a.y, L = Math.hypot(dx, dy) || 1, off = (SW * PX) / 2 + 2;
@@ -260,6 +371,26 @@ function LinePlan({ data, layout, setLayout, res, startHHMM, editable }: {
             const workers = planStations.get(s.station)?.worker_ids ?? s.worker_ids;
             const names = planStations.get(s.station)?.workers ?? s.workers;
             const isBn = res?.bottleneck === s.station;
+            if (planMode) {
+              const c = center(s.station); const virt = placement!.virtual.includes(s.station);
+              return (
+                <g key={s.station} transform={`translate(${c.x},${c.y})`}>
+                  <rect x={-24} y={-11} width={48} height={22} rx={11} fill={res ? loadColor(util) : "#fff"} stroke={isBn ? "#7a1f12" : virt ? "#c0392b" : "#1f2a37"}
+                    strokeWidth={isBn ? 3 : 1.2} strokeDasharray={virt ? "4 3" : undefined} />
+                  <text x={0} y={4} textAnchor="middle" className="twin-st">{s.station}{res ? ` · ${Math.round(util)}%` : ""}</text>
+                  {st.queue > 0 && <g transform="translate(26,-20)"><rect x={0} y={0} width={30} height={14} rx={7} fill={st.queue >= 40 ? "#c0392b" : st.queue >= 20 ? "#b7791f" : "#5b6878"} />
+                    <text x={15} y={10.5} textAnchor="middle" className="twin-badge">{st.queue}</text></g>}
+                  {workers.map((w, k) => {
+                    const on = st.working.has(w);
+                    return <g key={w + k} transform={`translate(${-14 + k * 20},22)`}>
+                      <circle r={8} fill={on ? "#1f4e79" : "#fff"} stroke="#1f4e79" strokeWidth={1.5} />
+                      <text y={3} textAnchor="middle" className={on ? "twin-w on" : "twin-w"}>{initials(names[k] ?? w)}</text><title>{names[k] ?? w}</title></g>;
+                  })}
+                  {isBn && <text x={0} y={-16} textAnchor="middle" className="twin-bn">goulot</text>}
+                  <title>{`Station ${s.station} · ${s.operations.map((o) => `${o.id} ${o.name}`).join(" + ")}\n${fmt.n(s.minutes, 2)} min/pièce · ${names.join(", ") || "sans ouvrière"}${virt ? "\nAucune machine du plan : station placée à côté" : ""}${ss ? `\nOccupation ${ss.utilization_pct} % · encours max ${ss.max_wip}` : ""}`}</title>
+                </g>
+              );
+            }
             return (
               <g key={s.station} transform={`translate(${X(p.x)},${Y(p.y)})`} onPointerDown={onDown(String(s.station))} style={{ cursor: editable ? "grab" : "default" }}>
                 <rect width={SW * PX} height={SH * PX} rx={7} fill={res ? loadColor(util) : "#dfe6ee"} fillOpacity={0.9}
@@ -500,6 +631,135 @@ function SyncPanel({ data, base, runId }: { data: TwinData; base: string; runId:
             </tr>))}</tbody>
         </table></div>
       </>}
+    </div>
+  );
+}
+
+// =================================================================== plan d'atelier sous la ligne
+function PlanUnderlay({ wplan, placement, X, Y, colorOf }: {
+  wplan: WorkshopPlan; placement: Placement; X: (m: number) => number; Y: (m: number) => number; colorOf: (sid: number) => string;
+}) {
+  const owner = new Map<string, number>();
+  for (const [sid, mids] of Object.entries(placement.assignment)) for (const m of mids) owner.set(m, Number(sid));
+  const k = X(1) - X(0);
+  return (
+    <g className="twin-underlay">
+      <rect x={X(0)} y={Y(0)} width={Number(wplan.width_m) * k} height={Number(wplan.length_m) * k} fill="#fbfaf7" stroke="#d5d0c4" />
+      {wplan.elements.map((e) => {
+        if (e.kind === "zone") return <g key={e.id}><rect x={X(e.x)} y={Y(e.y)} width={e.w * k} height={e.h * k} fill={ZONES[e.zone]?.color ?? "#eee"} fillOpacity={0.35} stroke="#c9c2b0" strokeDasharray="6 4" />
+          <text x={X(e.x) + 6} y={Y(e.y) + 15} className="twin-small" fill="#7a735f">{e.name || ZONES[e.zone]?.label}</text></g>;
+        if (e.kind === "aisle") return <rect key={e.id} x={X(e.x)} y={Y(e.y)} width={e.w * k} height={e.h * k} fill="#efece4" stroke="#c9c2b0" strokeDasharray="5 4" />;
+        return null;
+      })}
+      {wplan.elements.map((e) => {
+        if (e.kind === "wall") return <line key={e.id} x1={X(e.x1)} y1={Y(e.y1)} x2={X(e.x2)} y2={Y(e.y2)} stroke="#3a3f47" strokeWidth={Math.max(2, e.thickness * k)} strokeLinecap="square" />;
+        if (e.kind === "pillar") return <rect key={e.id} x={X(e.x - e.w / 2)} y={Y(e.y - e.d / 2)} width={e.w * k} height={e.d * k} fill="#3a3f47" />;
+        if (e.kind === "door") return <g key={e.id} transform={`translate(${X(e.x)},${Y(e.y)}) rotate(${e.rot})`}>
+          <rect x={-e.width * k / 2} y={-0.14 * k} width={e.width * k} height={0.28 * k} fill="#fbfaf7" />
+          <path d={`M${-e.width * k / 2},0 L${-e.width * k / 2},${-e.width * k} A${e.width * k},${e.width * k} 0 0 1 ${e.width * k / 2},0`} fill="none" stroke={e.exit ? "#1f8a5b" : "#8a8f98"} strokeWidth={1.5} /></g>;
+        if (e.kind === "machine") {
+          const sid = owner.get(e.id); const used = sid != null; const op = operatorPoint(e);
+          return <g key={e.id}>
+            <g transform={`translate(${X(e.x)},${Y(e.y)}) rotate(${e.rot})`}>
+              <rect x={-e.w * k / 2} y={-e.d * k / 2} width={e.w * k} height={e.d * k} rx={4}
+                fill={e.status === "panne" ? "#f6d0d0" : used ? colorOf(sid!) : "#ffffff"} fillOpacity={used ? 0.95 : 0.8}
+                stroke={used ? "#1f2a37" : "#a3abb6"} strokeWidth={used ? 1.4 : 1} strokeDasharray={e.status === "reserve" ? "5 3" : undefined} />
+            </g>
+            <text x={X(e.x)} y={Y(e.y) + 4} textAnchor="middle" className="twin-small" fill={used ? "#1f2a37" : "#8a929d"}>{e.label}</text>
+            {!used && e.type !== "chariot" && <circle cx={X(op[0])} cy={Y(op[1])} r={3} fill="#c3c9d1" />}
+            <title>{`${e.label} · ${MACHINE_CATALOG[e.type]?.label ?? e.type}${e.status !== "service" ? ` (${e.status === "panne" ? "en panne" : "réserve"})` : ""}${used ? ` · station ${sid}` : " · non utilisée"}`}</title>
+          </g>;
+        }
+        return null;
+      })}
+    </g>
+  );
+}
+
+// =================================================================== association stations ↔ machines
+function PlanPanel({ data, placement, wplan, writable, busy, onAssign, onBalance }: {
+  data: TwinData; placement: Placement; wplan: WorkshopPlan; writable: boolean; busy: string;
+  onAssign: (a: Record<string, string[]>) => void; onBalance: (o: { solver: string; mct: number; maxM: number }) => void;
+}) {
+  const [showBal, setShowBal] = useState(false);
+  const [solver, setSolver] = useState("rpw");
+  const [mct, setMct] = useState(String(placement.travel.minutes || 0));
+  const [maxM, setMaxM] = useState("2");
+  useEffect(() => { setMct(String(placement.travel.minutes || 0)); }, [placement.travel.minutes]);
+  const machines = wplan.elements.filter((e): e is Machine => e.kind === "machine" && e.type !== "chariot");
+  const byId = new Map(machines.map((m) => [m.id, m]));
+  const owner = new Map<string, number>();
+  for (const [sid, mids] of Object.entries(placement.assignment)) for (const m of mids) owner.set(m, Number(sid));
+  const transfer = new Map(placement.flow.transfers.map((t) => [t.from, t]));
+  const setMachine = (sid: number, idx: number, mid: string) => {
+    const a: Record<string, string[]> = {};
+    for (const s of data.plan.stations) a[String(s.station)] = [...(placement.assignment[String(s.station)] ?? [])];
+    const cur = a[String(sid)];
+    if (mid) { for (const k of Object.keys(a)) a[k] = a[k].filter((m) => m !== mid); if (idx < cur.length) cur[idx] = mid; else cur.push(mid); a[String(sid)] = cur.filter(Boolean); }
+    else a[String(sid)] = cur.filter((_, i) => i !== idx);
+    onAssign(a);
+  };
+  const statusTxt = (m: Machine) => (m.status === "service" ? "" : m.status === "panne" ? " (en panne)" : " (réserve)");
+  return (
+    <div className="card">
+      <div className="card-head"><h2>Stations sur le plan « {placement.plan_name} »</h2>
+        <div className="row">
+          <Link className="btn small" to={`/atelier/plan?id=${placement.plan_id}`}>Modifier le plan</Link>
+          {writable && <button className="btn small" disabled={!!busy} onClick={() => onAssign({})}>Association automatique</button>}
+          {writable && <button className="btn small primary" disabled={!!busy} onClick={() => setShowBal(!showBal)}>Simuler l'équilibrage sur ce plan</button>}
+        </div>
+      </div>
+      <div className="kpis">
+        <div className="kpi"><span>Parcours d'un paquet</span><b>{fmt.n(placement.flow.meters_per_bundle, 1)} m</b><small>par les allées</small></div>
+        <div className="kpi"><span>Retours en arrière</span><b>{placement.flow.backtracks.length}</b><small>{placement.flow.u_cell ? "cellule en U détectée" : "sens du flux : 1re → dernière station"}</small></div>
+        <div className="kpi"><span>Entrée ↔ sortie</span><b>{fmt.n(placement.flow.entry_exit_m, 1)} m</b><small>emprise {fmt.n(placement.flow.extent_m, 1)} m</small></div>
+        <div className="kpi"><span>Machines libres</span><b>{placement.unused.length}</b><small>en service, non utilisées</small></div>
+      </div>
+      {showBal && writable && (
+        <div className="notice warn">
+          <p><b>Équilibrage avec les machines réelles du plan</b> : un nouveau calcul est lancé avec la même gamme, les postes = machines en service du plan
+            (pannes et réserve exclues) et un temps de déplacement par machine supplémentaire tenue par une ouvrière, déduit des distances du plan
+            {placement.travel.neighbour_m ? ` (machine voisine à ${fmt.n(placement.travel.neighbour_m, 2)} m en médiane)` : ""}. Puis la journée est simulée sur le plan et comparée au calcul d'origine.</p>
+          <div className="row">
+            <label>Solveur<select value={solver} onChange={(e) => setSolver(e.target.value)}><option value="rpw">RPW (rapide)</option><option value="cp_sat">CP-SAT (optimal)</option></select></label>
+            <label>Déplacement (min/pièce/machine)<input type="number" min={0} max={2} step={0.01} value={mct} onChange={(e) => setMct(e.target.value)} style={{ width: 120 }} /></label>
+            <label>Machines max par ouvrière<input type="number" min={1} max={3} value={maxM} onChange={(e) => setMaxM(e.target.value)} style={{ width: 90 }} /></label>
+            <button className="btn primary" disabled={busy === "balance"} onClick={() => onBalance({ solver, mct: Math.max(0, Number(mct.replace(",", ".")) || 0), maxM: Math.min(3, Math.max(1, Number(maxM) || 1)) })}>
+              {busy === "balance" ? "Calcul en cours…" : "Lancer le calcul puis la simulation"}</button>
+          </div>
+        </div>
+      )}
+      {(placement.notes.length > 0 || placement.flow.warnings.length > 0) && <ul className="issues">
+        {placement.flow.warnings.map((w, k) => <li key={`w${k}`} className="warning">{w.message}</li>)}
+        {placement.notes.map((n, k) => <li key={`n${k}`} className="info">{n}</li>)}
+      </ul>}
+      <div className="table-wrap"><table>
+        <thead><tr><th>Station</th><th>Opérations</th><th>Machine(s) demandée(s)</th><th>Machine(s) du plan</th><th>Vers la suivante</th></tr></thead>
+        <tbody>{data.plan.stations.map((s) => {
+          const mids = placement.assignment[String(s.station)] ?? [];
+          const types = (s.machine_types?.length ? s.machine_types : [...new Set(s.operations.map((o) => o.machine_type).filter(Boolean))]);
+          const t = transfer.get(s.station);
+          const slots = Math.max(1, mids.length, Math.min(3, types.length * Math.max(1, s.operators)));
+          return (
+            <tr key={s.station} className={placement.virtual.includes(s.station) ? "row-over" : ""}>
+              <td>{s.station}</td>
+              <td className="small">{s.operations.map((o) => o.id).join(", ")}</td>
+              <td className="small">{types.join(", ") || "manuel"}{s.operators > 1 ? ` × ${s.operators}` : ""}</td>
+              <td className="row tight">{Array.from({ length: slots }, (_, i) => (
+                <select key={i} value={mids[i] ?? ""} disabled={!writable || !!busy} onChange={(e) => setMachine(s.station, i, e.target.value)}>
+                  <option value="">— aucune —</option>
+                  {[...machines].sort((a, b) => Number(types.includes(machineType(b))) - Number(types.includes(machineType(a))) || a.label.localeCompare(b.label, "fr", { numeric: true }))
+                    .map((m) => <option key={m.id} value={m.id}>{m.label} · {MACHINE_CATALOG[m.type]?.label ?? m.type}{statusTxt(m)}{owner.has(m.id) && owner.get(m.id) !== s.station ? ` (st. ${owner.get(m.id)})` : ""}</option>)}
+                </select>))}
+                {mids.some((m) => byId.get(m) && !types.includes(machineType(byId.get(m)!)) && types.length > 0) && <span className="badge warn">autre type</span>}
+              </td>
+              <td>{t ? `${fmt.n(t.meters, 1)} m` : "—"}{t && t.meters > 1.8 * t.straight + 1 ? <small className="muted"> ({fmt.n(t.straight, 1)} à vol d'oiseau)</small> : null}</td>
+            </tr>);
+        })}</tbody>
+      </table></div>
+      {placement.missing.length > 0 && <p className="notice warn">Machines manquantes sur le plan : {placement.missing.map((m) => `st. ${m.station} (${m.type})`).join(", ")}. Ajoutez-les au plan ou choisissez une machine à la main.</p>}
+      {placement.unused.length > 0 && <p className="muted small">Machines en service non utilisées : {placement.unused.map((id) => byId.get(id)?.label ?? id).join(", ")}.</p>}
+      <p className="muted small">Association automatique : machine liée au poste (WS) de la station, sinon même type de machine en suivant les n° de machine (M01, M02…), puis la plus proche. Les distances sont mesurées de poste opératrice à poste opératrice en contournant murs, poteaux et machines.</p>
     </div>
   );
 }
