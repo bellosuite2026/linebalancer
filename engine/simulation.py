@@ -431,7 +431,8 @@ def apply_scenario(plan: dict, scenario: Optional[dict] = None) -> tuple[dict, l
     for sid in sw:
         sw[sid] = [w for w in sw[sid] if w not in absent]
     if absent:
-        notes.append("Absente(s) : " + ", ".join(_worker_label(p, w) for w in sorted(absent)) + ".")
+        txt = "Absente(s) : " + ", ".join(_worker_label(p, w) for w in sorted(absent))
+        notes.append(txt if txt.endswith(".") else txt + ".")
 
     reassign = scenario.get("reassign", True)
     st_by_id = {int(s["station"]): s for s in p.get("stations", [])}
@@ -780,13 +781,25 @@ class LineDaySimulator:
             })
         blocked = [s["station"] for s in stations if s["operators"] == 0]
         wutil = {w: self.wbusy[w] / T for w in self.res}
+        # Capacité de chaque poste sur la journée (pièces) : temps disponible (hors panne) × rendement
+        # / charge de l'ouvrière (une ouvrière partagée porte la somme de ses postes).
+        wload = {w: 0.0 for w in self.res}
+        for sid, ws in self.sw.items():
+            for w in ws:
+                wload[w] += self.minutes[sid] / len(ws)
+        eff = max(1e-6, self.cfg.efficiency)
         for s in stations:
+            sid = s["station"]
             s["worker_util_max"] = round(max((wutil[w] for w in s["workers"]), default=0) * 100, 1)
+            down = sum(max(0.0, min(b, T) - max(a, 0.0)) for a, b in self.down[sid])
+            caps = [(T - down) * eff * self.weff.get((w, sid), 1.0) / wload[w] * len(s["workers"])
+                    for w in s["workers"] if wload[w] > 0]
+            s["capacity_pieces"] = round(min(caps)) if caps else 0
         if blocked:
             bottleneck = blocked[0]
         else:
-            # goulot = poste dont l'ouvrière la plus occupée l'est le plus ; égalité : plus grosse file devant
-            bottleneck = max(stations, key=lambda s: (round(s["worker_util_max"]), s["avg_wip"]))["station"] \
+            # goulot = poste de plus faible capacité ; égalité : plus grosse file devant
+            bottleneck = min(stations, key=lambda s: (s["capacity_pieces"], -s["avg_wip"]))["station"] \
                 if stations else None
         hours = max(1, math.ceil(T / 60))
         hourly = [0] * hours
