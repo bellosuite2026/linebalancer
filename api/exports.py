@@ -317,7 +317,7 @@ def build_pdf(run: dict, problem: Optional[dict], org_name: str = "") -> bytes:
         canvas.saveState()
         canvas.setFont("Helvetica", 7)
         canvas.setFillColor(colors.grey)
-        canvas.drawString(14 * mm, 7 * mm, "Textile Line Balancer · linebalancer.netlify.app")
+        canvas.drawString(14 * mm, 7 * mm, "Textile Line Balancer · linebalancer.onrender.com")
         canvas.drawRightString(page[0] - 14 * mm, 7 * mm, f"Page {doc_.page}")
         canvas.restoreState()
 

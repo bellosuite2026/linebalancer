@@ -61,3 +61,8 @@ python scripts/balance.py --sam data/samples/... --cycle-time 1.5 --solver rpw
 1. Lancer `QT_QPA_PLATFORM=offscreen pytest tests/ -q` — tous les tests doivent passer (72).
 2. Vérifier que `python -m gui.main` démarre (utiliser `QT_QPA_PLATFORM=offscreen` en CI/sans écran).
 3. Lancer `python -c "import ast; ast.parse(open('gui/main_window.py').read())"` pour vérifier la syntaxe.
+
+## Hébergement (2026-10-27)
+- Interface web : site statique Render gratuit « linebalancer » (srv-dbghps0m7kps739cokr0), https://linebalancer.onrender.com, build `npm ci && npm run build` dans web/, publication dist/, réécriture SPA `/*` → `/index.html`, déploiement auto sur main. Voir render.yaml.
+- API : Render tlb-api, https://tlb-api.onrender.com (TLB_CORS_ORIGINS inclut la nouvelle et l'ancienne origine).
+- Ancienne adresse https://linebalancer.netlify.app : mini site de redirection 301 (route par route) vers linebalancer.onrender.com, déployé à la main ; aucun build Netlify actif. Ne plus rien publier sur Netlify.

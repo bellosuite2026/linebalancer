@@ -329,7 +329,7 @@ def build_pdf(sim: dict, org_name: str = "") -> bytes:
         canvas.saveState()
         canvas.setFont("Helvetica", 7)
         canvas.setFillColor(colors.grey)
-        canvas.drawString(14 * mm, 7 * mm, "Textile Line Balancer · linebalancer.netlify.app · simulation indicative")
+        canvas.drawString(14 * mm, 7 * mm, "Textile Line Balancer · linebalancer.onrender.com · simulation indicative")
         canvas.drawRightString(page[0] - 14 * mm, 7 * mm, f"Page {doc_.page}")
         canvas.restoreState()
 

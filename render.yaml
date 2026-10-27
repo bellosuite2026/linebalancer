@@ -1,4 +1,5 @@
 # Blueprint Render : API Textile Line Balancer (conteneur Docker, même région que Supabase)
+# + interface web (site statique gratuit). Services créés par l'API Render ; ce fichier sert de référence.
 services:
   - type: web
     name: tlb-api
@@ -15,8 +16,49 @@ services:
       - key: TLB_SUPABASE_ANON_KEY
         sync: false        # clé publishable, saisie dans le tableau de bord Render
       - key: TLB_CORS_ORIGINS
-        sync: false        # ex. https://linebalancer.netlify.app
+        sync: false        # ex. https://linebalancer.onrender.com,https://linebalancer.netlify.app
       - key: TLB_JOB_WORKERS
         value: "2"
       - key: TLB_JOB_TIME_LIMIT
         value: "300"
+
+  # Interface web React/Vite : site statique Render gratuit (srv-dbghps0m7kps739cokr0)
+  # https://linebalancer.onrender.com — l'ancienne adresse linebalancer.netlify.app redirige en 301.
+  - type: web
+    name: linebalancer
+    runtime: static
+    branch: main
+    rootDir: web
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    autoDeploy: true
+    pullRequestPreviewsEnabled: false
+    envVars:               # valeurs publiques, identiques à web/.env.production
+      - key: NODE_VERSION
+        value: "22"
+      - key: VITE_SUPABASE_URL
+        sync: false
+      - key: VITE_SUPABASE_ANON_KEY
+        sync: false
+      - key: VITE_API_URL
+        sync: false
+    routes:
+      - type: rewrite      # SPA : toute route inconnue sert index.html
+        source: /*
+        destination: /index.html
+    headers:
+      - path: /assets/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+      - path: /index.html
+        name: Cache-Control
+        value: no-cache
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
