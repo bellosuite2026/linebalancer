@@ -25,17 +25,27 @@ export interface SceneBundle {
   kind: "queue" | "work" | "move";
 }
 
+export interface SceneWorker {
+  id: string;
+  label: string;
+  x: number;
+  z: number;
+  kind: "idle" | "walk" | "work";
+}
+
 interface Props {
   plan?: WorkshopPlan | null;
   stations?: SceneStation[];
   states?: Record<string, SceneStationState>;
   bundles?: SceneBundle[];
+  workers?: SceneWorker[];
   title?: string;
   className?: string;
 }
 
 const EMPTY_STATIONS: SceneStation[] = [];
 const EMPTY_BUNDLES: SceneBundle[] = [];
+const EMPTY_WORKERS: SceneWorker[] = [];
 const ROOM_HEIGHT = 2.8;
 const TABLE_HEIGHT = 0.76;
 
@@ -161,7 +171,31 @@ function addOperator(group: THREE.Group, x: number, z: number, active = false, s
   group.add(head);
 }
 
-function addMachine(group: THREE.Group, machine: Machine, shiftX: number, shiftZ: number, stationId?: number) {
+function makeWorker(group: THREE.Group, worker: SceneWorker) {
+  const actor = new THREE.Group();
+  actor.userData.workerId = worker.id;
+  const clothing = new THREE.MeshStandardMaterial({ color: "#76858b", roughness: 0.82 });
+  const skin = new THREE.MeshStandardMaterial({ color: "#d9aa87", roughness: 0.9 });
+  const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.17, 0.42, 3, 8), clothing);
+  body.position.y = 0.8;
+  body.userData.workerPart = true;
+  actor.add(body);
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.13, 12, 10), skin);
+  head.position.set(0, 1.16, -0.02);
+  actor.add(head);
+  for (const x of [-0.09, 0.09]) {
+    const leg = makeBox(actor, [0.07, 0.34, 0.08], [x, 0.25, 0.02], new THREE.MeshStandardMaterial({ color: "#454c52", roughness: 0.9 }));
+    leg.userData.walkLeg = true;
+  }
+  const name = makeLabel(worker.label, "#263746");
+  name.position.set(0, 1.62, 0);
+  name.scale.set(1.05, 0.32, 1);
+  actor.add(name);
+  group.add(actor);
+  return actor;
+}
+
+function addMachine(group: THREE.Group, machine: Machine, shiftX: number, shiftZ: number, stationId?: number, showOperator = true) {
   const root = new THREE.Group();
   root.position.set(machine.x + shiftX, 0, machine.y + shiftZ);
   root.rotation.y = (-machine.rot * Math.PI) / 180;
@@ -184,7 +218,7 @@ function addMachine(group: THREE.Group, machine: Machine, shiftX: number, shiftZ
   } else if (machine.type === "presse_thermocollage") {
     makeBox(root, [machine.w * 0.62, 0.58, machine.d * 0.68], [0, TABLE_HEIGHT + 0.32, 0], headMat);
   }
-  if (machine.status === "service" && machine.type !== "chariot") {
+  if (showOperator && machine.status === "service" && machine.type !== "chariot") {
     const [ox, oz] = operatorPoint(machine);
     addOperator(group, ox + shiftX, oz + shiftZ, false, stationId);
   }
@@ -193,7 +227,7 @@ function addMachine(group: THREE.Group, machine: Machine, shiftX: number, shiftZ
   group.add(label);
 }
 
-export default function PlanScene3D({ plan, stations = EMPTY_STATIONS, states = {}, bundles = EMPTY_BUNDLES, title = "Vue 3D", className = "" }: Props) {
+export default function PlanScene3D({ plan, stations = EMPTY_STATIONS, states = {}, bundles = EMPTY_BUNDLES, workers = EMPTY_WORKERS, title = "Vue 3D", className = "" }: Props) {
   const hostRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
@@ -202,9 +236,11 @@ export default function PlanScene3D({ plan, stations = EMPTY_STATIONS, states = 
   const modelRef = useRef<THREE.Group | null>(null);
   const activityRef = useRef<THREE.Group | null>(null);
   const bundleRef = useRef<THREE.Group | null>(null);
+  const workerGroupRef = useRef<THREE.Group | null>(null);
   const resetRef = useRef<(() => void) | null>(null);
   const bundlePool = useRef<THREE.Mesh[]>([]);
   const stationIndicators = useRef(new Map<number, THREE.Mesh>());
+  const workerActors = useRef(new Map<string, THREE.Group>());
   const offsets = useRef({ x: 0, z: 0 });
   const [ready, setReady] = useState(false);
   const [error, setError] = useState("");
@@ -237,7 +273,8 @@ export default function PlanScene3D({ plan, stations = EMPTY_STATIONS, states = 
     const model = new THREE.Group();
     const activity = new THREE.Group();
     const bundleGroup = new THREE.Group();
-    scene.add(model, activity, bundleGroup);
+    const workerGroup = new THREE.Group();
+    scene.add(model, activity, bundleGroup, workerGroup);
     const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 1500);
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
@@ -252,6 +289,7 @@ export default function PlanScene3D({ plan, stations = EMPTY_STATIONS, states = 
     modelRef.current = model;
     activityRef.current = activity;
     bundleRef.current = bundleGroup;
+    workerGroupRef.current = workerGroup;
 
     const resize = () => {
       const width = Math.max(1, host.clientWidth);
@@ -282,6 +320,7 @@ export default function PlanScene3D({ plan, stations = EMPTY_STATIONS, states = 
       disposeGroup(model);
       disposeGroup(activity);
       disposeGroup(bundleGroup);
+      disposeGroup(workerGroup);
       renderer.dispose();
       renderer.domElement.remove();
       sceneRef.current = null;
@@ -291,12 +330,43 @@ export default function PlanScene3D({ plan, stations = EMPTY_STATIONS, states = 
       modelRef.current = null;
       activityRef.current = null;
       bundleRef.current = null;
+      workerGroupRef.current = null;
       resetRef.current = null;
       bundlePool.current = [];
       stationIndicators.current.clear();
+      workerActors.current.clear();
       setReady(false);
     };
   }, []);
+
+  useEffect(() => {
+    const group = workerGroupRef.current;
+    if (!ready || !group) return;
+    const activeIds = new Set(workers.map((worker) => worker.id));
+    for (const [id, actor] of workerActors.current) if (!activeIds.has(id)) {
+      group.remove(actor);
+      disposeGroup(actor);
+      workerActors.current.delete(id);
+    }
+    const { x: shiftX, z: shiftZ } = offsets.current;
+    for (const worker of workers) {
+      let actor = workerActors.current.get(worker.id);
+      if (!actor) {
+        actor = makeWorker(group, worker);
+        workerActors.current.set(worker.id, actor);
+      }
+      actor.position.set(worker.x + shiftX, 0, worker.z + shiftZ);
+      actor.userData.kind = worker.kind;
+      actor.traverse((object) => {
+        if (!(object instanceof THREE.Mesh)) return;
+        if (object.userData.workerPart) {
+          const color = worker.kind === "work" ? "#1f6685" : worker.kind === "walk" ? "#c17b2c" : "#76858b";
+          (object.material as THREE.MeshStandardMaterial).color.set(color);
+        }
+        if (object.userData.walkLeg) object.rotation.x = worker.kind === "walk" ? Math.sin(performance.now() / 75 + (object.position.x < 0 ? 0 : Math.PI)) * 0.55 : 0;
+      });
+    }
+  }, [ready, workers]);
 
   useEffect(() => {
     const scene = sceneRef.current;
@@ -360,7 +430,7 @@ export default function PlanScene3D({ plan, stations = EMPTY_STATIONS, states = 
       else if (element.kind === "pillar") {
         makeBox(model, [element.w, ROOM_HEIGHT, element.d], [element.x + shiftX, ROOM_HEIGHT / 2, element.y + shiftZ], new THREE.MeshStandardMaterial({ color: "#555d5e", roughness: 0.9 }));
       } else if (element.kind === "machine") {
-        addMachine(model, element, shiftX, shiftZ, assigned.get(element.id));
+        addMachine(model, element, shiftX, shiftZ, assigned.get(element.id), stations.length === 0);
       }
     }
     if (!elements.some((element) => element.kind === "wall")) {
@@ -378,7 +448,7 @@ export default function PlanScene3D({ plan, stations = EMPTY_STATIONS, states = 
         id: `virtual-${station.station}`, kind: "machine", type: "piqueuse_plate", x: station.x, y: station.z,
         w: 1.15, d: 0.72, rot: 0, label: `Poste ${station.station}`, operator: "front", status: "service",
       };
-      addMachine(model, machine, shiftX, shiftZ);
+      addMachine(model, machine, shiftX, shiftZ, undefined, false);
     }
 
     for (const station of stations) {

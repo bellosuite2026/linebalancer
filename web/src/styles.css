@@ -258,6 +258,8 @@ tr.row-over td { background: #fdf6f5; }
 .twin-canvas { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: #fbfbf9; touch-action: none; }
 .twin-canvas svg { display: block; width: 100%; height: auto; user-select: none; }
 .twin-grid { stroke: #efede7; stroke-width: 1; }
+.twin-worker { pointer-events: none; }
+.twin-worker-initial { fill: #fff; font-size: 6px; font-weight: 800; pointer-events: none; }
 .twin-st { font-size: 15px; font-weight: 900; fill: #13202f; } .twin-small { font-size: 10px; fill: #13202f; font-weight: 600; }
 .twin-badge { font-size: 10px; font-weight: 800; fill: #fff; } .twin-bn { font-size: 10px; font-weight: 800; fill: #7a1f12; text-transform: uppercase; letter-spacing: .04em; }
 .twin-w { font-size: 8.5px; font-weight: 800; fill: #1f4e79; } .twin-w.on { fill: #fff; }

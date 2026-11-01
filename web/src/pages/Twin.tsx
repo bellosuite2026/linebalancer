@@ -3,12 +3,12 @@ import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom"
 import { api, download, fmt, post } from "../lib/api";
 import { canWrite, useSession } from "../lib/session";
 import {
-  buildTracks, bundleAt, clock, defaultLayout, newScenario,
+  buildTracks, buildWorkerTracks, bundleAt, clock, defaultLayout, newScenario, workerAt,
   type Layout, type LayoutKind, type Placement, type Scenario, type SimResult, type Simulation, type Sync, type Twin as TwinData,
 } from "../lib/twin";
 import type { ProblemRow, Run } from "../lib/types";
 import { MACHINE_CATALOG, ZONES, machineType, operatorPoint, type Machine, type WorkshopPlan } from "../lib/workshop";
-import type { SceneBundle, SceneStation, SceneStationState } from "../components/PlanScene3D";
+import type { SceneBundle, SceneStation, SceneStationState, SceneWorker } from "../components/PlanScene3D";
 
 const PlanScene3D = lazy(() => import("../components/PlanScene3D"));
 
@@ -245,6 +245,8 @@ function LinePlan({ data, layout, setLayout, res, startHHMM, editable, placement
   const drag = useRef<{ sid: string; dx: number; dy: number } | null>(null);
   const shift = res?.shift_minutes ?? 480;
   const tracks = useMemo(() => (res ? buildTracks(res) : []), [res]);
+  const workerTracks = useMemo(() => (res ? buildWorkerTracks(res) : []), [res]);
+  const workerTrackById = useMemo(() => new Map(workerTracks.map((track) => [track.id, track])), [workerTracks]);
   const lastSt = data.plan.stations[data.plan.stations.length - 1]?.station;
   const finishTimes = useMemo(() => {
     const out: [number, number][] = [];
@@ -276,6 +278,35 @@ function LinePlan({ data, layout, setLayout, res, startHHMM, editable, placement
   const center = (sid: number | string) => {
     const p = pos[String(sid)] ?? { x: 0, y: 0 };
     return planMode ? { x: X(p.x), y: Y(p.y) } : { x: X(p.x + SW / 2), y: Y(p.y + SH / 2) };
+  };
+  const workerStationPoint = (sid: number) => {
+    const point = pos[String(sid)] ?? { x: 0, y: 0 };
+    return planMode ? { x: point.x, y: point.y } : { x: point.x + SW / 2, y: point.y + SH + 0.45 };
+  };
+  const routeMeters = (from: number, to: number) => {
+    if (planMode) {
+      const exact = placement?.routes?.[`${from}-${to}`];
+      const reverse = placement?.routes?.[`${to}-${from}`];
+      const routePoints = exact?.length ? exact : reverse?.length ? [...reverse].reverse() : null;
+      if (routePoints) return routePoints.map(([x, y]) => ({ x, y }));
+    }
+    return [workerStationPoint(from), workerStationPoint(to)];
+  };
+  const distanceOn = (points: { x: number; y: number }[]) => points.slice(1).reduce((sum, point, index) =>
+    sum + Math.hypot(point.x - points[index].x, point.y - points[index].y), 0);
+  const alongMeters = (points: { x: number; y: number }[], fraction: number) => {
+    const lengths = points.slice(1).map((point, index) => Math.hypot(point.x - points[index].x, point.y - points[index].y));
+    let remaining = lengths.reduce((sum, length) => sum + length, 0) * Math.max(0, Math.min(1, fraction));
+    for (let index = 0; index < lengths.length; index++) {
+      const length = lengths[index];
+      if (remaining <= length || index === lengths.length - 1) {
+        const ratio = length ? Math.min(1, remaining / length) : 0;
+        return { x: points[index].x + (points[index + 1].x - points[index].x) * ratio,
+          y: points[index].y + (points[index + 1].y - points[index].y) * ratio };
+      }
+      remaining -= length;
+    }
+    return points[points.length - 1] ?? { x: 0, y: 0 };
   };
   const sceneStations = useMemo<SceneStation[]>(() => data.plan.stations.map((station) => {
     const point = pos[String(station.station)] ?? { x: 0, y: 0 };
@@ -376,6 +407,25 @@ function LinePlan({ data, layout, setLayout, res, startHHMM, editable, placement
     return [{ id: bundle.id, x: (from.x + (to.x - from.x) * state.f) / PX + minX,
       z: (from.y + (to.y - from.y) * state.f) / PX + minY, size: bundle.size, kind: "move" }];
   }), [tracks, t, placement, planMode, layout.positions, minX, minY]);
+  const sceneWorkers = useMemo<SceneWorker[]>(() => {
+    const workerIds = [...new Set([...data.plan.stations.flatMap((station) => station.worker_ids), ...workerTracks.map((track) => track.id)])];
+    return workerIds.map((id) => {
+      const track = workerTrackById.get(id);
+      const nextIndex = track?.visits.findIndex((entry) => entry.start > t) ?? -1;
+      const previous = track && nextIndex > 0 ? track.visits[nextIndex - 1] : null;
+      const next = track && nextIndex > 0 ? track.visits[nextIndex] : null;
+      const walkMinutes = previous && next && previous.station !== next.station
+        ? distanceOn(routeMeters(previous.station, next.station)) / 50 : 0;
+      const visit = track ? workerAt(track, t, walkMinutes) : null;
+      const state = visit ?? { kind: "idle" as const, station: data.plan.stations.find((station) => station.worker_ids.includes(id))?.station ?? data.plan.stations[0]?.station ?? 1 };
+      let point: { x: number; y: number };
+      if (state.kind === "walk") {
+        const path = routeMeters(state.from, state.to);
+        point = alongMeters(path, state.f);
+      } else point = workerStationPoint(state.station);
+      return { id, label: data.plan.workers[id]?.name ?? id, x: point.x, z: point.y, kind: state.kind };
+    });
+  }, [data.plan.stations, data.plan.workers, layout.positions, planMode, placement, t, workerTracks]);
   const warnPairs = new Set((res?.lean.warnings ?? []).filter((w) => w.kind === "backtrack" || w.kind === "long_transfer")
     .map((w) => `${w.stations?.[0]}-${w.stations?.[1]}`));
 
@@ -388,13 +438,13 @@ function LinePlan({ data, layout, setLayout, res, startHHMM, editable, placement
         </div>
         <button className="btn primary" disabled={!res} onClick={() => { if (t >= shift) setT(0); setPlaying(!playing); }}>{playing ? "⏸ Pause" : "▶ Lecture"}</button>
         <div className="seg">{SPEEDS.map((s) => <button key={s} className={speed === s ? "on" : ""} onClick={() => setSpeed(s)}>x{s}</button>)}</div>
-        <input type="range" min={0} max={shift} step={0.5} value={t} onChange={(e) => setT(Number(e.target.value))} disabled={!res} />
+        <input type="range" min={0} max={shift} step={0.05} value={t} onChange={(e) => setT(Number(e.target.value))} disabled={!res} />
         <span className="twin-clock">{clock(startHHMM, t)}</span>
         <span className="muted small">{done} pièces finies · encours {wip} pcs</span>
       </div>
       {res?.trace.truncated && t > traceEnd && <p className="muted small">Animation détaillée limitée aux {Math.round(traceEnd)} premières minutes (paquets très petits) ; les résultats couvrent toute la journée.</p>}
       {scene3d ? <Suspense fallback={<div className="p3d-fallback twin-3d" role="status">Chargement du moteur 3D…</div>}>
-        <PlanScene3D plan={planMode ? wplan : null} stations={sceneStations} states={sceneStates} bundles={sceneBundles}
+        <PlanScene3D plan={planMode ? wplan : null} stations={sceneStations} states={sceneStates} bundles={sceneBundles} workers={sceneWorkers}
           className="twin-3d" title={planMode ? `Jumeau 3D · ${wplan!.name}` : "Jumeau 3D · ligne"} />
       </Suspense> : <div className="twin-canvas">
         <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} style={{ minWidth: Math.min(W, 1100) }} onPointerMove={onMove} onPointerUp={onUp} onPointerLeave={onUp}>
@@ -435,12 +485,6 @@ function LinePlan({ data, layout, setLayout, res, startHHMM, editable, placement
                   <text x={0} y={4} textAnchor="middle" className="twin-st">{s.station}{res ? ` · ${Math.round(util)}%` : ""}</text>
                   {st.queue > 0 && <g transform="translate(26,-20)"><rect x={0} y={0} width={30} height={14} rx={7} fill={st.queue >= 40 ? "#c0392b" : st.queue >= 20 ? "#b7791f" : "#5b6878"} />
                     <text x={15} y={10.5} textAnchor="middle" className="twin-badge">{st.queue}</text></g>}
-                  {workers.map((w, k) => {
-                    const on = st.working.has(w);
-                    return <g key={w + k} transform={`translate(${-14 + k * 20},22)`}>
-                      <circle r={8} fill={on ? "#1f4e79" : "#fff"} stroke="#1f4e79" strokeWidth={1.5} />
-                      <text y={3} textAnchor="middle" className={on ? "twin-w on" : "twin-w"}>{initials(names[k] ?? w)}</text><title>{names[k] ?? w}</title></g>;
-                  })}
                   {isBn && <text x={0} y={-16} textAnchor="middle" className="twin-bn">goulot</text>}
                   <title>{`Station ${s.station} · ${s.operations.map((o) => `${o.id} ${o.name}`).join(" + ")}\n${fmt.n(s.minutes, 2)} min/pièce · ${names.join(", ") || "sans ouvrière"}${virt ? "\nAucune machine du plan : station placée à côté" : ""}${ss ? `\nOccupation ${ss.utilization_pct} % · encours max ${ss.max_wip}` : ""}`}</title>
                 </g>
@@ -456,17 +500,20 @@ function LinePlan({ data, layout, setLayout, res, startHHMM, editable, placement
                 {st.queue > 0 && <g transform={`translate(${SW * PX - 4},${SH * PX + 4})`}>
                   <rect x={-34} y={0} width={34} height={15} rx={7} fill={st.queue >= 40 ? "#c0392b" : st.queue >= 20 ? "#b7791f" : "#5b6878"} />
                   <text x={-17} y={11} textAnchor="middle" className="twin-badge">{st.queue}</text></g>}
-                {workers.map((w, k) => {
-                  const on = st.working.has(w);
-                  return <g key={w + k} transform={`translate(${12 + k * 22},${SH * PX + 14})`}>
-                    <circle r={9} fill={on ? "#1f4e79" : "#fff"} stroke="#1f4e79" strokeWidth={1.5} />
-                    <text y={3.5} textAnchor="middle" className={on ? "twin-w on" : "twin-w"}>{initials(names[k] ?? w)}</text>
-                    <title>{names[k] ?? w}{on ? " (au travail)" : ""}</title></g>;
-                })}
                 {isBn && <text x={SW * PX / 2} y={-6} textAnchor="middle" className="twin-bn">goulot</text>}
                 <title>{`Station ${s.station} · ${s.operations.map((o) => `${o.id} ${o.name}`).join(" + ")}\n${fmt.n(s.minutes, 2)} min/pièce · ${names.join(", ") || "sans ouvrière"}${ss ? `\nOccupation ${ss.utilization_pct} % · attente moy. ${ss.avg_wait_min} min · encours max ${ss.max_wip}` : ""}`}</title>
               </g>
             );
+          })}
+          {sceneWorkers.map((worker) => {
+            const x = X(worker.x), y = Y(worker.z + 0.28);
+            const fill = worker.kind === "work" ? "#1f6685" : worker.kind === "walk" ? "#c17b2c" : "#76858b";
+            return <g key={worker.id} className={`twin-worker ${worker.kind}`} transform={`translate(${x},${y})`}>
+              <circle cy={-9} r={8} fill={fill} stroke="#fff" strokeWidth={2} />
+              <path d="M-6,-1 Q0,-5 6,-1 L7,10 Q0,14 -7,10Z" fill={fill} stroke="#fff" strokeWidth={1.5} />
+              <text y={-7} textAnchor="middle" className="twin-worker-initial">{initials(worker.label)}</text>
+              <title>{`${worker.label} · ${worker.kind === "work" ? "au poste" : worker.kind === "walk" ? "en déplacement" : "en attente"}`}</title>
+            </g>;
           })}
           {dots.map((d) => <rect key={d.key} x={d.x - 3.5} y={d.y - 3.5} width={7} height={7} rx={1.5}
             fill={d.kind === "w" ? "#ffffff" : d.kind === "m" ? "#1f4e79" : "#7b8794"} stroke="#1f2a37" strokeWidth={0.6} />)}
@@ -476,7 +523,7 @@ function LinePlan({ data, layout, setLayout, res, startHHMM, editable, placement
       <div className="legend">
         <span><i style={{ background: "#3fa66b" }} />occupation &lt; 75 %</span><span><i style={{ background: "#f0b429" }} />75–92 %</span>
         <span><i style={{ background: "#e4572e" }} />&gt; 92 % (saturée)</span><span>▪ paquet ({res?.config?.bundle_size ?? 10} pcs)</span>
-        <span>● ouvrière (pleine = au travail)</span>{editable && <span>Glissez un poste pour le déplacer (grille 10 cm).</span>}
+        <span>Ouvrières : gris en attente, bleu au poste, ocre en déplacement.</span>{editable && <span>Glissez un poste pour le déplacer (grille 10 cm).</span>}
       </div>
     </div>
   );

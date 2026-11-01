@@ -102,6 +102,12 @@ export function defaultLayout(ids: number[], kind: LayoutKind): Layout {
 // --------------------------------------------------------------- trace -> positions
 export interface Seg { st: number; a: number; s: number; e: number; w: string }
 export interface BundleTrack { id: number; size: number; segs: Seg[] }
+export interface WorkerVisit { station: number; start: number; end: number }
+export interface WorkerTrack { id: string; visits: WorkerVisit[] }
+
+export type WorkerState =
+  | { kind: "idle" | "work"; station: number }
+  | { kind: "walk"; from: number; to: number; f: number };
 
 export function buildTracks(res: SimResult): BundleTrack[] {
   const map = new Map<number, BundleTrack>();
@@ -135,6 +141,41 @@ export function bundleAt(b: BundleTrack, t: number): BundleState | null {
     if (nx && t < nx.a) return { kind: "move", from: g.st, to: nx.st, f: (t - g.e) / Math.max(0.01, nx.a - g.e) };
   }
   return null;
+}
+
+export function buildWorkerTracks(res: SimResult): WorkerTrack[] {
+  const tracks = new Map<string, WorkerTrack>();
+  for (const bundle of buildTracks(res)) for (const segment of bundle.segs) {
+    if (!segment.w || !Number.isFinite(segment.s) || !Number.isFinite(segment.e)) continue;
+    let track = tracks.get(segment.w);
+    if (!track) { track = { id: segment.w, visits: [] }; tracks.set(segment.w, track); }
+    track.visits.push({ station: segment.st, start: segment.s, end: segment.e });
+  }
+  return [...tracks.values()].map((track) => ({
+    ...track,
+    visits: track.visits.sort((a, b) => a.start - b.start || a.end - b.end),
+  }));
+}
+
+export function workerAt(track: WorkerTrack, t: number, walkMinutes = 0): WorkerState | null {
+  const { visits } = track;
+  if (!visits.length) return null;
+  const active = visits.find((visit) => visit.start <= t && t < visit.end);
+  if (active) return { kind: "work", station: active.station };
+
+  const nextIndex = visits.findIndex((visit) => visit.start > t);
+  if (nextIndex === 0) return { kind: "idle", station: visits[0].station };
+  if (nextIndex < 0) return { kind: "idle", station: visits[visits.length - 1].station };
+
+  const previous = visits[nextIndex - 1];
+  const next = visits[nextIndex];
+  if (previous.station === next.station) return { kind: "idle", station: previous.station };
+  const gap = next.start - previous.end;
+  if (gap <= 0) return { kind: "idle", station: next.station };
+  const duration = Math.min(gap, Math.max(0, walkMinutes));
+  const start = next.start - duration;
+  if (duration <= 0 || t < start) return { kind: "idle", station: previous.station };
+  return { kind: "walk", from: previous.station, to: next.station, f: Math.max(0, Math.min(1, (t - start) / duration)) };
 }
 
 export function finishedAt(res: SimResult, t: number): number {
