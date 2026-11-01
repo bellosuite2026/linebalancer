@@ -178,10 +178,12 @@ def wp():
 
 def test_plan_crud_inventory_and_isolation(wp):
     c, store, org, rid, ha, hb = wp
-    body = {"name": "Atelier actuel", "width_m": 20, "length_m": 10, "elements": two_rooms()["elements"],
+    body = {"name": "Atelier actuel", "width_m": 20, "length_m": 10,
+            "elements": [*two_rooms()["elements"], {"kind": "dim", "id": "measure-1"}],
             "background": {"path": f"{org}/fond.png", "opacity": 0.5}}
     r = c.post(f"/v1/orgs/{org}/workshop-plans", headers=ha, json=body)
     assert r.status_code == 201, r.text
+    assert r.json()["elements"][-1]["kind"] == "dim"
     pid = r.json()["id"]
     bad = {**body, "background": {"path": f"{uuid.uuid4()}/x.png"}}
     assert c.post(f"/v1/orgs/{org}/workshop-plans", headers=ha, json=bad).status_code == 422

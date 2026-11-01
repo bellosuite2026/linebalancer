@@ -276,7 +276,7 @@ class SimulateRequest(BaseModel):
 
 
 # ------------------------------------------------------------------ plan d'atelier (cartographie)
-PLAN_ELEMENT_KINDS = {"wall", "pillar", "door", "aisle", "zone", "machine", "text"}
+PLAN_ELEMENT_KINDS = {"wall", "pillar", "door", "aisle", "zone", "machine", "text", "dim"}
 
 
 class WorkshopPlanIn(BaseModel):

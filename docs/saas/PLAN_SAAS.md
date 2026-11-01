@@ -42,7 +42,8 @@ Postgres : ateliers, utilisateurs, lignes/projets, historiques de calcul, abonne
 
 | Inclus | Plus tard |
 |---|---|
-| Import CSV/Excel SAM, postes, ouvriers (+ modèles téléchargeables) | Vue Implantation 2D / 3D |
+| Import CSV/Excel SAM, postes, ouvriers (+ modèles téléchargeables) | — |
+| Plan d'atelier 2D et jumeau numérique 2D | Éditeur 3D de l'atelier et du jumeau |
 | Diagnostic avant calcul avec actions correctives | Simulation à événements discrets |
 | Équilibrage RPW et CP-SAT, cadence minimale | Scénarios what-if multiples |
 | Tableau par station, Yamazumi, KPIs (efficacité, opérateurs) | Analyse capacité commande / délais |
@@ -64,6 +65,10 @@ Postgres : ateliers, utilisateurs, lignes/projets, historiques de calcul, abonne
 - Argument de vente : 1 opérateur économisé sur une ligne ~ 1 000-1 200 TND/mois de masse salariale.
 
 # 6. Feuille de route
+
+État au 1 novembre 2026 : le plan d'atelier 2D et le jumeau numérique 2D sont
+disponibles dans l'interface web. L'éditeur 3D et la vue 3D du jumeau ne sont pas
+encore implémentés dans le client web.
 
 1. **Fait** — API v0.1 : import, diagnostic, équilibrage, cadence min, export JSON, file de calculs, clés API, 23 tests API.
 2. Corriger le bug d'affectation des postes de CP-SAT (signalé par l'API) et les données pantalon/veste.
