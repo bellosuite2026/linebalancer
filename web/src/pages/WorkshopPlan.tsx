@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { api, fmt, post } from "../lib/api";
 import { canManage, canWrite, useSession } from "../lib/session";
@@ -10,6 +10,8 @@ import {
   type Aisle, type Door, type El, type Machine, type MachineStatus, type OperatorSide, type P, type PlanSettings, type PlanSummary,
   type Wall, type WorkshopPlan, type Zone,
 } from "../lib/workshop";
+
+const PlanScene3D = lazy(() => import("../components/PlanScene3D"));
 
 type Tool = "select" | "wall" | "pillar" | "door" | "aisle" | "zone" | "machine" | "calibrate" | "background";
 const TOOLS: { id: Tool; label: string; hint: string }[] = [
@@ -46,6 +48,7 @@ export default function WorkshopPlanPage() {
   const [serverAt, setServerAt] = useState<string | null>(null);
   const [restore, setRestore] = useState<WorkshopPlan | null>(null);
   const [tool, setTool] = useState<Tool>("select");
+  const [canvasMode, setCanvasMode] = useState<"2d" | "3d">("2d");
   const [armed, setArmed] = useState("piqueuse_plate");
   const [zoneKind, setZoneKind] = useState("montage");
   const [sel, setSel] = useState<string | null>(null);
@@ -505,12 +508,18 @@ export default function WorkshopPlanPage() {
         {/* ------------------------------------------------ plan */}
         <section className="card wp-canvas-card">
           <div className="row small wp-toolbar">
-            <button className="btn small" onClick={() => zoomAt(1 / 1.3)}>＋</button>
-            <button className="btn small" onClick={() => zoomAt(1.3)}>－</button>
-            <button className="btn small" onClick={() => fit(plan)}>Ajuster</button>
+            <div className="seg" aria-label="Vue du plan">
+              <button className={canvasMode === "2d" ? "on" : ""} aria-pressed={canvasMode === "2d"} onClick={() => setCanvasMode("2d")}>2D</button>
+              <button className={canvasMode === "3d" ? "on" : ""} aria-pressed={canvasMode === "3d"} onClick={() => setCanvasMode("3d")}>3D</button>
+            </div>
+            {canvasMode === "2d" && <>
+              <button className="btn small" onClick={() => zoomAt(1 / 1.3)}>＋</button>
+              <button className="btn small" onClick={() => zoomAt(1.3)}>－</button>
+              <button className="btn small" onClick={() => fit(plan)}>Ajuster</button>
+            </>}
             {writable && <><button className="btn small" disabled={!undo.current.length} onClick={doUndo} title="Ctrl+Z">↶ Annuler</button>
               <button className="btn small" disabled={!redo.current.length} onClick={doRedo} title="Ctrl+Y">↷ Rétablir</button></>}
-            <span className="muted">{toolHint}</span>
+            <span className="muted">{canvasMode === "2d" ? toolHint : "Vue 3D du plan enregistré dans l’éditeur · faites glisser pour orbiter."}</span>
           </div>
           {tool === "calibrate" && <div className="notice warn row">
             {calib.length < 2 ? `Calibrage : touchez le point ${calib.length + 1} sur 2.` : <>Distance réelle entre les 2 points :
@@ -518,8 +527,11 @@ export default function WorkshopPlanPage() {
               <button className="btn small primary" onClick={applyCalibration} disabled={!(Number(calibDist.replace(",", ".")) > 0)}>Appliquer</button></>}
             <button className="link" onClick={() => { setCalib([]); setTool("select"); }}>Annuler</button>
           </div>}
-          <div ref={wrapRef} className="wp-canvas" onDragOver={(e) => e.preventDefault()}
-            onDrop={(e) => { const k = e.dataTransfer.getData("text/x-machine"); if (k) { e.preventDefault(); placeAt(toM(e.clientX, e.clientY), k); } }}>
+          <div ref={wrapRef} className="wp-canvas" onDragOver={(e) => { if (canvasMode === "2d") e.preventDefault(); }}
+            onDrop={(e) => { if (canvasMode !== "2d") return; const k = e.dataTransfer.getData("text/x-machine"); if (k) { e.preventDefault(); placeAt(toM(e.clientX, e.clientY), k); } }}>
+            {canvasMode === "3d" ? <Suspense fallback={<div className="p3d-fallback" role="status">Chargement du moteur 3D…</div>}>
+              <PlanScene3D plan={plan} className="wp-canvas3d" title={`Atelier · ${plan.name}`} />
+            </Suspense> :
             <svg ref={svgRef} viewBox={`${view.x} ${view.y} ${view.w} ${vh}`} onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}
               onWheel={onWheel} style={{ touchAction: "none", cursor: tool === "select" ? "default" : "crosshair" }} xmlns="http://www.w3.org/2000/svg">
               <defs>
@@ -579,7 +591,7 @@ export default function WorkshopPlanPage() {
                 {calib.map((p, i) => <circle key={i} cx={p[0]} cy={p[1]} r={Math.max(0.08, view.w / 200)} fill="#c0392b" />)}
                 {calib.length === 2 && <line x1={calib[0][0]} y1={calib[0][1]} x2={calib[1][0]} y2={calib[1][1]} stroke="#c0392b" strokeWidth={Math.max(0.03, view.w / 500)} strokeDasharray="0.2 0.1" />}
               </g>}
-            </svg>
+            </svg>}
           </div>
           <div className="legend small"><span>● opératrice (côté de travail)</span><span>contour rouge = à vérifier</span><span>hachures rouges = en panne</span><span>pointillés = réserve</span><span>Pincez pour zoomer, glissez le fond pour vous déplacer</span></div>
         </section>

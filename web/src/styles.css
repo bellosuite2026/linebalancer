@@ -300,7 +300,7 @@ tr.row-over td { background: #fdf6f5; }
 .wp-ico { flex: none; width: 30px; height: 22px; border: 1.5px solid #5b6878; border-radius: 4px; display: grid; place-items: center; font-size: .68rem; font-weight: 800; color: #1f4e79; background: #f7f9fc; }
 .wp-canvas-card { padding: .7rem; min-width: 0; }
 .wp-toolbar { margin-bottom: .5rem; }
-.wp-canvas { height: calc(100vh - 230px); min-height: 420px; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: #f1efe9; }
+.wp-canvas { position: relative; height: calc(100vh - 230px); min-height: 420px; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: #f1efe9; }
 .wp-canvas svg { display: block; width: 100%; height: 100%; user-select: none; -webkit-user-select: none; }
 .wp-grid { stroke: #e6e2d8; stroke-width: .01; vector-effect: non-scaling-stroke; } .wp-grid.major { stroke: #d6d1c4; }
 .wp-zone-t { fill: #6c6553; font-weight: 700; }
@@ -320,12 +320,17 @@ tr.row-over td { background: #fdf6f5; }
 .wp-measure { fill: var(--brand); stroke: #fff; stroke-width: .08; paint-order: stroke; font-size: .35px; font-weight: 700; pointer-events: none; }
 .wp-canvas3d, .p3d, .twin-3d { position: relative; min-width: 0; min-height: 360px; overflow: hidden; border: 1px solid var(--line); border-radius: 8px; background: #f1efe9; }
 .p3d { display: grid; grid-template-rows: auto minmax(0, 1fr); }
+.p3d-stage { position: relative; min-width: 0; min-height: 320px; overflow: hidden; }
 .p3d-canvas { display: block; width: 100%; height: 100%; min-height: 320px; touch-action: none; }
 .p3d-bar { position: relative; z-index: 1; padding: .4rem .55rem; border-bottom: 1px solid var(--line); background: #fff; }
 .p3d-h { margin: 0; font-size: .95rem; }
 .p3d-err { margin: .5rem; padding: .6rem .75rem; border-left: 3px solid var(--err); background: #fbeaea; color: #8e2a20; font-size: .88rem; }
 .p3d-loading { position: absolute; inset: 2.8rem 0 0; display: grid; place-items: center; padding: 1rem; background: rgba(255,255,255,.82); color: var(--muted); font-size: .9rem; }
+.p3d-fallback { min-height: 360px; display: grid; place-items: center; padding: 1rem; color: var(--muted); font-size: .9rem; }
+.wp-canvas > .p3d { width: 100%; height: 100%; min-height: 360px; border: 0; border-radius: 0; }
+.wp-canvas > .p3d .p3d-stage { min-height: 0; }
 .twin-3d { min-height: 420px; }
+.twin-3d .p3d-stage { min-height: 370px; }
 .wp-props fieldset.plain, fieldset.plain { border: 0; padding: 0; margin: 0; min-width: 0; }
 .wp-gamme { border-top: 1px solid var(--line); margin-top: .8rem; padding-top: .2rem; }
 .plain-list { padding-left: 1rem; margin: .3rem 0 .6rem; } .plain-list li { margin: .25rem 0; }
@@ -345,5 +350,8 @@ select.on-select { border-color: var(--brand); background: #e6effa; font-weight:
   .wp-canvas { height: 65vh; }
   .wp-canvas3d, .p3d, .twin-3d { min-height: 300px; }
   .p3d-canvas { min-height: 260px; }
+  .p3d-bar { align-items: flex-start; }
+  .p3d-fallback { min-height: 300px; }
+  .p3d-stage, .twin-3d .p3d-stage { min-height: 300px; }
 }
 @media (max-width: 700px) { .form-grid.tight4 { grid-template-columns: 1fr 1fr; } }

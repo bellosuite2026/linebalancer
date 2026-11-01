@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { api, download, fmt, post } from "../lib/api";
 import { canWrite, useSession } from "../lib/session";
@@ -8,6 +8,9 @@ import {
 } from "../lib/twin";
 import type { ProblemRow, Run } from "../lib/types";
 import { MACHINE_CATALOG, ZONES, machineType, operatorPoint, type Machine, type WorkshopPlan } from "../lib/workshop";
+import type { SceneBundle, SceneStation, SceneStationState } from "../components/PlanScene3D";
+
+const PlanScene3D = lazy(() => import("../components/PlanScene3D"));
 
 const SPEEDS = [1, 5, 10, 30, 60];
 const PX = 70;                       // pixels par mètre
@@ -234,6 +237,7 @@ function LinePlan({ data, layout, setLayout, res, startHHMM, editable, placement
   placement?: Placement | null; wplan?: WorkshopPlan | null;
 }) {
   const planMode = !!(placement && wplan && placement.plan_id === wplan.id);
+  const [scene3d, setScene3d] = useState(false);
   const [t, setT] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState(30);
@@ -273,6 +277,16 @@ function LinePlan({ data, layout, setLayout, res, startHHMM, editable, placement
     const p = pos[String(sid)] ?? { x: 0, y: 0 };
     return planMode ? { x: X(p.x), y: Y(p.y) } : { x: X(p.x + SW / 2), y: Y(p.y + SH / 2) };
   };
+  const sceneStations = useMemo<SceneStation[]>(() => data.plan.stations.map((station) => {
+    const point = pos[String(station.station)] ?? { x: 0, y: 0 };
+    return {
+      station: station.station,
+      x: planMode ? point.x : point.x + SW / 2,
+      z: planMode ? point.y : point.y + SH / 2,
+      machineIds: planMode ? placement?.assignment[String(station.station)] ?? [] : [],
+      virtual: planMode && placement?.virtual.includes(station.station),
+    };
+  }), [data.plan.stations, layout.positions, planMode, placement]);
   const route = (a: number, b: number): { x: number; y: number }[] | null => {
     const r = placement?.routes?.[`${a}-${b}`];
     return planMode && r && r.length >= 2 ? r.map(([x, y]) => ({ x: X(x), y: Y(y) })) : null;
@@ -334,12 +348,44 @@ function LinePlan({ data, layout, setLayout, res, startHHMM, editable, placement
   const wip = [...stState.values()].reduce((a, s) => a + s.queue, 0);
   const simStations = new Map(res?.stations.map((s) => [s.station, s]) ?? []);
   const planStations = new Map(res?.plan.stations.map((s) => [s.station, s]) ?? []);
+  const sceneStates = useMemo<Record<string, SceneStationState>>(() => Object.fromEntries(data.plan.stations.map((station) => {
+    const runtime = simStations.get(station.station);
+    const activity = stState.get(station.station);
+    return [String(station.station), {
+      utilization: runtime?.worker_util_max ?? runtime?.utilization_pct ?? station.load_pct ?? 0,
+      queue: activity?.queue ?? 0,
+      working: !!activity?.working.size,
+    }];
+  })), [data.plan.stations, res, t]);
+  const sceneBundles = useMemo<SceneBundle[]>(() => tracks.flatMap<SceneBundle>((bundle) => {
+    const state = bundleAt(bundle, t);
+    if (!state) return [];
+    if (state.kind === "queue" || state.kind === "work") {
+      const point = center(state.st);
+      const col = (bundle.id % 5) - 2;
+      const row = Math.floor(bundle.id % 15 / 5);
+      return [{ id: bundle.id, x: point.x / PX + minX + col * 0.12, z: point.y / PX + minY + row * 0.12, size: bundle.size,
+        kind: state.kind === "work" ? "work" : "queue" }];
+    }
+    const routePoints = route(state.from, state.to);
+    if (routePoints) {
+      const point = along(routePoints, state.f);
+      return [{ id: bundle.id, x: point.x / PX + minX, z: point.y / PX + minY, size: bundle.size, kind: "move" }];
+    }
+    const from = center(state.from), to = center(state.to);
+    return [{ id: bundle.id, x: (from.x + (to.x - from.x) * state.f) / PX + minX,
+      z: (from.y + (to.y - from.y) * state.f) / PX + minY, size: bundle.size, kind: "move" }];
+  }), [tracks, t, placement, planMode, layout.positions, minX, minY]);
   const warnPairs = new Set((res?.lean.warnings ?? []).filter((w) => w.kind === "backtrack" || w.kind === "long_transfer")
     .map((w) => `${w.stations?.[0]}-${w.stations?.[1]}`));
 
   return (
     <div>
       <div className="twin-controls">
+        <div className="seg" aria-label="Vue du jumeau numérique">
+          <button className={!scene3d ? "on" : ""} aria-pressed={!scene3d} onClick={() => setScene3d(false)}>2D</button>
+          <button className={scene3d ? "on" : ""} aria-pressed={scene3d} onClick={() => setScene3d(true)}>3D</button>
+        </div>
         <button className="btn primary" disabled={!res} onClick={() => { if (t >= shift) setT(0); setPlaying(!playing); }}>{playing ? "⏸ Pause" : "▶ Lecture"}</button>
         <div className="seg">{SPEEDS.map((s) => <button key={s} className={speed === s ? "on" : ""} onClick={() => setSpeed(s)}>x{s}</button>)}</div>
         <input type="range" min={0} max={shift} step={0.5} value={t} onChange={(e) => setT(Number(e.target.value))} disabled={!res} />
@@ -347,7 +393,10 @@ function LinePlan({ data, layout, setLayout, res, startHHMM, editable, placement
         <span className="muted small">{done} pièces finies · encours {wip} pcs</span>
       </div>
       {res?.trace.truncated && t > traceEnd && <p className="muted small">Animation détaillée limitée aux {Math.round(traceEnd)} premières minutes (paquets très petits) ; les résultats couvrent toute la journée.</p>}
-      <div className="twin-canvas">
+      {scene3d ? <Suspense fallback={<div className="p3d-fallback twin-3d" role="status">Chargement du moteur 3D…</div>}>
+        <PlanScene3D plan={planMode ? wplan : null} stations={sceneStations} states={sceneStates} bundles={sceneBundles}
+          className="twin-3d" title={planMode ? `Jumeau 3D · ${wplan!.name}` : "Jumeau 3D · ligne"} />
+      </Suspense> : <div className="twin-canvas">
         <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} style={{ minWidth: Math.min(W, 1100) }} onPointerMove={onMove} onPointerUp={onUp} onPointerLeave={onUp}>
           <defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0L10,5L0,10z" fill="#9aa6b5" /></marker>
             <marker id="arrw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0L10,5L0,10z" fill="#c0392b" /></marker></defs>
@@ -423,6 +472,7 @@ function LinePlan({ data, layout, setLayout, res, startHHMM, editable, placement
             fill={d.kind === "w" ? "#ffffff" : d.kind === "m" ? "#1f4e79" : "#7b8794"} stroke="#1f2a37" strokeWidth={0.6} />)}
         </svg>
       </div>
+      }
       <div className="legend">
         <span><i style={{ background: "#3fa66b" }} />occupation &lt; 75 %</span><span><i style={{ background: "#f0b429" }} />75–92 %</span>
         <span><i style={{ background: "#e4572e" }} />&gt; 92 % (saturée)</span><span>▪ paquet ({res?.config?.bundle_size ?? 10} pcs)</span>
