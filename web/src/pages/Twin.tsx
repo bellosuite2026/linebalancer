@@ -769,7 +769,7 @@ function PlanUnderlay({ wplan, placement, X, Y, colorOf }: {
                 stroke={used ? "#1f2a37" : "#a3abb6"} strokeWidth={used ? 1.4 : 1} strokeDasharray={e.status === "reserve" ? "5 3" : undefined} />
             </g>
             <text x={X(e.x)} y={Y(e.y) + 4} textAnchor="middle" className="twin-small" fill={used ? "#1f2a37" : "#8a929d"}>{e.label}</text>
-            {!used && e.type !== "chariot" && <circle cx={X(op[0])} cy={Y(op[1])} r={3} fill="#c3c9d1" />}
+            {!used && machineType(e) !== "" && <circle cx={X(op[0])} cy={Y(op[1])} r={3} fill="#c3c9d1" />}
             <title>{`${e.label} · ${MACHINE_CATALOG[e.type]?.label ?? e.type}${e.status !== "service" ? ` (${e.status === "panne" ? "en panne" : "réserve"})` : ""}${used ? ` · station ${sid}` : " · non utilisée"}`}</title>
           </g>;
         }
@@ -789,7 +789,7 @@ function PlanPanel({ data, placement, wplan, writable, busy, onAssign, onBalance
   const [mct, setMct] = useState(String(placement.travel.minutes || 0));
   const [maxM, setMaxM] = useState("2");
   useEffect(() => { setMct(String(placement.travel.minutes || 0)); }, [placement.travel.minutes]);
-  const machines = wplan.elements.filter((e): e is Machine => e.kind === "machine" && e.type !== "chariot");
+  const machines = wplan.elements.filter((e): e is Machine => e.kind === "machine" && machineType(e) !== "");
   const byId = new Map(machines.map((m) => [m.id, m]));
   const owner = new Map<string, number>();
   for (const [sid, mids] of Object.entries(placement.assignment)) for (const m of mids) owner.set(m, Number(sid));

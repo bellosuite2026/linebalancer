@@ -28,23 +28,13 @@ OPERATOR_GAP_M = 0.45           # centre de l'opératrice à partir du bord de l
 VIRTUAL_SPACING_M = 1.6
 
 # type -> libellé, largeur, profondeur, type machine de la gamme ("" = pas un poste de travail)
+# Source unique : engine.machine_library (37 machines et équipements, v3.0).
+from engine.machine_library import FAMILIES as _LIB_FAMILIES, LIBRARY as MACHINE_LIBRARY  # noqa: E402
+
 MACHINE_CATALOG: dict[str, dict] = {
-    "piqueuse_plate":        {"label": "Piqueuse plate", "w": 1.20, "d": 0.60, "machine_type": "piqueuse_plate"},
-    "surjeteuse_3_fils":     {"label": "Surjeteuse 3 fils", "w": 1.05, "d": 0.55, "machine_type": "surjeteuse_3_fils"},
-    "surjeteuse_4_fils":     {"label": "Surjeteuse 4 fils", "w": 1.05, "d": 0.55, "machine_type": "surjeteuse_4_fils"},
-    "surjeteuse_5_fils":     {"label": "Surjeteuse 5 fils", "w": 1.10, "d": 0.55, "machine_type": "surjeteuse_5_fils"},
-    "recouvreuse":           {"label": "Recouvreuse", "w": 1.10, "d": 0.60, "machine_type": "recouvreuse"},
-    "chainette":             {"label": "Chaînette", "w": 1.20, "d": 0.60, "machine_type": "chainette"},
-    "piqueuse_2_aiguilles":  {"label": "Double aiguille", "w": 1.20, "d": 0.60, "machine_type": "piqueuse_2_aiguilles"},
-    "piqueuse_boutonniere":  {"label": "Boutonnière", "w": 1.20, "d": 0.70, "machine_type": "piqueuse_boutonniere"},
-    "piqueuse_bouton":       {"label": "Pose-boutons", "w": 1.10, "d": 0.65, "machine_type": "piqueuse_bouton"},
-    "bride":                 {"label": "Bartack / brides", "w": 1.10, "d": 0.65, "machine_type": "bride"},
-    "table_coupe":           {"label": "Table de coupe", "w": 6.00, "d": 1.80, "machine_type": "table_coupe"},
-    "table_travail":         {"label": "Table de préparation", "w": 1.60, "d": 0.80, "machine_type": "table_travail"},
-    "table_repassage":       {"label": "Fer / table à repasser", "w": 1.40, "d": 0.70, "machine_type": "table_repassage"},
-    "presse_thermocollage":  {"label": "Thermocolleuse", "w": 2.20, "d": 1.00, "machine_type": "presse_thermocollage"},
-    "table_controle":        {"label": "Poste de contrôle", "w": 1.50, "d": 0.80, "machine_type": "table_controle"},
-    "chariot":               {"label": "Chariot / rack d'encours", "w": 1.00, "d": 0.60, "machine_type": ""},
+    k: {"label": v["label"], "w": v["w"], "d": v["d"], "h": v["h"], "machine_type": v["machine_type"],
+        "category": v["category"], "shape": v["shape"]}
+    for k, v in MACHINE_LIBRARY.items()
 }
 
 ZONES = {
@@ -53,17 +43,7 @@ ZONES = {
 }
 
 # Familles interchangeables quand le type exact manque (repli, signalé dans les notes).
-_FAMILIES = {
-    "surjeteuse": {"surjeteuse_3_fils", "surjeteuse_4_fils", "surjeteuse_5_fils", "surjeteuse"},
-    "repassage": {"table_repassage", "fer_repassage", "presse_vapeur", "repassage"},
-    "table": {"table_travail", "table_controle", "manuel", "table", "table_preparation"},
-    "piqueuse": {"piqueuse_plate", "piqueuse", "piqueuse_1_aiguille", "plate"},
-    "thermo": {"presse_thermocollage", "thermocolleuse", "thermocollage"},
-    "bouton": {"piqueuse_bouton", "pose_bouton", "pose_boutons", "boutons"},
-    "boutonniere": {"piqueuse_boutonniere", "boutonniere"},
-    "bride": {"bride", "bartack", "brides"},
-    "double": {"piqueuse_2_aiguilles", "double_aiguille", "2_aiguilles"},
-}
+_FAMILIES = _LIB_FAMILIES
 
 
 def norm_type(s: Optional[str]) -> str:

@@ -152,9 +152,9 @@ class TwinStore(ProdStore):
             raise StoreError(404, "Introuvable.")
         return s
 
-    def list_simulations(self, tok, org, rid, limit=20):
+    def list_simulations(self, tok, org, rid, limit=20, kind="twin"):
         return [{k: v for k, v in s.items() if k != "results"} for s in self.sims.values()
-                if s["org_id"] == org and s["run_id"] == rid]
+                if s["org_id"] == org and s["run_id"] == rid and s.get("kind", "twin") == kind]
 
 
 PROBLEM_SK = {**PROBLEM, "operations": [{**o, "required_skills": ["piqure"] if o["id"] != "A" else ["surjet"]}

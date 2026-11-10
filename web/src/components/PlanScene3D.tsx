@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import { addMachineBody } from "../lib/machines3d";
 import { MACHINE_CATALOG, ZONES, operatorPoint, type Machine, type WorkshopPlan } from "../lib/workshop";
 
 export interface SceneStation {
@@ -55,6 +56,7 @@ function colorForLoad(value: number) {
 
 function disposeGroup(group: THREE.Group) {
   group.traverse((object) => {
+    if (object.userData.shared) return;     // géométries / matériaux partagés de la bibliothèque 3D
     if (object instanceof THREE.Mesh || object instanceof THREE.Line) object.geometry.dispose();
     if (!(object instanceof THREE.Mesh || object instanceof THREE.Line || object instanceof THREE.Sprite)) return;
     const raw = object.material;
@@ -200,25 +202,16 @@ function addMachine(group: THREE.Group, machine: Machine, shiftX: number, shiftZ
   root.position.set(machine.x + shiftX, 0, machine.y + shiftZ);
   root.rotation.y = (-machine.rot * Math.PI) / 180;
   group.add(root);
-  const steel = new THREE.MeshStandardMaterial({ color: "#58656b", roughness: 0.74, metalness: 0.12 });
-  const top = new THREE.MeshStandardMaterial({ color: machine.status === "panne" ? "#b94b3d" : machine.status === "reserve" ? "#aeb4b6" : "#e2e4df", roughness: 0.68 });
-  const headMat = new THREE.MeshStandardMaterial({ color: "#8eaaa8", roughness: 0.58, metalness: 0.08 });
-  const legX = Math.max(0.08, machine.w / 2 - 0.09);
-  const legZ = Math.max(0.08, machine.d / 2 - 0.08);
-  for (const x of [-legX, legX]) for (const z of [-legZ, legZ]) makeBox(root, [0.055, TABLE_HEIGHT, 0.055], [x, TABLE_HEIGHT / 2, z], steel);
-  const tableTop = makeBox(root, [machine.w, 0.09, machine.d], [0, TABLE_HEIGHT, 0], top);
+  const tableTop = addMachineBody(root, machine.type, machine.w, machine.d, machine.status);
   if (stationId != null) {
+    // plateau propre (non partagé) : sa couleur suit l'état du poste
+    tableTop.material = (tableTop.material as THREE.MeshStandardMaterial).clone();
+    tableTop.userData.shared = false;
     tableTop.userData.stationId = stationId;
     tableTop.userData.part = "tabletop";
     tableTop.userData.baseColor = machine.status === "panne" ? "#b94b3d" : machine.status === "reserve" ? "#aeb4b6" : "#e2e4df";
   }
-  if (machine.type !== "chariot" && !machine.type.startsWith("table") && machine.type !== "presse_thermocollage") {
-    makeBox(root, [0.43, 0.37, Math.min(0.32, machine.d * 0.65)], [machine.w * 0.2, TABLE_HEIGHT + 0.2, -machine.d * 0.05], headMat);
-    makeBox(root, [0.13, 0.16, 0.28], [machine.w * 0.34, TABLE_HEIGHT + 0.04, machine.d * 0.23], steel);
-  } else if (machine.type === "presse_thermocollage") {
-    makeBox(root, [machine.w * 0.62, 0.58, machine.d * 0.68], [0, TABLE_HEIGHT + 0.32, 0], headMat);
-  }
-  if (showOperator && machine.status === "service" && machine.type !== "chariot") {
+  if (showOperator && machine.status === "service" && MACHINE_CATALOG[machine.type]?.machine_type !== "") {
     const [ox, oz] = operatorPoint(machine);
     addOperator(group, ox + shiftX, oz + shiftZ, false, stationId);
   }

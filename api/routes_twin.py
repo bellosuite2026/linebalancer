@@ -116,7 +116,7 @@ def register(app: FastAPI, queue: JobQueue, auth: SupabaseAuth, store: SupabaseS
                 "plan": plan, "problem_name": (problem or {}).get("name", ""),
                 "layout": layout, "layout_saved": bool(saved), "placement": pl,
                 "workshop_plans": call(store.list_plans, p.token, org_id),
-                "sessions": sessions, "simulations": call(store.list_simulations, p.token, org_id, run["id"]),
+                "sessions": sessions, "simulations": call(store.list_simulations, p.token, org_id, run["id"], 20, "twin"),
                 "other_runs": [{"id": r["id"], "created_at": r.get("created_at"), "stations_used": r.get("stations_used"),
                                 "actual_cycle_time": r.get("actual_cycle_time"), "solver": r.get("solver"),
                                 "problem_id": r.get("problem_id")} for r in others[:30]]}
@@ -243,3 +243,8 @@ def register(app: FastAPI, queue: JobQueue, auth: SupabaseAuth, store: SupabaseS
         layout, _ = effective_layout(org_id, plan, saved_layout(org_id, run["id"], p), p)
         return twin.sync(session, entries, plan, layout, order_qty=order_qty, order_done=order_done,
                          bundle_size=bundle_size)
+
+    from api import routes_des
+    routes_des.register(app, queue, store, principal, {
+        "call": call, "uid": uid, "membership": membership, "load_plan": load_plan, "saved_layout": saved_layout,
+        "effective_layout": effective_layout, "org_name": org_name, "safe_update": safe_update, "now": _now})

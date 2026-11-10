@@ -328,3 +328,20 @@ class PlanPlacementIn(BaseModel):
     """Placer les stations d'un calcul sur les machines d'un plan (association auto + manuelle)."""
     plan_id: str
     assignment: dict[str, list[str]] = Field(default_factory=dict, max_length=300)
+
+
+# ------------------------------------------------------------------ simulation à événements discrets (v3.0)
+class DesScenario(BaseModel):
+    """Scénario : surcharges du modèle (settings / source / shift / transporters / stations / breakdowns)."""
+    name: str = Field(default="Scénario", max_length=60)
+    overrides: dict[str, Any] = Field(default_factory=dict)
+    absent: list[str] = Field(default_factory=list, max_length=100, description="Opérateurs absents")
+
+
+class DesRequest(BaseModel):
+    name: str = Field(default="", max_length=120)
+    model: Optional[dict[str, Any]] = Field(default=None, description="Modèle édité ; par défaut : modèle généré")
+    scenarios: list[DesScenario] = Field(default_factory=lambda: [DesScenario(name="Référence")],
+                                         min_length=1, max_length=3)
+    replications: int = Field(default=5, ge=1, le=20)
+    plan_id: Optional[str] = Field(default=None, description="Plan d'atelier pour les chemins à pied")

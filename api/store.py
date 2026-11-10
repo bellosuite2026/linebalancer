@@ -260,10 +260,10 @@ class SupabaseStore:
         return self._req("GET", "/twin_simulations", token, single=True, params={
             "select": "*", "id": f"eq.{sim_id}", "org_id": f"eq.{org_id}"})
 
-    def list_simulations(self, token: str, org_id: str, run_id: str, limit: int = 20) -> list[dict]:
+    def list_simulations(self, token: str, org_id: str, run_id: str, limit: int = 20, kind: str = "twin") -> list[dict]:
         return self._req("GET", "/twin_simulations", token, params={
-            "select": "id,org_id,run_id,name,status,scenarios,error,created_at,finished_at",
-            "org_id": f"eq.{org_id}", "run_id": f"eq.{run_id}", "order": "created_at.desc",
+            "select": "id,org_id,run_id,name,status,kind,scenarios,error,created_at,finished_at",
+            "org_id": f"eq.{org_id}", "run_id": f"eq.{run_id}", "kind": f"eq.{kind}", "order": "created_at.desc",
             "limit": str(limit)})
 
 

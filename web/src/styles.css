@@ -357,3 +357,8 @@ select.on-select { border-color: var(--brand); background: #e6effa; font-weight:
   .p3d-stage, .twin-3d .p3d-stage { min-height: 300px; }
 }
 @media (max-width: 700px) { .form-grid.tight4 { grid-template-columns: 1fr 1fr; } }
+.wp-libcat { border: 1px solid var(--line); border-radius: 8px; padding: .25rem .4rem; background: #fafbfc; }
+.wp-libcat > summary { cursor: pointer; font-weight: 600; font-size: .85rem; padding: .15rem 0; }
+.wp-libcat > summary small { color: var(--muted); font-weight: 400; }
+.wp-libcat .wp-libitem { width: 100%; margin-top: .25rem; }
+.wp-libcat .wp-ico { color: #fff; }
