@@ -93,6 +93,7 @@ export default function RunDetail() {
           {run.solver === "rpw" && <button className="btn" onClick={() => relaunch(run.kind, "cp_sat")}>Optimiser avec CP-SAT</button>}
           {bal && bal.stations_used > 0 && <Link className="btn primary" to={`/production?calcul=${run.id}`}>Suivre en production</Link>}
           {bal && bal.stations_used > 0 && <Link className="btn" to={`/jumeau/${run.id}`}>Jumeau numérique</Link>}
+          {bal && bal.stations_used > 0 && <Link className="btn" to={`/simulation/${run.id}`}>Simulation 3D</Link>}
           <Link className="btn ghost" to="/calcul">Nouveau calcul</Link>
         </div>
       )}

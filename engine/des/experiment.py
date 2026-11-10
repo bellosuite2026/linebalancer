@@ -75,7 +75,7 @@ def run_experiment(model: dict, scenarios: Optional[list[dict]] = None, replicat
 
 def model_for_view(m: dict) -> dict:
     """Ce que l'animation doit connaître du modèle (positions, files, acteurs, chemins)."""
-    keep = ("id", "label", "x", "y", "qx", "qy", "servers", "operators", "machine_ids", "machine_type", "minutes",
+    keep = ("id", "label", "x", "y", "qx", "qy", "mx", "my", "rot", "machine", "servers", "operators", "machine_ids", "machine_type", "minutes",
             "setup_min", "mtbf_min", "mttr_min", "defect_pct", "rework_to", "queue_capacity", "operations")
     return {"name": m["name"], "stations": [{k: s.get(k) for k in keep} for s in m["stations"]],
             "route": m["route"], "operators": m["operators"], "transporters": m["transporters"],

@@ -37,7 +37,7 @@ export default function TwinHome() {
       <ol className="steps">
         <li className={plans?.length ? "done" : ""}><b>1. Plan de l'atelier</b><span>Importez un plan (image, PDF, DXF) ou dessinez la salle, les allées et les zones, puis posez vos machines.</span></li>
         <li className={runs?.length ? "done" : ""}><b>2. Calcul d'équilibrage</b><span>Saisissez la gamme et lancez un calcul (<Link to="/calcul">nouveau calcul</Link>).</span></li>
-        <li><b>3. Simulation sur le plan</b><span>Les stations sont placées sur les machines du plan : distances réelles, parcours des paquets, scénarios « et si ».</span></li>
+        <li><b>3. Simulation sur le plan</b><span>Les stations sont placées sur les machines du plan : distances réelles, parcours des paquets, scénarios « et si ». « Simulation 3D » = simulation à événements discrets détaillée (paquets, opérateurs qui marchent, agents de liaison, pannes, pauses, réplications).</span></li>
       </ol>
 
       <section className="card">
@@ -75,6 +75,7 @@ export default function TwinHome() {
                   <td>{r.actual_cycle_time ? `${fmt.n(r.actual_cycle_time, 2)} min` : "—"}</td>
                   <td className="row tight">
                     <Link className="btn small" to={`/jumeau/${r.id}`}>Jumeau numérique</Link>
+                    <Link className="btn small" to={`/simulation/${r.id}${pid ? `?plan=${pid}` : ""}`}>Simulation 3D</Link>
                     {plans && plans.length > 0 && <>
                       <select value={pid} onChange={(e) => setPick({ ...pick, [r.id]: e.target.value })} aria-label="Plan d'atelier">
                         {plans.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select>

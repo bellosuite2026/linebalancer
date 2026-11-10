@@ -182,7 +182,7 @@ function Twin() {
         <div>
           <h1>Jumeau numérique</h1>
           <p className="muted">{data.problem_name || "Ligne"} · {data.plan.stations.length} stations · {Object.keys(data.plan.workers).length} ouvrières
-            {data.plan.cycle_time ? ` · cycle ${fmt.n(data.plan.cycle_time, 2)} min` : ""} · <Link to={`/calculs/${runId}`}>voir le calcul</Link></p>
+            {data.plan.cycle_time ? ` · cycle ${fmt.n(data.plan.cycle_time, 2)} min` : ""} · <Link to={`/calculs/${runId}`}>voir le calcul</Link> · <Link to={`/simulation/${runId}${placement?.plan_id ? `?plan=${placement.plan_id}` : ""}`}>simulation 3D détaillée (événements discrets)</Link></p>
         </div>
         <div className="row">
           <div className="seg">

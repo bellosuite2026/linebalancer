@@ -133,6 +133,8 @@ def normalize_model(model: dict) -> dict:
         stations.append({
             "id": sid, "label": str(st.get("label") or f"Poste {sid}")[:60],
             "x": x, "y": y, "qx": _f(st.get("qx"), x - 0.55), "qy": _f(st.get("qy"), y + 0.35),
+            "mx": _f(st.get("mx"), x), "my": _f(st.get("my"), y - 0.75), "rot": _f(st.get("rot"), 0),
+            "machine": str(st.get("machine") or "")[:60],
             "minutes": _f(st.get("minutes"), 0, 0, 1000), "servers": _i(st.get("servers"), 1, 1, 20),
             "operators": [str(o) for o in st.get("operators") or []],
             "setup_min": _f(st.get("setup_min"), s["setup_min"], 0, 1000),

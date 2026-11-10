@@ -362,3 +362,38 @@ select.on-select { border-color: var(--brand); background: #e6effa; font-weight:
 .wp-libcat > summary small { color: var(--muted); font-weight: 400; }
 .wp-libcat .wp-libitem { width: 100%; margin-top: .25rem; }
 .wp-libcat .wp-ico { color: #fff; }
+
+/* ---------------------------------------------------------------- simulation à événements discrets */
+.sim-page { max-width: 1500px; }
+.sim-grid { display: grid; grid-template-columns: minmax(270px, 330px) 1fr; gap: 1rem; align-items: start; }
+.sim-panel { max-height: calc(100vh - 120px); overflow: auto; position: sticky; top: .6rem; }
+.sim-panel h3 { margin: .8rem 0 .4rem; }
+.sim-panel details { border-top: 1px solid var(--line); padding: .35rem 0; }
+.sim-panel summary { cursor: pointer; font-weight: 600; font-size: .9rem; padding: .2rem 0; }
+.sim-panel label { display: block; font-size: .8rem; color: var(--muted); margin: .3rem 0; }
+.sim-panel label input, .sim-panel label select { width: 100%; }
+.sim-panel .row label { flex: 1 1 80px; }
+.sim-break { flex-wrap: nowrap; margin: .2rem 0; } .sim-break input { min-width: 0; flex: 1; }
+.sim-dot { display: inline-block; width: 10px; height: 10px; border-radius: 3px; flex: none; }
+.sim-st-table input { width: 4.2rem; padding: .15rem .25rem; } .sim-st-table td, .sim-st-table th { padding: .15rem .25rem; font-size: .78rem; }
+.sim-scen { border-left: 4px solid var(--brand); padding-left: .5rem !important; }
+.sim-scen summary { display: flex; gap: .4rem; align-items: center; } .sim-scen summary input { flex: 1; font-weight: 600; }
+.sim-hist { list-style: none; padding: 0; margin: 0; font-size: .82rem; } .sim-hist li { margin: .2rem 0; } .sim-hist .on { font-weight: 700; }
+.sim-view { min-width: 0; }
+.sim-toolbar { justify-content: space-between; margin-bottom: .4rem; }
+.sim-stage { display: grid; gap: .5rem; height: min(62vh, 620px); }
+.sim-stage.both { grid-template-columns: 1fr 1fr; }
+.sim2d, .sim3d { width: 100%; height: 100%; min-height: 260px; border: 1px solid var(--line); border-radius: 10px; background: #f6f5f1; display: block; touch-action: none; }
+.sim3d { position: relative; overflow: hidden; } .sim3d canvas { width: 100% !important; height: 100% !important; display: block; }
+.sim-timeline { display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; margin-top: .6rem; }
+.sim-range { flex: 1 1 200px; }
+.sim-clock { font-variant-numeric: tabular-nums; font-size: 1.15rem; min-width: 5.5rem; }
+.sim-notes { margin: .5rem 0 0; color: var(--muted); }
+.sim-scen-tabs { margin-bottom: .5rem; }
+.chart { width: 100%; height: auto; display: block; }
+.chart-scroll { max-height: 520px; overflow: auto; }
+.chart-legend { display: flex; flex-wrap: wrap; gap: .3rem .8rem; font-size: .78rem; color: var(--muted); margin: .3rem 0; }
+.chart-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: .3rem; vertical-align: -1px; }
+.sim-dash2 { display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; }
+.ok-t { color: var(--ok); } .err-t { color: var(--err); }
+@media (max-width: 1100px) { .sim-grid { grid-template-columns: 1fr; } .sim-panel { position: static; max-height: none; } .sim-stage.both { grid-template-columns: 1fr; height: auto; } .sim-stage.both > * { height: 46vh; } .sim-dash2 { grid-template-columns: 1fr; } }

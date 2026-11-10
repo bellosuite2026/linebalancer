@@ -1,0 +1,193 @@
+// Vue 2D (canvas) de la simulation : plan d'atelier, postes colorés par état, chariots d'encours avec
+// leurs paquets empilés, opérateurs et transporteurs qui se déplacent le long des allées.
+import { useEffect, useRef, useState } from "react";
+import { MACHINE_CATALOG, rectCorners, type Machine, type WorkshopPlan } from "../lib/workshop";
+import { STATE_COLOR, STATION_STATES, lotColor, type DesModel, type Frame } from "../lib/des";
+
+interface Props { model: DesModel; plan: WorkshopPlan | null; frame: Frame | null; selected?: string | null; onSelect?: (sid: string | null) => void; className?: string }
+
+export default function SimCanvas2D({ model, plan, frame, selected, onSelect, className = "" }: Props) {
+  const ref = useRef<HTMLCanvasElement>(null);
+  const [, force] = useState(0);
+  const view = useRef<{ s: number; ox: number; oy: number } | null>(null);
+  const drag = useRef<{ x: number; y: number; ox: number; oy: number; moved: boolean } | null>(null);
+  const bg = useRef<HTMLCanvasElement | null>(null);
+  const bgKey = useRef("");
+
+  // emprise : salle du plan ou postes
+  const bounds = () => {
+    if (plan) return { x0: -0.5, y0: -0.5, x1: plan.width_m + 0.5, y1: plan.length_m + 0.5 };
+    const xs = model.stations.flatMap((s) => [s.x, s.qx, s.mx]).concat([model.source.x, model.sink.x]);
+    const ys = model.stations.flatMap((s) => [s.y, s.qy, s.my]).concat([model.source.y, model.sink.y]);
+    return { x0: Math.min(...xs) - 1.5, y0: Math.min(...ys) - 1.5, x1: Math.max(...xs) + 1.5, y1: Math.max(...ys) + 1.5 };
+  };
+
+  const fit = () => {
+    const c = ref.current; if (!c) return;
+    const b = bounds(), W = c.clientWidth, H = c.clientHeight;
+    const s = Math.min(W / (b.x1 - b.x0), H / (b.y1 - b.y0));
+    view.current = { s, ox: (W - s * (b.x1 - b.x0)) / 2 - b.x0 * s, oy: (H - s * (b.y1 - b.y0)) / 2 - b.y0 * s };
+    bgKey.current = "";
+  };
+
+  // fond statique (murs, allées, machines) mis en cache dans un canvas hors écran
+  const drawBackground = (W: number, H: number, dpr: number) => {
+    const v = view.current!;
+    const key = `${W}x${H}x${dpr}:${v.s.toFixed(3)}:${v.ox.toFixed(1)}:${v.oy.toFixed(1)}:${selected}`;
+    if (bg.current && bgKey.current === key) return bg.current;
+    const off = bg.current ?? document.createElement("canvas");
+    off.width = W * dpr; off.height = H * dpr;
+    const g = off.getContext("2d")!;
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    g.fillStyle = "#f6f5f1"; g.fillRect(0, 0, W, H);
+    const X = (x: number) => v.ox + x * v.s, Y = (y: number) => v.oy + y * v.s;
+    const poly = (pts: [number, number][], fill?: string, stroke?: string, lw = 1) => {
+      g.beginPath(); pts.forEach(([x, y], i) => (i ? g.lineTo(X(x), Y(y)) : g.moveTo(X(x), Y(y)))); g.closePath();
+      if (fill) { g.fillStyle = fill; g.fill(); } if (stroke) { g.strokeStyle = stroke; g.lineWidth = lw; g.stroke(); }
+    };
+    if (plan) {
+      g.fillStyle = "#ffffff"; g.fillRect(X(0), Y(0), plan.width_m * v.s, plan.length_m * v.s);
+      for (const e of plan.elements) {
+        if (e.kind === "zone") { g.fillStyle = "rgba(120,140,170,.07)"; g.fillRect(X(e.x), Y(e.y), e.w * v.s, e.h * v.s); }
+        if (e.kind === "aisle") { g.fillStyle = e.main ? "rgba(46,158,91,.10)" : "rgba(46,158,91,.06)"; g.fillRect(X(e.x), Y(e.y), e.w * v.s, e.h * v.s); }
+      }
+      for (const e of plan.elements) {
+        if (e.kind === "wall") { g.strokeStyle = "#5a5f66"; g.lineWidth = Math.max(2, (e.thickness || 0.2) * v.s); g.lineCap = "square"; g.beginPath(); g.moveTo(X(e.x1), Y(e.y1)); g.lineTo(X(e.x2), Y(e.y2)); g.stroke(); }
+        if (e.kind === "pillar") { g.fillStyle = "#3a3f47"; g.fillRect(X(e.x - e.w / 2), Y(e.y - e.d / 2), e.w * v.s, e.d * v.s); }
+        if (e.kind === "door") { g.fillStyle = e.exit ? "#1f8a5b" : "#c8ccd2"; const p = rectCorners(e.x, e.y, e.width, 0.25, e.rot); poly(p, g.fillStyle as string); }
+      }
+      const used = new Set(model.stations.flatMap((s) => s.machine_ids));
+      for (const e of plan.elements) {
+        if (e.kind !== "machine") continue;
+        const m = e as Machine;
+        poly(rectCorners(m.x, m.y, m.w, m.d, m.rot), used.has(m.id) ? "#fbfbf9" : "#eef0f2", used.has(m.id) ? "#5b6878" : "#b5bcc5", 1);
+        if (!used.has(m.id)) {
+          g.fillStyle = "#9aa3ad"; g.font = `${Math.max(8, Math.min(12, v.s * 0.22))}px sans-serif`; g.textAlign = "center"; g.textBaseline = "middle";
+          g.fillText(MACHINE_CATALOG[m.type]?.short ?? "", X(m.x), Y(m.y));
+        }
+      }
+    } else {
+      // implantation sans plan : tables dessinées autour des postes
+      for (const s of model.stations) {
+        const w = 1.2, d = 0.6;
+        poly(rectCorners(s.mx, s.my, w, d, s.rot ?? 0), "#fbfbf9", "#5b6878", 1);
+      }
+    }
+    // chemins entre postes consécutifs (flux des paquets)
+    g.setLineDash([4, 4]); g.strokeStyle = "rgba(59,125,216,.35)"; g.lineWidth = 1.2;
+    for (let i = 0; i + 1 < model.route.length; i++) {
+      const a = model.route[i], b = model.route[i + 1];
+      const key = a <= b ? `${a}|${b}` : `${b}|${a}`;
+      const p = model.paths?.[key]?.pts;
+      const A = model.stations.find((s) => s.id === a)!, B = model.stations.find((s) => s.id === b)!;
+      const pts = p && p.length > 1 ? p : [[A.x, A.y], [B.x, B.y]];
+      g.beginPath(); pts.forEach(([x, y], k) => (k ? g.lineTo(X(x), Y(y)) : g.moveTo(X(x), Y(y)))); g.stroke();
+    }
+    g.setLineDash([]);
+    // source / sortie
+    const tag = (x: number, y: number, txt: string, col: string) => {
+      g.fillStyle = col; g.beginPath(); g.arc(X(x), Y(y), Math.max(7, v.s * 0.28), 0, Math.PI * 2); g.fill();
+      g.fillStyle = "#fff"; g.font = `700 ${Math.max(8, v.s * 0.22)}px sans-serif`; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(txt, X(x), Y(y));
+    };
+    tag(model.source.x, model.source.y, "IN", "#1f4e79");
+    tag(model.sink.x, model.sink.y, "OUT", "#2e9e5b");
+    bg.current = off; bgKey.current = key;
+    return off;
+  };
+
+  useEffect(() => {
+    const c = ref.current; if (!c) return;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const W = c.clientWidth, H = c.clientHeight;
+    if (c.width !== W * dpr || c.height !== H * dpr) { c.width = W * dpr; c.height = H * dpr; bgKey.current = ""; }
+    if (!view.current) fit();
+    const v = view.current!;
+    const g = c.getContext("2d")!;
+    g.setTransform(1, 0, 0, 1, 0, 0);
+    g.drawImage(drawBackground(W, H, dpr), 0, 0);
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const X = (x: number) => v.ox + x * v.s, Y = (y: number) => v.oy + y * v.s;
+    const s = v.s;
+    // postes : plateau coloré selon l'état + étiquette
+    model.stations.forEach((st, i) => {
+      const state = STATION_STATES[frame?.stations[i] ?? 1] ?? "starved";
+      const col = STATE_COLOR[state];
+      const pts = rectCorners(st.mx, st.my, 1.0, 0.45, st.rot ?? 0);
+      g.beginPath(); pts.forEach(([x, y], k) => (k ? g.lineTo(X(x), Y(y)) : g.moveTo(X(x), Y(y)))); g.closePath();
+      g.globalAlpha = 0.75; g.fillStyle = col; g.fill(); g.globalAlpha = 1;
+      g.lineWidth = selected === st.id ? 3 : 1; g.strokeStyle = selected === st.id ? "#1f4e79" : "rgba(0,0,0,.35)"; g.stroke();
+      g.fillStyle = "#1d2b38"; g.font = `700 ${Math.max(9, Math.min(13, s * 0.26))}px sans-serif`; g.textAlign = "center"; g.textBaseline = "middle";
+      g.fillText(st.id, X(st.mx), Y(st.my));
+      // chariot d'encours
+      g.strokeStyle = "#8a7a5a"; g.lineWidth = 1; g.strokeRect(X(st.qx) - s * 0.25, Y(st.qy) - s * 0.2, s * 0.5, s * 0.4);
+    });
+    if (!frame) return;
+    // paquets : carrés colorés par lot, empilés dans les files, quantité affichée
+    const bs = Math.max(5, s * 0.22);
+    for (const b of frame.bundles) {
+      const off = b.kind === 3 || b.kind === 4 ? (b.z - 1) * bs * 0.5 : Math.min(b.z, 12) * bs * 0.38;
+      const x = X(b.x) + (b.kind === 3 || b.kind === 4 ? bs * 0.6 : 0), y = Y(b.y) - off;
+      g.fillStyle = lotColor(b.lot); g.fillRect(x - bs / 2, y - bs / 2, bs, bs * 0.7);
+      g.lineWidth = b.rework ? 2 : 0.8; g.strokeStyle = b.rework ? "#d64541" : "rgba(255,255,255,.9)"; g.strokeRect(x - bs / 2, y - bs / 2, bs, bs * 0.7);
+      if (bs >= 12 && (b.z === 0 || b.kind === 3 || b.kind === 4)) {
+        g.fillStyle = "#fff"; g.font = `700 ${Math.round(bs * 0.45)}px sans-serif`; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(String(b.qty), x, y - bs * 0.15);
+      }
+    }
+    // files trop hautes : compteur
+    // acteurs : opérateurs (disque + tête) et transporteurs (chariot + charge)
+    for (const a of frame.actors) {
+      const x = X(a.x), y = Y(a.y);
+      if (a.kind === "operator") {
+        const r = Math.max(4, s * 0.17);
+        const col = a.state === 1 || a.state === 4 ? "#e8a33d" : a.state === 2 || a.state === 3 ? "#1f6685" : "#76858b";
+        g.fillStyle = col; g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill();
+        g.fillStyle = "#d9aa87"; g.beginPath(); g.arc(x, y, r * 0.5, 0, Math.PI * 2); g.fill();
+      } else {
+        const w = Math.max(10, s * 0.6), h = Math.max(7, s * 0.4);
+        g.save(); g.translate(x, y); g.rotate(a.heading);
+        g.fillStyle = a.load ? "#16a085" : "#7f8c8d"; g.fillRect(-w / 2, -h / 2, w, h);
+        g.restore();
+        g.fillStyle = "#fff"; g.font = `700 ${Math.max(8, s * 0.22)}px sans-serif`; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(a.load ? String(a.load) : "T", x, y);
+      }
+    }
+  });
+
+  useEffect(() => {
+    const c = ref.current; if (!c) return;
+    const wheel = (ev: WheelEvent) => {
+      ev.preventDefault(); const v = view.current; if (!v) return;
+      const r = c.getBoundingClientRect(), mx = ev.clientX - r.left, my = ev.clientY - r.top;
+      const k = ev.deltaY > 0 ? 1 / 1.15 : 1.15;
+      view.current = { s: v.s * k, ox: mx - (mx - v.ox) * k, oy: my - (my - v.oy) * k }; bgKey.current = "";
+      force((n) => n + 1);
+    };
+    const ro = new ResizeObserver(() => { fit(); force((n) => n + 1); });
+    ro.observe(c);
+    c.addEventListener("wheel", wheel, { passive: false });
+    return () => { c.removeEventListener("wheel", wheel); ro.disconnect(); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [plan, model]);
+
+  const toM = (ev: React.PointerEvent) => {
+    const r = ref.current!.getBoundingClientRect(), v = view.current!;
+    return [(ev.clientX - r.left - v.ox) / v.s, (ev.clientY - r.top - v.oy) / v.s];
+  };
+  return (
+    <canvas ref={ref} className={`sim2d ${className}`} role="img" aria-label="Simulation 2D de l'atelier"
+      onPointerDown={(ev) => { (ev.target as HTMLElement).setPointerCapture(ev.pointerId); const v = view.current!; drag.current = { x: ev.clientX, y: ev.clientY, ox: v.ox, oy: v.oy, moved: false }; }}
+      onPointerMove={(ev) => {
+        const d = drag.current; if (!d || !view.current) return;
+        if (Math.abs(ev.clientX - d.x) + Math.abs(ev.clientY - d.y) > 4) d.moved = true;
+        if (d.moved) { view.current = { ...view.current, ox: d.ox + ev.clientX - d.x, oy: d.oy + ev.clientY - d.y }; bgKey.current = ""; force((n) => n + 1); }
+      }}
+      onPointerUp={(ev) => {
+        const d = drag.current; drag.current = null;
+        if (d && !d.moved && onSelect) {
+          const [x, y] = toM(ev);
+          const hit = model.stations.find((s) => Math.hypot(s.mx - x, s.my - y) < 0.8 || Math.hypot(s.x - x, s.y - y) < 0.5);
+          onSelect(hit ? hit.id : null);
+        }
+      }}
+      onDoubleClick={() => { fit(); force((n) => n + 1); }} />
+  );
+}

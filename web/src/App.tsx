@@ -18,6 +18,8 @@ import ProductionDashboard from "./pages/ProductionDashboard";
 import Twin from "./pages/Twin";
 import TwinHome from "./pages/TwinHome";
 import WorkshopPlan from "./pages/WorkshopPlan";
+import { lazy, Suspense } from "react";
+const Simulation = lazy(() => import("./pages/Simulation"));
 
 export default function App() {
   const { session, loading, recovery, orgs, orgsLoaded, orgsError, refreshOrgs, isSuperAdmin } = useSession();
@@ -52,6 +54,7 @@ export default function App() {
         <Route path="/production/:id/saisie" element={<ProductionEntry />} />
         <Route path="/jumeau" element={<TwinHome />} />
         <Route path="/jumeau/:runId" element={<Twin />} />
+        <Route path="/simulation/:runId" element={<Suspense fallback={<div className="page muted">Chargement…</div>}><Simulation /></Suspense>} />
         <Route path="/atelier/plan" element={<WorkshopPlan />} />
         <Route path="/atelier" element={<Account />} />
         <Route path="/admin" element={isSuperAdmin ? <Admin /> : <Navigate to="/" replace />} />

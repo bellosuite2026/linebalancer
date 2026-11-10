@@ -49,9 +49,11 @@ def build_model(plan: dict, layout: Optional[dict] = None, workshop_plan: Option
         mach = ms[mids[0]] if mids else None
         x, y = pos[sid]
         qx, qy = _queue_point(x, y, mach)
+        mx, my = (round(W._num(mach.get("x")), 2), round(W._num(mach.get("y")), 2)) if mach else (round(x, 2), round(y - 0.75, 2))
         types = W.station_types(st)
         stations.append({
-            "id": str(sid), "label": f"Station {sid}", "x": round(x, 2), "y": round(y, 2), "qx": qx, "qy": qy,
+            "id": str(sid), "label": f"Station {sid}", "x": round(x, 2), "y": round(y, 2), "qx": qx, "qy": qy, "mx": mx, "my": my,
+            "rot": W._num(mach.get("rot")) if mach else 0.0, "machine": (mach or {}).get("type") or "",
             "minutes": float(st.get("minutes") or 0), "servers": max(1, len(workers)), "operators": list(workers),
             "machine_ids": mids, "machine_type": types[0] if types else "manuel",
             "operations": [str(o.get("name") or o.get("id") or "") for o in st.get("operations") or []],
