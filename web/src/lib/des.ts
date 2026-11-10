@@ -44,7 +44,7 @@ export interface ScenarioResult {
   throughput: { hourly: number[]; cumulative: [number, number][]; target_per_hour: number | null };
   wip_series: [number, number][]; lead_time: { hist: { edges: number[]; counts: number[] }; count: number; sample: number[] };
   conservation: { ok: boolean; initial: number; launched: number; done: number; in_system: number }; notes: string[];
-  trace?: Trace; replications: { n: number; seeds: number[]; kpis: Record<string, CI>; station_util: Record<string, CI> }; model: DesModel;
+  trace?: Trace; replications: { n: number; seeds: number[]; kpis: Record<string, CI> & { bottleneck: string | CI }; station_util: Record<string, CI> }; model: DesModel;
 }
 export interface DesScenario { name: string; overrides: Record<string, unknown>; absent: string[]; result: ScenarioResult }
 export interface DesResults { engine: string; replications: number; scenarios: DesScenario[]; comparison: { key: string; label: string; values: CI[] }[] }

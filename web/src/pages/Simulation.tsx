@@ -11,6 +11,7 @@ import {
 } from "../lib/des";
 import type { WorkshopPlan } from "../lib/workshop";
 import SimCanvas2D from "../components/SimCanvas2D";
+import ErrorBoundary, { hasWebGL } from "../components/ErrorBoundary";
 import { Bars, Gantt, Histogram, Legend, LineChart, StateBars, StatePie } from "../components/SimCharts";
 
 const SimScene3D = lazy(() => import("../components/SimScene3D"));
@@ -62,7 +63,8 @@ export default function Simulation() {
   const [sim, setSim] = useState<DesSim | null>(null);
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
-  const [view, setView] = useState<View>("both");
+  const webgl = useMemo(() => hasWebGL(), []);
+  const [view, setView] = useState<View>(() => (hasWebGL() ? "both" : "2d"));
   const [scIdx, setScIdx] = useState(0);
   const [tab, setTab] = useState<Tab>("states");
   const [picked, setPicked] = useState<string | null>(null);
@@ -297,7 +299,7 @@ export default function Simulation() {
             <div className="kpi"><span>Pièces produites</span><b>{ciTxt(rk.pieces, 0)}</b><small>{fmt.n(kpi.per_hour, 1)} pcs/h{kpi.target_per_hour ? ` · objectif ${fmt.n(kpi.target_per_hour, 0)}/h` : ""}</small></div>
             <div className="kpi"><span>Temps de traversée</span><b>{ciTxt(rk.lead_time_avg, 0)} min</b><small>p90 {fmt.n(kpi.lead_time_p90, 0)} min</small></div>
             <div className="kpi"><span>Encours moyen</span><b>{ciTxt(rk.wip_avg, 0)}</b><small>max {fmt.n(kpi.wip_max, 0)} pièces</small></div>
-            <div className="kpi warn"><span>Goulot</span><b>Poste {rk.bottleneck.mean}</b><small>le plus occupé (travail + panne + attente opérateur)</small></div>
+            <div className="kpi warn"><span>Goulot</span><b>Poste {String(typeof rk.bottleneck === "object" ? rk.bottleneck?.mean : rk.bottleneck)}</b><small>le plus occupé (travail + panne + attente opérateur)</small></div>
             <div className="kpi"><span>Opérateurs</span><b>{ciTxt(rk.operator_util_avg, 0)} %</b><small>{fmt.n(kpi.walk_m, 0)} m à pied au total</small></div>
           </div>}
           <div className="row sim-toolbar">
@@ -307,10 +309,10 @@ export default function Simulation() {
             <Legend keys={STATION_STATES.slice(0, 6)} labels={STATE_LABEL} colors={STATE_COLOR} />
           </div>
           <div className={`sim-stage ${view}`}>
-            {view !== "3d" && <SimCanvas2D model={vModel!} plan={plan} frame={frame} selected={picked} onSelect={setPicked} />}
-            {view !== "2d" && <Suspense fallback={<div className="sim3d p3d-loading">Chargement de la vue 3D…</div>}>
-              <SimScene3D model={vModel!} plan={plan} frame={frame} />
-            </Suspense>}
+            {view !== "3d" && <ErrorBoundary label="Vue 2D indisponible"><SimCanvas2D model={vModel!} plan={plan} frame={frame} selected={picked} onSelect={setPicked} /></ErrorBoundary>}
+            {view !== "2d" && <ErrorBoundary label="Vue 3D indisponible"><Suspense fallback={<div className="sim3d p3d-loading">Chargement de la vue 3D…</div>}>
+              {webgl ? <SimScene3D model={vModel!} plan={plan} frame={frame} /> : <div className="sim3d"><p className="notice warn">Ce navigateur ne peut pas créer de contexte WebGL : la 3D n'est pas disponible ici, la vue 2D l'est.</p></div>}
+            </Suspense></ErrorBoundary>}
           </div>
           {cursor ? <div className="sim-timeline">
             <button className="btn small" onClick={() => { setT(0); }} title="Début">⏮</button>
@@ -328,7 +330,7 @@ export default function Simulation() {
       </div>
 
       {/* ------------------------------------------------ tableaux de bord */}
-      {res && results && <section className="card">
+      {res && results && <ErrorBoundary label="Tableaux de bord indisponibles"><section className="card">
         <div className="tabs">
           {([["states", "États des postes"], ["wip", "Encours"], ["throughput", "Débit"], ["lead", "Temps de traversée"], ["operators", "Opérateurs"], ["compare", "Comparaison"]] as [Tab, string][]).map(([k, l]) =>
             <button key={k} className={tab === k ? "on" : ""} onClick={() => setTab(k)}>{l}</button>)}
@@ -382,7 +384,7 @@ export default function Simulation() {
           })}</tbody></table>
           <p className="muted small">{results.replications} réplication(s) par scénario (graines différentes) ; « ± » = demi-largeur de l'intervalle de confiance à 95 % (loi de Student).</p>
         </div>}
-      </section>}
+      </section></ErrorBoundary>}
     </div>
   );
 }

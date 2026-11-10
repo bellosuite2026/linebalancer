@@ -45,6 +45,7 @@ const Icon = ({ d, dash }: { d: string; dash?: boolean }) => (
 
 type DragMode = "pan" | "move" | "wallEnd" | "draw" | "bg" | "pinch" | "marquee" | "resize" | "rotate" | "erase" | "dimPt" | "measure";
 interface Drag {
+  areaHit?: string;
   mode: DragMode;
   sx: number; sy: number; cx: number; cy: number; id?: string; end?: 1 | 2; idx?: number; orig?: El; origs?: El[]; view?: View;
   bg?: { x: number; y: number }; dist?: number; moved?: boolean; before?: WorkshopPlan; changed?: boolean;
@@ -324,6 +325,12 @@ export default function WorkshopPlanPage() {
       }
       const hit = hitTest(plan.elements, mx, my, tol);
       const additive = e.shiftKey || e.ctrlKey || e.metaKey || multi;
+      // zone / allée non sélectionnée : glisser dessus encadre les machines posées dessus (un simple toucher la sélectionne)
+      if (hit && (hit.kind === "zone" || hit.kind === "aisle") && !S.has(hit.id) && !additive) {
+        setSel([]);
+        drag.current = { ...d, mode: "marquee", areaHit: hit.id }; setMarquee([[mx, my], [mx, my]]);
+        return;
+      }
       if (hit) {
         if (additive) { setSel((s) => (s.includes(hit.id) ? s.filter((x) => x !== hit.id) : [...s, hit.id])); drag.current = null; return; }
         const ids = S.has(hit.id) ? sel : [hit.id];
@@ -452,7 +459,7 @@ export default function WorkshopPlanPage() {
     if (d.before && d.changed) { pushUndo(d.before); return; }   // déplacement, poignée, gomme, fond : une seule étape d'historique
     if (d.mode === "marquee") {
       setMarquee(null);
-      if (!d.moved) return;
+      if (!d.moved) { if (d.areaHit) setSel([d.areaHit]); return; }
       const x0 = Math.min(d.cx, mx), x1 = Math.max(d.cx, mx), y0 = Math.min(d.cy, my), y1 = Math.max(d.cy, my);
       const inside = plan.elements.filter((el) => elPoly(el).every(([x, y]) => x >= x0 && x <= x1 && y >= y0 && y <= y1)).map((el) => el.id);
       setSel((s) => (e.shiftKey || e.ctrlKey || e.metaKey || multi ? [...new Set([...s, ...inside])] : inside));
@@ -781,7 +788,7 @@ export default function WorkshopPlanPage() {
             {sel.length > 0 && <span className="muted">{sel.length} sélectionné{sel.length > 1 ? "s" : ""}</span>}
             {sel.length > 0 && <button className="link" onClick={() => setSel([])}>désélectionner (Échap)</button>}
           </div>}
-          {!view3d && tool === "measure" && <div className="notice row tight small wp-measure">
+          {!view3d && tool === "measure" && <div className="notice row tight small wp-measurebar">
             <div className="seg">{MEASURE_MODES.map((m) => <button key={m.id} className={mMode === m.id ? "on" : ""} onClick={() => { setMMode(m.id); resetMeasure(); }}>{m.label}</button>)}</div>
             {writable && <label className="check" title="Chaque mesure terminée devient une cote affichée sur le plan (exportée en PNG/PDF)"><input type="checkbox" checked={keepDim} onChange={(e) => setKeepDim(e.target.checked)} /> Garder la cote sur le plan</label>}
             {mMode === "chain" && mPts.length >= 2 && <><b>{fmt.n(polyLen(mPts), 2)} m</b><button className="btn small primary" onClick={finishChain}>Terminer</button></>}

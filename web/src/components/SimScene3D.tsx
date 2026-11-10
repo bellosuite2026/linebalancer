@@ -1,7 +1,7 @@
 // Vue 3D de la simulation (three.js, chargée à la demande) : décor statique fusionné par matériau,
 // paquets / opérateurs / transporteurs / voyants d'état en InstancedMesh (fluide avec 60 postes,
 // 60 opérateurs et 300 paquets sur tablette).
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
@@ -48,10 +48,17 @@ function mergeStatic(src: THREE.Group): THREE.Group {
 export default function SimScene3D({ model, plan, frame, className = "" }: Props) {
   const host = useRef<HTMLDivElement>(null);
   const api = useRef<{ update: (f: Frame | null) => void } | null>(null);
+  const [fail, setFail] = useState("");
 
   useEffect(() => {
     const el = host.current; if (!el) return;
-    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+    let renderer: THREE.WebGLRenderer;
+    try {
+      renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+    } catch {
+      setFail("Ce navigateur ne peut pas créer de contexte WebGL : utilisez la vue 2D (ou un autre navigateur / appareil) pour la 3D.");
+      return;
+    }
     renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
     renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     el.appendChild(renderer.domElement);
@@ -194,5 +201,6 @@ export default function SimScene3D({ model, plan, frame, className = "" }: Props
 
   useEffect(() => { api.current?.update(frame); }, [frame]);
 
+  if (fail) return <div className={`sim3d ${className}`}><p className="notice warn">{fail}</p></div>;
   return <div ref={host} className={`sim3d ${className}`} role="img" aria-label="Simulation 3D de l'atelier" />;
 }

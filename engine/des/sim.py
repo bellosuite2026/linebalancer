@@ -623,7 +623,13 @@ class Simulator:
                 "down_min": round(acc[S_DOWN], 1),
             })
         active = lambda s: s["states"]["work"] + s["states"]["setup"] + s["states"]["down"] + s["states"]["wait_operator"]  # noqa: E731
-        bott = max(stations, key=lambda s: (active(s), s["queue_avg"]))["id"] if stations else None
+        # goulot : poste le plus actif ; à ±1 point près, celui dont la charge par serveur est la plus forte
+        # (le 1er poste, toujours alimenté en flux tiré, ne doit pas masquer le vrai goulot)
+        bott = None
+        if stations:
+            top = max(active(s) for s in stations)
+            cands = [s for s in stations if active(s) >= top - 1.0]
+            bott = max(cands, key=lambda s: (s["minutes"] / max(1, s["servers"]), active(s)))["id"]
         ops = []
         for oid, o in self.ops.items():
             acc = self.op_tr[oid].acc
