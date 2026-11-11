@@ -605,6 +605,8 @@ class FlowSim:
         size = int(_f(p.get("bundle_size"), 10, 1, 500))
         interval = _f(p.get("interval_min"), 0, 0, 1000)
         cap = int(_f(p.get("wip_cap"), 30, 0, 100000))
+        if cap == 0 and interval <= 0:      # flux tiré sans plafond : 1 paquet par opération (évite l'infini)
+            cap = max(2, sum(1 for b in self.blocks if b.get("type") in ("operation", "inspect")))
         lots = [lot for lot in p.get("lots") or [] if isinstance(lot, dict)] or [{"style": "Modèle", "qty": 0}]
         for li, lot in enumerate(lots):
             left = int(_f(lot.get("qty"), 0, 0)) or math.inf
@@ -793,7 +795,7 @@ def from_plan(plan: dict, problem: Optional[dict] = None, name: str = "") -> dic
     Y = lambda r: 60 + r * 150  # noqa: E731
     blocks.append({"id": "src", "type": "source", "label": "Coupe (paquets)", "x": 0, "y": 60,
                    "params": {"lots": [{"style": plan.get("problem_name") or "Modèle", "size": "", "color": "", "qty": 0}],
-                              "bundle_size": 10, "interval_min": 0, "wip_cap": max(4, 2 * len(sid))}})
+                              "bundle_size": 10, "interval_min": 0, "wip_cap": max(4, round(0.6 * len(sid)))}})
 
     def comp_name(s):
         st = next(x for x in stations if str(x["station"]) == s)
