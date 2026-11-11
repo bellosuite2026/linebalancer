@@ -345,3 +345,27 @@ class DesRequest(BaseModel):
                                          min_length=1, max_length=3)
     replications: int = Field(default=5, ge=1, le=20)
     plan_id: Optional[str] = Field(default=None, description="Plan d'atelier pour les chemins à pied")
+
+
+# ------------------------------------------------------------------ logique par blocs (Process Flow)
+class FlowIn(BaseModel):
+    name: str = Field(default="Flux", min_length=1, max_length=120)
+    run_id: Optional[str] = None
+    graph: dict[str, Any] = Field(default_factory=dict)
+
+
+class FlowPatch(BaseModel):
+    name: Optional[str] = Field(default=None, min_length=1, max_length=120)
+    graph: Optional[dict[str, Any]] = None
+
+
+class FlowValidateIn(BaseModel):
+    graph: dict[str, Any]
+
+
+class FlowSimulateIn(BaseModel):
+    graph: dict[str, Any]
+    name: str = Field(default="", max_length=120)
+    replications: int = Field(default=3, ge=1, le=20)
+    flow_id: Optional[str] = None
+    plan_id: Optional[str] = None

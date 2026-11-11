@@ -6,6 +6,13 @@
   GET  /v1/orgs/{org}/simulations/{sid}               statut + résultats (route du jumeau, commune)
   GET  /v1/orgs/{org}/simulations/{sid}/des.xlsx|pdf  exports des tableaux de bord
 
+Logique par blocs (Process Flow) :
+  GET    /v1/orgs/{org}/runs/{id}/flow/auto           graphe généré depuis la gamme + modèle du plan (animation)
+  POST   /v1/orgs/{org}/flows/validate                validation (cycles, branches orphelines, sorties)
+  GET    /v1/orgs/{org}/flows[?run_id]                graphes enregistrés ; POST : créer
+  GET|PATCH|DELETE /v1/orgs/{org}/flows/{fid}
+  POST   /v1/orgs/{org}/runs/{id}/flow/simulate       exécution par le moteur DES (tâche de fond, kind = 'flow')
+
 Stockage : table twin_simulations (kind = 'des', layout = modèle). RLS par atelier.
 """
 from __future__ import annotations
@@ -18,9 +25,10 @@ from fastapi.responses import Response
 
 from api import des
 from api.jobs import JobQueue
-from api.schemas import DesRequest
+from api.schemas import DesRequest, FlowIn, FlowPatch, FlowSimulateIn, FlowValidateIn
 from api.store import StoreError, SupabaseStore
 from engine.des.builder import summary
+from engine.des.flow import FlowError, from_plan, normalize_graph, run_flow_experiment, validate as validate_flow
 from engine.des.model import ModelError
 
 log = logging.getLogger("tlb.api")
@@ -113,3 +121,97 @@ def register(app: FastAPI, queue: JobQueue, store: SupabaseStore, principal, h: 
         sim = done(org_id, sim_id, p)
         return Response(des.build_pdf(sim, org_name(sim["org_id"], p)), media_type="application/pdf",
                         headers={"Content-Disposition": f'attachment; filename="simulation_{sim_id[:8]}.pdf"'})
+
+
+    # ================================================================== logique par blocs (Process Flow)
+    FLOW_MAX_BYTES = 500_000
+
+    def _graph(g: dict) -> dict:
+        import json as _json
+        if len(_json.dumps(g)) > FLOW_MAX_BYTES:
+            raise HTTPException(413, "Graphe trop volumineux.")
+        return normalize_graph(g)
+
+    @app.get("/v1/orgs/{org_id}/runs/{run_id}/flow/auto", tags=["process-flow"])
+    def flow_auto(org_id: str, run_id: str, plan_id: Optional[str] = None, p=Depends(principal)):
+        org_id = membership(org_id, p)
+        run, plan, problem, layout, wp, _ = base(org_id, run_id, p, plan_id)
+        try:
+            graph = from_plan(plan, problem)
+        except FlowError as e:
+            raise HTTPException(422, str(e))
+        model = des.auto_model(plan, layout, wp)
+        return {"graph": graph, "validation": validate_flow(graph), "model": model, "workshop_plan": wp,
+                "problem_name": (problem or {}).get("name", ""),
+                "flows": call(store.list_flows, p.token, org_id, run["id"]),
+                "simulations": call(store.list_simulations, p.token, org_id, run["id"], 20, "flow")}
+
+    @app.post("/v1/orgs/{org_id}/flows/validate", tags=["process-flow"])
+    def flow_validate(org_id: str, body: FlowValidateIn, p=Depends(principal)):
+        membership(org_id, p)
+        return validate_flow(_graph(body.graph))
+
+    @app.get("/v1/orgs/{org_id}/flows", tags=["process-flow"])
+    def flow_list(org_id: str, run_id: Optional[str] = None, p=Depends(principal)):
+        org_id = membership(org_id, p)
+        return call(store.list_flows, p.token, org_id, uid(run_id, "Calcul") if run_id else None)
+
+    @app.post("/v1/orgs/{org_id}/flows", status_code=201, tags=["process-flow"])
+    def flow_create(org_id: str, body: FlowIn, p=Depends(principal)):
+        org_id = membership(org_id, p, write=True)
+        return call(store.create_flow, p.token, org_id, {"name": body.name, "graph": _graph(body.graph),
+                                                         "run_id": uid(body.run_id, "Calcul") if body.run_id else None})
+
+    @app.get("/v1/orgs/{org_id}/flows/{flow_id}", tags=["process-flow"])
+    def flow_get(org_id: str, flow_id: str, p=Depends(principal)):
+        org_id = membership(org_id, p)
+        return call(store.get_flow, p.token, org_id, uid(flow_id, "Graphe"))
+
+    @app.patch("/v1/orgs/{org_id}/flows/{flow_id}", tags=["process-flow"])
+    def flow_patch(org_id: str, flow_id: str, body: FlowPatch, p=Depends(principal)):
+        org_id = membership(org_id, p, write=True)
+        fields = {k: v for k, v in {"name": body.name, "graph": _graph(body.graph) if body.graph is not None else None}.items()
+                  if v is not None}
+        if not fields:
+            raise HTTPException(422, "Rien à modifier.")
+        return call(store.update_flow, p.token, org_id, uid(flow_id, "Graphe"), fields)
+
+    @app.delete("/v1/orgs/{org_id}/flows/{flow_id}", status_code=204, tags=["process-flow"])
+    def flow_delete(org_id: str, flow_id: str, p=Depends(principal)):
+        org_id = membership(org_id, p, write=True)
+        if not call(store.delete_flow, p.token, org_id, uid(flow_id, "Graphe")):
+            raise HTTPException(404, "Graphe introuvable (ou droits insuffisants).")
+        return Response(status_code=204)
+
+    @app.post("/v1/orgs/{org_id}/runs/{run_id}/flow/simulate", status_code=202, tags=["process-flow"])
+    def flow_simulate(org_id: str, run_id: str, body: FlowSimulateIn, p=Depends(principal)):
+        org_id = membership(org_id, p, write=True)
+        run, plan, _, layout, wp, _ = base(org_id, run_id, p, body.plan_id)
+        graph = _graph(body.graph)
+        chk = validate_flow(graph)
+        if not chk["ok"]:
+            raise HTTPException(422, chk["errors"][0]["msg"])
+        model = des.auto_model(plan, layout, wp)
+        sids = [str(s["id"]) for s in model["stations"]]
+        row = call(store.create_simulation, p.token, org_id, p.user_id, {
+            "run_id": run["id"], "kind": "flow", "name": (body.name or graph.get("name") or "Flux")[:120],
+            "scenarios": [{"name": graph.get("name") or "Flux", "flow_id": body.flow_id}],
+            "layout": {"graph": graph, "model": des.model_view(model)}})
+        token, sim_id = p.token, row["id"]
+        T = float((graph.get("shift") or {}).get("minutes") or 480)
+        reps = max(1, min(body.replications, int(des.WORK_BUDGET // max(1.0, len(graph["blocks"]) * T * 2))))
+
+        def work() -> dict:
+            safe_update(token, sim_id, {"status": "running", "started_at": now()})
+            try:
+                res = run_flow_experiment(graph, reps, sids)
+            except Exception as e:  # noqa: BLE001
+                log.exception("Flux %s en échec", sim_id)
+                safe_update(token, sim_id, {"status": "failed", "error": str(e)[:2000], "finished_at": now()})
+                raise
+            safe_update(token, sim_id, {"status": "done", "results": {"engine": "flow-1.0", "replications": reps,
+                                                                       "result": res}, "finished_at": now()})
+            return {"id": sim_id}
+
+        queue.submit("flow", org_id, work)
+        return row

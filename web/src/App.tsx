@@ -21,6 +21,7 @@ import WorkshopPlan from "./pages/WorkshopPlan";
 import { lazy, Suspense } from "react";
 import ErrorBoundary from "./components/ErrorBoundary";
 const Simulation = lazy(() => import("./pages/Simulation"));
+const FlowEditor = lazy(() => import("./pages/FlowEditor"));
 
 export default function App() {
   const { session, loading, recovery, orgs, orgsLoaded, orgsError, refreshOrgs, isSuperAdmin } = useSession();
@@ -56,6 +57,7 @@ export default function App() {
         <Route path="/jumeau" element={<TwinHome />} />
         <Route path="/jumeau/:runId" element={<Twin />} />
         <Route path="/simulation/:runId" element={<ErrorBoundary label="La page de simulation n'a pas pu s'afficher"><Suspense fallback={<div className="page muted">Chargement…</div>}><Simulation /></Suspense></ErrorBoundary>} />
+        <Route path="/flux/:runId" element={<ErrorBoundary label="L'éditeur de flux n'a pas pu s'afficher"><Suspense fallback={<div className="page muted">Chargement…</div>}><FlowEditor /></Suspense></ErrorBoundary>} />
         <Route path="/atelier/plan" element={<WorkshopPlan />} />
         <Route path="/atelier" element={<Account />} />
         <Route path="/admin" element={isSuperAdmin ? <Admin /> : <Navigate to="/" replace />} />

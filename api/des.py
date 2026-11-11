@@ -28,6 +28,12 @@ def auto_model(plan: dict, layout: dict, workshop_plan: Optional[dict], settings
     return build_model(plan, layout, workshop_plan, settings)
 
 
+def model_view(model: dict) -> dict:
+    """Modèle normalisé réduit à ce que l'animation du plan doit connaître (postes, source, sortie)."""
+    from engine.des.experiment import model_for_view
+    return model_for_view(normalize_model(model))
+
+
 def absent(model: dict, ids: list[str]) -> tuple[dict, list[str]]:
     """Absences : l'opérateur est retiré ; un poste vide est repris par l'opérateur du poste voisin
     le moins chargé (il tient alors les deux postes et marche entre eux)."""

@@ -58,3 +58,28 @@ Exemple (dos de pantalon de Karim, équilibrage RPW à la cadence 8 : 6 postes, 
 | Traversée moyenne | 383 min | 146 min | 134 min |
 
 Limites : un seul convoyeur par modèle ; pas de croisement entre boucles ni d'ascenseurs ; l'aiguillage de la boucle est modélisé par un temps (pas de collision fine entre cintres) ; la marche des opératrices au poste n'est pas modifiée par le convoyeur.
+
+## Phase 2.2 — Logique personnalisée par blocs (type Process Flow), livrée le 2026-11-11
+Moteur : `engine/des/flow.py` (SimPy, déterministe avec graine). Page `/flux/:runId` (bouton « Process Flow » d'un calcul, lien depuis la simulation 3D) : éditeur visuel @xyflow/react (MIT, chargé à part).
+
+| Bloc | Rôle | Paramètres |
+|---|---|---|
+| Source | lance les paquets de l'ordre de coupe | lots (modèle, taille, couleur, quantité), pièces par paquet, intervalle (0 = tiré), produits en cours max |
+| File | attente FIFO | capacité (0 = illimitée) |
+| Opération | travail | min/pièce, serveurs, file devant, mise en route, ressource prise pendant l'opération, **poste du plan lié** (animation) |
+| Retard | attente sans capacité | minutes |
+| Décision | branche | probabilités / attribut (valeurs par sortie) / condition (attribut op valeur) |
+| Séparation | sous-composants (devant, dos, manches…) | composants (un par sortie) |
+| Assemblage | attend une pièce de chaque branche | appariement : même produit, même lot, même taille (ou attribut) |
+| Contrôle | opération + défauts | % défauts → sortie « retouche » (boucle de retouche autorisée) |
+| Groupage / dégroupage | lots de transfert | taille du groupe, même attribut |
+| Prendre / libérer ressource | opérateur, machine, chariot | ressource, quantité |
+| Attribut | taille, couleur, modèle… | fixer ou tirer au hasard (valeurs + poids) |
+| Sortie | produits finis | — |
+
+- Génération automatique depuis la gamme : précédences des opérations → graphe des stations (réduction transitive) → séparation là où plusieurs branches partent, assemblage là où elles se rejoignent ; sans précédence exploitable : ligne en série.
+- Validation : types, sorties reliées, au moins 2 entrées par assemblage, branches orphelines (non alimentées) ou sans issue, cycles (erreur sauf boucle passant par une décision ou un contrôle = avertissement), ressources déclarées.
+- Exécution (`POST …/runs/{id}/flow/simulate`, tâche de fond, `twin_simulations.kind = 'flow'`), réplications + IC 95 %. Conservation des pièces : chaque jeton porte la part de produit qu'il représente (séparation en k = 1/k chacun, assemblage = somme).
+- Animation : jetons présents par bloc (● n) au fil du temps ; les blocs d'opération liés à un poste colorent ce poste sur le plan (travail / attente / bloqué).
+- Stockage : table `process_flows` (migration 20261111000009, RLS par atelier : membres en lecture, owner/admin/methodes/chef_ligne en écriture).
+- Limites : pas de sous-graphes réutilisables ; une seule loi de temps par opération ; les opérateurs ne se déplacent pas dans ce mode (ressources abstraites) ; animation du plan limitée aux états des postes liés.

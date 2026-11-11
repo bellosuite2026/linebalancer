@@ -94,6 +94,7 @@ export default function RunDetail() {
           {bal && bal.stations_used > 0 && <Link className="btn primary" to={`/production?calcul=${run.id}`}>Suivre en production</Link>}
           {bal && bal.stations_used > 0 && <Link className="btn" to={`/jumeau/${run.id}`}>Jumeau numérique</Link>}
           {bal && bal.stations_used > 0 && <Link className="btn" to={`/simulation/${run.id}`}>Simulation 3D</Link>}
+          {bal && bal.stations_used > 0 && <Link className="btn" to={`/flux/${run.id}`}>Process Flow</Link>}
           <Link className="btn ghost" to="/calcul">Nouveau calcul</Link>
         </div>
       )}

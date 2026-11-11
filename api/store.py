@@ -266,6 +266,35 @@ class SupabaseStore:
             "org_id": f"eq.{org_id}", "run_id": f"eq.{run_id}", "kind": f"eq.{kind}", "order": "created_at.desc",
             "limit": str(limit)})
 
+    # ------------------------------------------------------------ graphes de flux (Process Flow)
+    _FLOW_SUMMARY = "id,org_id,run_id,name,created_at,updated_at"
+
+    def list_flows(self, token: str, org_id: str, run_id: Optional[str] = None) -> list[dict]:
+        params = {"select": self._FLOW_SUMMARY, "org_id": f"eq.{org_id}", "order": "updated_at.desc", "limit": "50"}
+        if run_id:
+            params["run_id"] = f"eq.{run_id}"
+        return self._req("GET", "/process_flows", token, params=params)
+
+    def get_flow(self, token: str, org_id: str, flow_id: str) -> dict:
+        return self._req("GET", "/process_flows", token, single=True, params={
+            "select": "*", "id": f"eq.{flow_id}", "org_id": f"eq.{org_id}"})
+
+    def create_flow(self, token: str, org_id: str, data: dict) -> dict:
+        rows = self._req("POST", "/process_flows", token, prefer="return=representation", json={**data, "org_id": org_id})
+        return rows[0]
+
+    def update_flow(self, token: str, org_id: str, flow_id: str, fields: dict) -> dict:
+        rows = self._req("PATCH", "/process_flows", token, prefer="return=representation",
+                         params={"id": f"eq.{flow_id}", "org_id": f"eq.{org_id}"}, json=fields)
+        if not rows:
+            raise StoreError(404, "Graphe introuvable (ou droits insuffisants).")
+        return rows[0]
+
+    def delete_flow(self, token: str, org_id: str, flow_id: str) -> bool:
+        rows = self._req("DELETE", "/process_flows", token, prefer="return=representation",
+                         params={"id": f"eq.{flow_id}", "org_id": f"eq.{org_id}"})
+        return bool(rows)
+
 
 def _to_error(r: httpx.Response, single: bool) -> StoreError:
     try:
