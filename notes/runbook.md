@@ -1,3 +1,5 @@
+> 2026-11-11 (Hark) : consigne actuelle de Karim — le front et l'API sont sur Render (autodeploy de main, push autorisé après chaque livraison testée) ; Netlify n'est plus utilisé (redirection 301). Les étapes Netlify ci-dessous sont obsolètes.
+
 # Draft release and QA
 
 1. Run `cd web && npm ci && npm run build`. Confirm the web 3D implementation is emitted as its own asset chunk before publishing; do not treat CSS selectors as proof that the 3D feature is present.

@@ -73,6 +73,9 @@ def plan_body(stations: list[dict]) -> dict:
                     "operator": "front", "status": "service", "w": {"table_controle": 1.5, "table_repassage": 1.55,
                     "mannequin_vapeur": 1.2, "detecteur_aiguilles": 1.8, "etiqueteuse_emballage": 1.8, "rack_encours": 1.2,
                     "palette_carton": 1.2, "convoyeur_suspendu": 1.5}[t], "d": 0.8})
+    if os.environ.get("E2E_CONVEYOR"):     # convoyeur suspendu dessiné au-dessus de l'allée et des deux rangées
+        els.append({"kind": "rail", "id": "r1", "label": "UPS E2E", "height": 2.2, "radius": 0.5, "speed": 20,
+                    "pts": [[1.2, 4.8], [W - 1.5, 4.8], [W - 1.5, 6.9], [1.2, 6.9]]})
     return {"name": "Atelier E2E DES", "width_m": W, "length_m": L, "elements": els}
 
 
@@ -102,6 +105,25 @@ def main() -> int:
     model = mod["model"]
     ok(len(model["stations"]) == run["stations_used"], f"modèle généré : {len(model['stations'])} postes, {len(model['operators'])} opérateurs")
     ok(any(len(v["pts"]) > 2 for v in model["paths"].values()), "chemins à pied par les allées (polylignes)")
+    if os.environ.get("E2E_CONVEYOR"):
+        cv = model.get("conveyor") or {}
+        ok(cv.get("enabled") and len(cv.get("loop") or []) == 4, "rail du plan repris dans le modèle (convoyeur actif)")
+        body = {"name": "E2E UPS", "model": model, "replications": 2, "plan_id": plan["id"],
+                "scenarios": [{"name": "Convoyeur suspendu"}, {"name": "Paquets / chariots", "overrides": {"conveyor": {"enabled": False}}}]}
+        sim = c.post(f"/v1/orgs/{org}/runs/{run['id']}/des", json=body)
+        ok(sim.status_code == 202, f"simulation convoyeur lancée ({sim.status_code})")
+        s = wait(c, f"/v1/orgs/{org}/simulations/{sim.json()['id']}")
+        ok(s["status"] == "done", f"simulation convoyeur terminée {s['id']} {s.get('error', '')}")
+        r0, r1 = (it["result"] for it in s["results"]["scenarios"])
+        k0, k1 = r0["kpis"], r1["kpis"]
+        print(f"     UPS : {k0['pieces']} pcs, encours {k0['wip_avg']}, traversée {k0['lead_time_avg']} min, rail {k0['rail_util_pct']} %, "
+              f"cintres {k0['carriers_in_circulation']}, rail/poste {k0['rail_time_avg']}/{k0['station_time_avg']} min ; "
+              f"chariots : {k1['pieces']} pcs, encours {k1['wip_avg']}, traversée {k1['lead_time_avg']} min")
+        ok(r0["conservation"]["ok"] and r1["conservation"]["ok"], "conservation des pièces (2 scénarios)")
+        ok(r0["conveyor"]["carriers"] > 0 and any(e[1] == 4 for e in r0["trace"]["events"]), "cintres animés (trace)")
+        ok(r0["model"]["conveyor"]["pts"] and r1["conveyor"] is None, "géométrie du rail renvoyée ; chariots sans convoyeur")
+        print(f"     QA : /simulation/{run['id']}?plan={plan['id']}&sim={s['id']}")
+        return 1 if FAIL else 0
     body = {"name": "E2E", "model": model, "replications": 3, "plan_id": plan["id"],
             "scenarios": [{"name": "Référence"}, {"name": "Agent de liaison + pannes",
                                                   "overrides": {"transporters": {"count": 1, "capacity": 4},
