@@ -7,6 +7,7 @@ import statistics
 from collections import Counter
 from typing import Optional
 
+from engine.des.conveyor import view as conveyor_view
 from engine.des.model import LIMITS, apply_overrides, normalize_model
 from engine.des.sim import simulate
 
@@ -16,7 +17,8 @@ _T95 = [12.706, 4.303, 3.182, 2.776, 2.571, 2.447, 2.365, 2.306, 2.262, 2.228, 2
         2.045, 2.042]
 
 KPI_KEYS = ["pieces", "per_hour", "lead_time_avg", "wip_avg", "wip_max", "operator_util_avg", "walk_m",
-            "transport_m", "defects"]
+            "transport_m", "defects", "rail_util_pct", "carriers_in_circulation", "rail_time_avg", "station_time_avg",
+            "rail_share_pct", "recirculations", "reassigned"]
 
 
 def t95(df: int) -> float:
@@ -80,7 +82,7 @@ def model_for_view(m: dict) -> dict:
     return {"name": m["name"], "stations": [{k: s.get(k) for k in keep} for s in m["stations"]],
             "route": m["route"], "operators": m["operators"], "transporters": m["transporters"],
             "source": m["source"], "sink": m["sink"], "shift": m["shift"], "settings": m["settings"],
-            "plan_id": m.get("plan_id")}
+            "plan_id": m.get("plan_id"), "conveyor": conveyor_view(m.get("conveyor") or {})}
 
 
 COMPARISON_ROWS = [
@@ -88,14 +90,20 @@ COMPARISON_ROWS = [
     ("wip_avg", "Encours moyen (pièces)"), ("wip_max", "Encours max (pièces)"),
     ("operator_util_avg", "Occupation opérateurs (%)"), ("walk_m", "Marche des opérateurs (m)"),
     ("transport_m", "Transport des paquets (m)"), ("defects", "Pièces en retouche"),
+    ("rail_util_pct", "Convoyeur : occupation du rail (%)"), ("carriers_in_circulation", "Convoyeur : cintres en circulation"),
+    ("rail_time_avg", "Convoyeur : temps sur rail par cintre (min)"),
+    ("station_time_avg", "Convoyeur : temps aux postes par cintre (min)"),
+    ("recirculations", "Convoyeur : tours supplémentaires (poste plein)"), ("reassigned", "Convoyeur : réaffectations dynamiques"),
 ]
 
 
 def comparison(items: list[dict]) -> list[dict]:
     rows = []
     for key, label in COMPARISON_ROWS:
-        rows.append({"key": key, "label": label,
-                     "values": [it["result"]["replications"]["kpis"][key] for it in items]})
+        vals = [it["result"]["replications"]["kpis"][key] for it in items]
+        if key in KPI_KEYS[9:] and all((v or {}).get("mean") is None for v in vals):
+            continue                     # indicateurs du convoyeur sans convoyeur : ligne omise
+        rows.append({"key": key, "label": label, "values": vals})
     rows.append({"key": "bottleneck", "label": "Goulot (poste)",
                  "values": [{"mean": it["result"]["replications"]["kpis"]["bottleneck"]} for it in items]})
     return rows

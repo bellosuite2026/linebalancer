@@ -18,10 +18,10 @@ const SimScene3D = lazy(() => import("../components/SimScene3D"));
 const SPEEDS = [1, 10, 30, 60, 120, 300, 600];
 const SCEN_COLORS = ["#1f4e79", "#e67e22", "#8e44ad"];
 type View = "2d" | "3d" | "both";
-type Tab = "states" | "wip" | "throughput" | "lead" | "operators" | "compare";
+type Tab = "states" | "wip" | "throughput" | "lead" | "operators" | "conveyor" | "compare";
 interface ScenarioForm { name: string; bundle_size: string; efficiency: string; cv: string; transporters: string; transfer: string;
-  mtbf: string; mttr: string; defect: string; setup: string; absent: string[] }
-const emptyForm = (name: string): ScenarioForm => ({ name, bundle_size: "", efficiency: "", cv: "", transporters: "", transfer: "", mtbf: "", mttr: "", defect: "", setup: "", absent: [] });
+  mtbf: string; mttr: string; defect: string; setup: string; absent: string[]; conveyor: "" | "on" | "off" }
+const emptyForm = (name: string): ScenarioForm => ({ name, bundle_size: "", efficiency: "", cv: "", transporters: "", transfer: "", mtbf: "", mttr: "", defect: "", setup: "", absent: [], conveyor: "" });
 
 function formToOverrides(f: ScenarioForm): Record<string, unknown> {
   const o: Record<string, Record<string, unknown> | unknown> = {};
@@ -36,6 +36,7 @@ function formToOverrides(f: ScenarioForm): Record<string, unknown> {
   if (num(f.setup) != null) settings.setup_min = num(f.setup);
   if (f.transfer) settings.transfer = f.transfer;
   if (num(f.transporters) != null) o.transporters = { count: num(f.transporters), capacity: 4, speed_m_per_min: 60 };
+  if (f.conveyor) o.conveyor = { enabled: f.conveyor === "on" };
   if (Object.keys(settings).length) o.settings = settings;
   if (Object.keys(source).length) o.source = source;
   return o;
@@ -146,6 +147,12 @@ export default function Simulation() {
   const setSrc = (k: string, v: unknown) => setModel((m) => (m ? { ...m, source: { ...m.source, [k]: v } } : m));
   const setStation = (id: string, k: string, v: unknown) => setModel((m) => (m ? { ...m, stations: m.stations.map((s) => (s.id === id ? { ...s, [k]: v } : s)) } : m));
   const numIn = (v: unknown, d: number) => (v == null || v === "" ? d : Number(v));
+  const setCv = (k: string, v: unknown) => setModel((m) => (m ? { ...m, conveyor: { enabled: false, ...(m.conveyor ?? {}), [k]: v } } : m));
+  const compareConveyor = () => {
+    const on = !!model?.conveyor?.enabled;
+    setForms([{ ...emptyForm(on ? "Convoyeur suspendu" : "Paquets / chariots") },
+      { ...emptyForm(on ? "Paquets / chariots" : "Convoyeur suspendu"), conveyor: on ? "off" : "on" }]);
+  };
   const S = model?.settings ?? {};
   const dist = S.dist ?? { kind: "normal", cv: 0.1 };
 
@@ -239,6 +246,28 @@ export default function Simulation() {
             }} /></label>
               {model.transporters.length > 0 && <label>Capacité (paquets)<input type="number" min={1} max={50} value={model.transporters[0].capacity} onChange={(e) => setModel({ ...model, transporters: model.transporters.map((x) => ({ ...x, capacity: +e.target.value })) })} /></label>}</div>
           </details>
+          <details open={!!model.conveyor?.enabled}><summary>Convoyeur suspendu (UPS){model.conveyor?.enabled ? " · actif" : ""}</summary>
+            <label className="check"><input type="checkbox" checked={!!model.conveyor?.enabled} onChange={(e) => setCv("enabled", e.target.checked)} /> Les pièces circulent sur des cintres (type Eton / INA)</label>
+            <p className="muted small">{model.conveyor?.loop?.length ? "Boucle dessinée sur le plan d'atelier." : "Sans rail dessiné sur le plan (outil « Convoyeur » de /atelier/plan), une boucle est générée autour des postes."} Une dérivation par poste (aiguillages d'entrée et de sortie), chargement près de l'entrée, déchargement près de la sortie.</p>
+            {model.conveyor?.enabled && <>
+              <div className="row small">
+                <label>Vitesse du rail (m/min)<input type="number" min={1} max={120} value={numIn(model.conveyor.speed_m_per_min, 18)} onChange={(e) => setCv("speed_m_per_min", +e.target.value)} /></label>
+                <label>Aiguillage (s)<input type="number" min={0} max={60} step={0.5} value={numIn(model.conveyor.switch_sec, 2)} onChange={(e) => setCv("switch_sec", +e.target.value)} /></label>
+                <label>Cintres (0 = auto)<input type="number" min={0} max={2000} value={numIn(model.conveyor.carriers, 0)} onChange={(e) => setCv("carriers", +e.target.value)} /></label>
+                <label>Pièces par cintre<input type="number" min={1} max={50} value={numIn(model.conveyor.carrier_capacity, 1)} onChange={(e) => setCv("carrier_capacity", +e.target.value)} /></label>
+                <label>Encours max par poste (cintres)<input type="number" min={1} max={50} value={numIn(model.conveyor.station_wip, 4)} onChange={(e) => setCv("station_wip", +e.target.value)} /></label>
+                <label>Hauteur du rail (m)<input type="number" min={1.2} max={4} step={0.1} value={numIn(model.conveyor.height_m, 2.1)} onChange={(e) => setCv("height_m", +e.target.value)} /></label>
+                <label>Chargement (min/cintre)<input type="number" min={0} step={0.05} value={numIn(model.conveyor.load_min, 0.1)} onChange={(e) => setCv("load_min", +e.target.value)} /></label>
+                <label>Espacement mini (m)<input type="number" min={0.05} step={0.05} value={numIn(model.conveyor.pitch_m, 0.3)} onChange={(e) => setCv("pitch_m", +e.target.value)} /></label>
+              </div>
+              <label className="check"><input type="checkbox" checked={model.conveyor.dynamic_routing !== false} onChange={(e) => setCv("dynamic_routing", e.target.checked)} /> Réaffectation dynamique : vers le poste le moins chargé parmi ceux qui ont la compétence</label>
+              <p className="muted small">Postes interchangeables (même compétence) : les postes d'une même opération partagée le sont d'office ; ajoutez-en ci-dessous (ex. « 7, 9 »).</p>
+              <div className="sim-alt">{model.stations.map((st) => (
+                <label key={st.id} className="small" title={st.operations.join(", ")}>Poste {st.id} ↔
+                  <input value={(model.conveyor?.alternates?.[st.id] ?? []).join(", ")} placeholder="—" onChange={(e) => setCv("alternates", { ...(model.conveyor?.alternates ?? {}), [st.id]: e.target.value.split(/[ ,;]+/).filter(Boolean) })} /></label>))}</div>
+            </>}
+            <button className="btn small" onClick={compareConveyor}>Comparer paquets / chariots et convoyeur suspendu</button>
+          </details>
           <details open={openSt} onToggle={(e) => setOpenSt((e.target as HTMLDetailsElement).open)}><summary>Postes ({model.stations.length})</summary>
             {openSt && <div className="table-wrap"><table className="sim-st-table">
               <thead><tr><th>Poste</th><th>min/pc</th><th>Serv.</th><th>File max</th><th>Défauts %</th><th>MTBF</th><th>MTTR</th></tr></thead>
@@ -269,6 +298,8 @@ export default function Simulation() {
                   <label>MTTR<input value={f.mttr} onChange={(e) => setForms(forms.map((x, j) => (j === i ? { ...x, mttr: e.target.value } : x)))} /></label>
                   <label>Défauts %<input value={f.defect} onChange={(e) => setForms(forms.map((x, j) => (j === i ? { ...x, defect: e.target.value } : x)))} /></label>
                   <label>Mise en route<input value={f.setup} onChange={(e) => setForms(forms.map((x, j) => (j === i ? { ...x, setup: e.target.value } : x)))} /></label>
+                  <label>Convoyeur<select value={f.conveyor} onChange={(e) => setForms(forms.map((x, j) => (j === i ? { ...x, conveyor: e.target.value as ScenarioForm["conveyor"] } : x)))}>
+                    <option value="">comme la référence</option><option value="on">suspendu (cintres)</option><option value="off">sans (paquets / chariots)</option></select></label>
                 </div>
                 <label>Absentes<select multiple value={f.absent} onChange={(e) => setForms(forms.map((x, j) => (j === i ? { ...x, absent: Array.from(e.target.selectedOptions).map((o) => o.value) } : x)))}>
                   {model.operators.map((o) => <option key={o.id} value={o.id}>{o.name} (postes {o.stations.join(", ")})</option>)}</select></label>
@@ -301,6 +332,8 @@ export default function Simulation() {
             <div className="kpi"><span>Encours moyen</span><b>{ciTxt(rk.wip_avg, 0)}</b><small>max {fmt.n(kpi.wip_max, 0)} pièces</small></div>
             <div className="kpi warn"><span>Goulot</span><b>Poste {String(typeof rk.bottleneck === "object" ? rk.bottleneck?.mean : rk.bottleneck)}</b><small>le plus occupé (travail + panne + attente opérateur)</small></div>
             <div className="kpi"><span>Opérateurs</span><b>{ciTxt(rk.operator_util_avg, 0)} %</b><small>{fmt.n(kpi.walk_m, 0)} m à pied au total</small></div>
+            {kpi.rail_util_pct != null && res?.conveyor && <div className="kpi"><span>Convoyeur</span><b>{ciTxt(rk.carriers_in_circulation, 0)} cintres</b>
+              <small>rail occupé {fmt.n(kpi.rail_util_pct, 0)} % · sur rail {fmt.n(kpi.rail_share_pct, 0)} % du temps</small></div>}
           </div>}
           <div className="row sim-toolbar">
             <div className="seg" aria-label="Vue">
@@ -332,7 +365,7 @@ export default function Simulation() {
       {/* ------------------------------------------------ tableaux de bord */}
       {res && results && <ErrorBoundary label="Tableaux de bord indisponibles"><section className="card">
         <div className="tabs">
-          {([["states", "États des postes"], ["wip", "Encours"], ["throughput", "Débit"], ["lead", "Temps de traversée"], ["operators", "Opérateurs"], ["compare", "Comparaison"]] as [Tab, string][]).map(([k, l]) =>
+          {([["states", "États des postes"], ["wip", "Encours"], ["throughput", "Débit"], ["lead", "Temps de traversée"], ["operators", "Opérateurs"], ...(res.conveyor ? [["conveyor", "Convoyeur"]] : []), ["compare", "Comparaison"]] as [Tab, string][]).map(([k, l]) =>
             <button key={k} className={tab === k ? "on" : ""} onClick={() => setTab(k)}>{l}</button>)}
         </div>
         {tab === "states" && <div className="sim-dash2">
@@ -373,9 +406,23 @@ export default function Simulation() {
                 <td>{fmt.n(x.states.empty, 1)} % {TR_LABEL.empty.toLowerCase()}</td><td>{fmt.n(x.states.loaded, 1)} % {TR_LABEL.loaded.toLowerCase()}</td><td>{fmt.n(x.distance_m, 0)} m</td></tr>)}
             </tbody></table></div>
         </>}
+        {tab === "conveyor" && res.conveyor && kpi && <>
+          <div className="kpis">
+            <div className="kpi"><span>Occupation du rail</span><b>{fmt.n(kpi.rail_util_pct, 1)} %</b><small>max {fmt.n(res.conveyor.rail_util_max_pct, 0)} % · {res.conveyor.capacity} places sur {fmt.n(res.conveyor.length_m, 1)} m</small></div>
+            <div className="kpi"><span>Cintres en circulation</span><b>{fmt.n(kpi.carriers_in_circulation, 1)}</b><small>max {res.conveyor.circulation_max} sur {res.conveyor.carriers} · {res.conveyor.carrier_capacity} pc/cintre</small></div>
+            <div className="kpi"><span>Temps sur rail / aux postes</span><b>{fmt.n(kpi.rail_time_avg, 1)} / {fmt.n(kpi.station_time_avg, 1)} min</b><small>{fmt.n(kpi.rail_share_pct, 0)} % du temps de traversée sur le rail</small></div>
+            <div className="kpi warn"><span>Tours supplémentaires</span><b>{kpi.recirculations}</b><small>poste plein (limite {res.conveyor.station_wip} cintres) · {kpi.reassigned} réaffectations</small></div>
+          </div>
+          <div className="table-wrap"><table className="small">
+            <thead><tr><th>Poste</th><th>Cintres reçus</th><th>Tours (poste plein)</th><th>Dérivation moy. / max</th><th>Occupation</th></tr></thead>
+            <tbody>{res.conveyor.stations.map((c) => { const st = res.stations.find((x) => x.id === c.id);
+              return <tr key={c.id}><td>{c.id}</td><td>{c.assigned}</td><td>{c.recirculations}</td><td>{fmt.n(st?.queue_avg, 1)} / {st?.queue_max}</td><td>{fmt.n(st?.utilization_pct, 1)} %</td></tr>; })}</tbody>
+          </table></div>
+          <p className="muted small">{res.conveyor.trips} cintres déchargés · {fmt.n(res.conveyor.distance_m / 1000, 1)} km parcourus · vitesse {fmt.n(res.conveyor.speed_m_per_min, 0)} m/min · aiguillage {fmt.n(res.conveyor.switch_sec, 1)} s.</p>
+        </>}
         {tab === "compare" && <div className="table-wrap"><table>
           <thead><tr><th>Indicateur</th>{results.scenarios.map((s, i) => <th key={i} style={{ color: SCEN_COLORS[i] }}>{s.name}</th>)}</tr></thead>
-          <tbody>{results.comparison.map((r) => {
+          <tbody>{results.comparison.filter((r) => r.values.some((v) => v && v.mean != null)).map((r) => {
             const ref = r.values[0]?.mean;
             return <tr key={r.key}><td>{r.label}</td>{r.values.map((v, i) => {
               const d = i > 0 && typeof v.mean === "number" && typeof ref === "number" && ref ? ((v.mean - ref) / ref) * 100 : null;

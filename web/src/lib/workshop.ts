@@ -17,7 +17,10 @@ export interface Machine {
 /** Cote gardée sur le plan (outil Mesure) : distance, chaîne, surface (2 coins) ou chemin à pied (tracé). */
 export type DimMode = "dist" | "chain" | "area" | "walk";
 export interface Dim { id: string; kind: "dim"; mode: DimMode; pts: P[]; note?: string }
-export type El = Wall | Pillar | Door | Aisle | Zone | Machine | Dim;
+/** Convoyeur suspendu (UPS) : boucle principale fermée dessinée sur le plan (sommets ; angles arrondis au rayon
+ * donné), à une hauteur donnée. Les dérivations vers les postes sont créées par la simulation. */
+export interface Rail { id: string; kind: "rail"; pts: P[]; height: number; radius: number; label: string; speed?: number }
+export type El = Wall | Pillar | Door | Aisle | Zone | Machine | Dim | Rail;
 export interface Background { path: string; x: number; y: number; width_m: number; height_m: number; opacity: number; source?: string }
 export interface PlanSettings { grid: number; snap: boolean; main_aisle_min: number; secondary_aisle_min: number; exit_max_m: number; wall_height: number }
 export interface WorkshopPlan {
@@ -111,7 +114,7 @@ export function elPoly(e: El): P[] {
     case "pillar": return boxPoly(e.x - e.w / 2, e.y - e.d / 2, e.w, e.d);
     case "door": return rectCorners(e.x, e.y, e.width, 0.3, e.rot);
     case "aisle": case "zone": return boxPoly(e.x, e.y, e.w, e.h);
-    case "dim": {
+    case "dim": case "rail": {
       const xs = e.pts.map((p) => p[0]), ys = e.pts.map((p) => p[1]);
       const x0 = Math.min(...xs), y0 = Math.min(...ys);
       return boxPoly(x0, y0, Math.max(0.01, Math.max(...xs) - x0), Math.max(0.01, Math.max(...ys) - y0));
@@ -131,22 +134,23 @@ export function overlap(a: P[], b: P[], tol = 0.02): boolean {
   return true;
 }
 export function elCenter(e: El): P {
-  if (e.kind === "dim") { const b = elPoly(e); return [(b[0][0] + b[2][0]) / 2, (b[0][1] + b[2][1]) / 2]; }
+  if (e.kind === "dim" || e.kind === "rail") { const b = elPoly(e); return [(b[0][0] + b[2][0]) / 2, (b[0][1] + b[2][1]) / 2]; }
   if (e.kind === "wall") return [(e.x1 + e.x2) / 2, (e.y1 + e.y2) / 2];
   if (e.kind === "aisle" || e.kind === "zone") return [e.x + e.w / 2, e.y + e.h / 2];
   return [e.x, e.y];
 }
 export function moveEl<T extends El>(e: T, dx: number, dy: number): T {
   if (e.kind === "wall") return { ...e, x1: r2(e.x1 + dx), y1: r2(e.y1 + dy), x2: r2(e.x2 + dx), y2: r2(e.y2 + dy) };
-  if (e.kind === "dim") return { ...e, pts: e.pts.map(([x, y]) => [r2(x + dx), r2(y + dy)] as P) };
+  if (e.kind === "dim" || e.kind === "rail") return { ...e, pts: e.pts.map(([x, y]) => [r2(x + dx), r2(y + dy)] as P) };
   return { ...e, x: r2((e as Machine).x + dx), y: r2((e as Machine).y + dy) };
 }
 export function hitTest(els: El[], x: number, y: number, tol = 0.15): El | null {
-  const order: El["kind"][] = ["dim", "machine", "pillar", "door", "wall", "aisle", "zone"];
+  const order: El["kind"][] = ["dim", "rail", "machine", "pillar", "door", "wall", "aisle", "zone"];
   for (const k of order) {
     for (let i = els.length - 1; i >= 0; i--) {
       const e = els[i]; if (e.kind !== k) continue;
       if (k === "dim") { if (dimSegments(e as Dim).some(([a, b]) => segDist(x, y, a[0], a[1], b[0], b[1]) <= tol) || Math.hypot(x - dimLabelAt(e as Dim)[0], y - dimLabelAt(e as Dim)[1]) <= tol * 2) return e; continue; }
+      if (k === "rail") { const r = e as Rail; if (r.pts.some((a, i) => { const b = r.pts[(i + 1) % r.pts.length]; return segDist(x, y, a[0], a[1], b[0], b[1]) <= tol; })) return e; continue; }
       if (k === "wall") { const w = e as Wall; if (segDist(x, y, w.x1, w.y1, w.x2, w.y2) <= Math.max(0.15, w.thickness / 2 + 0.05)) return e; continue; }
       if (k === "door") { if (Math.hypot(x - (e as Door).x, y - (e as Door).y) <= Math.max(0.4, (e as Door).width / 2)) return e; continue; }
       if (pointIn(elPoly(e), x, y)) return e;
@@ -208,7 +212,7 @@ export function snapTargets(els: El[]): P[] {
     else if (e.kind === "wall") out.push([e.x1, e.y1], [e.x2, e.y2], [(e.x1 + e.x2) / 2, (e.y1 + e.y2) / 2]);
     else if (e.kind === "aisle" || e.kind === "zone") out.push(...elPoly(e));
     else if (e.kind === "door") out.push([e.x, e.y]);
-    else if (e.kind === "dim") out.push(...e.pts);
+    else if (e.kind === "dim" || e.kind === "rail") out.push(...e.pts);
   }
   return out;
 }
@@ -546,3 +550,6 @@ export async function pngToPdf(png: Blob, title: string, subtitle: string, ratio
   doc.addImage(data, "PNG", 12, 26, w, h);
   return doc.output("blob");
 }
+
+/** Longueur de la boucle d'un rail (sommets, sans l'arrondi des angles). */
+export const railLength = (r: Rail) => r.pts.reduce((a, p, i) => { const q = r.pts[(i + 1) % r.pts.length]; return a + Math.hypot(q[0] - p[0], q[1] - p[1]); }, 0);

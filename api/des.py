@@ -79,6 +79,11 @@ def run(model: dict, scenarios: list[dict], replications: int, workshop_plan: Op
     n_st = len(model.get("stations") or [])
     T = float((model.get("shift") or {}).get("minutes") or 480)
     reps = max(1, min(LIMITS["replications"], int(replications)))
+    # convoyeur : un cintre (souvent 1 pièce) = un « paquet » → bien plus d'événements
+    cv_on = bool((model.get("conveyor") or {}).get("enabled")) or any(
+        ((sc.get("overrides") or {}).get("conveyor") or {}).get("enabled") for sc in scenarios)
+    if cv_on:
+        n_st *= 4
     while reps > 1 and n_st * T * reps * len(scenarios) > WORK_BUDGET:
         reps -= 1
     items, notes_all = [], []

@@ -57,6 +57,8 @@ def build_model(plan: dict, layout: Optional[dict] = None, workshop_plan: Option
             "minutes": float(st.get("minutes") or 0), "servers": max(1, len(workers)), "operators": list(workers),
             "machine_ids": mids, "machine_type": types[0] if types else "manuel",
             "operations": [str(o.get("name") or o.get("id") or "") for o in st.get("operations") or []],
+            "skills": sorted({str(k) for o in st.get("operations") or [] for k in o.get("skills") or []}),
+            "machine_types": sorted({str(o.get("machine_type")) for o in st.get("operations") or [] if o.get("machine_type")}),
         })
     by_op: dict[str, list[str]] = {}
     for st in stations:
@@ -69,7 +71,8 @@ def build_model(plan: dict, layout: Optional[dict] = None, workshop_plan: Option
         eff = float(info.get("efficiency") or 1.0) or 1.0
         if unq.get(w):
             eff *= 0.5
-        operators.append({"id": w, "name": str(info.get("name") or _label(plan, w)), "efficiency": eff, "stations": sts})
+        operators.append({"id": w, "name": str(info.get("name") or _label(plan, w)), "efficiency": eff, "stations": sts,
+                          "skills": list(info.get("skills") or [])})
     # une station tenue par 2 ouvrières = 2 serveurs ; partagée = 1 serveur par ouvrière présente
     first, last = stations[0], stations[-1]
     src = {"x": round(first["qx"] - 1.0, 2), "y": first["qy"]}
@@ -90,9 +93,28 @@ def build_model(plan: dict, layout: Optional[dict] = None, workshop_plan: Option
         "sink": sink, "stations": stations, "route": [s["id"] for s in stations], "operators": operators,
         "transporters": [], "settings": {**(settings or {}), "target_per_hour": target},
         "plan_id": layout.get("plan_id"),
+        "conveyor": conveyor_from_plan(workshop_plan),
     }
     model["paths"] = compute_paths(model, workshop_plan, with_all_pairs=False)
     return model
+
+
+def conveyor_from_plan(workshop_plan: Optional[dict]) -> dict:
+    """Rail de convoyeur suspendu dessiné sur le plan d'atelier (élément « rail ») : boucle principale,
+    hauteur, rayon des courbes, points de chargement / déchargement. Sans rail : convoyeur désactivé
+    (il peut être activé dans un scénario, la boucle est alors générée autour des postes)."""
+    rails = [e for e in (workshop_plan or {}).get("elements") or [] if isinstance(e, dict) and e.get("kind") == "rail"
+             and len(e.get("pts") or []) >= 3]
+    if not rails:
+        return {"enabled": False}
+    r = max(rails, key=lambda e: len(e.get("pts") or []))
+    out = {"enabled": True, "name": str(r.get("label") or "Convoyeur suspendu")[:60], "loop": r["pts"],
+           "plan_rail_id": r.get("id")}
+    for k_in, k_out in (("height", "height_m"), ("radius", "corner_radius_m"), ("speed", "speed_m_per_min"),
+                        ("load", "load"), ("unload", "unload")):
+        if r.get(k_in) is not None:
+            out[k_out] = r[k_in]
+    return out
 
 
 def _label(plan: dict, wid: str) -> str:

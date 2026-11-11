@@ -32,6 +32,7 @@ from __future__ import annotations
 import copy
 from typing import Any, Optional
 
+from engine.des.conveyor import normalize_conveyor
 from engine.des.distributions import normalize as normalize_dist
 
 LIMITS = {"stations": 150, "operators": 200, "transporters": 12, "shift_minutes": 960, "bundle_size": 200,
@@ -149,6 +150,8 @@ def normalize_model(model: dict) -> dict:
             "machine_ids": [str(x) for x in st.get("machine_ids") or []][:6],
             "machine_type": str(st.get("machine_type") or "")[:60],
             "operations": [str(x)[:80] for x in st.get("operations") or []][:30],
+            "skills": [str(x)[:60] for x in st.get("skills") or []][:20],
+            "machine_types": [str(x)[:60] for x in st.get("machine_types") or []][:10],
         })
     route = [str(r) for r in m.get("route") or ids if str(r) in ids] or ids
     # défauts au contrôle par défaut : dernier poste de la gamme, retouche au poste précédent
@@ -170,7 +173,8 @@ def normalize_model(model: dict) -> dict:
             continue
         known.add(oid)
         ops.append({"id": oid, "name": str(o.get("name") or oid)[:60], "efficiency": _f(o.get("efficiency"), 1, 0.1, 3),
-                    "stations": [str(x) for x in o.get("stations") or [] if str(x) in ids]})
+                    "stations": [str(x) for x in o.get("stations") or [] if str(x) in ids],
+                    "skills": [str(x)[:60] for x in o.get("skills") or []][:30]})
     for st in stations:   # opérateurs déclarés au poste
         for oid in st["operators"]:
             if oid not in known:
@@ -220,6 +224,19 @@ def normalize_model(model: dict) -> dict:
     pts["sink"] = [m["sink"]["x"], m["sink"]["y"]]
     m["points"] = {**pts, **{k: v for k, v in (m.get("points") or {}).items() if k not in pts}}
     m["paths"] = m.get("paths") or {}
+    try:
+        m["conveyor"] = normalize_conveyor(m)
+    except ValueError as e:
+        raise ModelError(str(e))
+    if m["conveyor"]["enabled"]:
+        # sur convoyeur : un cintre = un « paquet » ; la dérivation de chaque poste = sa file
+        # encours de départ équivalent en pièces (paquets × pièces par paquet) réparti sur des cintres
+        if "start_wip_pieces" not in m["source"]:
+            m["source"]["start_wip_pieces"] = m["source"]["start_wip_bundles"] * m["source"]["bundle_size"]
+        m["source"]["bundle_size"] = m["conveyor"]["carrier_capacity"]
+        m["source"]["start_wip_bundles"] = min(m["conveyor"]["station_wip"], -(-int(m["source"]["start_wip_pieces"]) // m["conveyor"]["carrier_capacity"]))
+        for st in stations:
+            st["queue_capacity"] = m["conveyor"]["station_wip"]
     m["name"] = str(m.get("name") or "Modèle")[:120]
     return m
 
@@ -238,7 +255,7 @@ def apply_overrides(model: dict, ov: Optional[dict]) -> dict:
     """Scénario : réglages / source / équipe / transporteurs / postes surchargés."""
     ov = ov or {}
     m = copy.deepcopy(model)
-    for key in ("settings", "source", "shift"):
+    for key in ("settings", "source", "shift", "conveyor"):
         if ov.get(key):
             m[key] = deep_merge(m.get(key) or {}, ov[key])
     # un réglage général du scénario s'applique à tous les postes (les surcharges par poste suivent)

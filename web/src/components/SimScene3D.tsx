@@ -7,6 +7,8 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { addMachineBody } from "../lib/machines3d";
 import { STATE_COLOR, STATION_STATES, lotColor, type DesModel, type Frame } from "../lib/des";
+
+const MAX_CARRIERS = 2000;
 import type { Machine, WorkshopPlan } from "../lib/workshop";
 
 interface Props { model: DesModel; plan: WorkshopPlan | null; frame: Frame | null; className?: string }
@@ -118,6 +120,30 @@ export default function SimScene3D({ model, plan, frame, className = "" }: Props
     for (const [x, z, col] of [[model.source.x, model.source.y, "#1f4e79"], [model.sink.x, model.sink.y, "#2e9e5b"]] as [number, number, string][]) {
       const m = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.05, 20), new THREE.MeshStandardMaterial({ color: col })); m.position.set(x, 0.03, z); stat.add(m);
     }
+    // convoyeur suspendu : rail (boucle + dérivations) à sa hauteur, poteaux de suspension, stations CH / DÉCH
+    const cv = model.conveyor?.enabled && model.conveyor.pts?.length ? model.conveyor : null;
+    const railH = cv?.height_m ?? 2.1;
+    if (cv) {
+      const railMat = new THREE.MeshStandardMaterial({ color: "#7b4fa0", metalness: 0.5, roughness: 0.35 });
+      const poleMat = new THREE.MeshStandardMaterial({ color: "#8d939a", metalness: 0.4, roughness: 0.5 });
+      const bar = (a: [number, number], b: [number, number], h: number, th: number, mat: THREE.Material) => {
+        const L = Math.hypot(b[0] - a[0], b[1] - a[1]); if (L < 0.01) return;
+        const m = new THREE.Mesh(new THREE.BoxGeometry(L + th, th, th), mat);
+        m.position.set((a[0] + b[0]) / 2, h, (a[1] + b[1]) / 2); m.rotation.y = -Math.atan2(b[1] - a[1], b[0] - a[0]); stat.add(m);
+      };
+      const pts = cv.pts!;
+      for (let i = 1; i < pts.length; i++) bar(pts[i - 1], pts[i], railH, 0.07, railMat);
+      for (const sp of Object.values(cv.spurs ?? {})) bar(sp.pt, sp.to, railH - 0.05, 0.05, railMat);
+      let acc = 0;
+      for (let i = 1; i < pts.length; i++) {
+        acc += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
+        if (acc >= 3) { acc = 0; const p = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.6, 0.04), poleMat); p.position.set(pts[i][0], railH + 0.3, pts[i][1]); stat.add(p); }
+      }
+      for (const [p, c] of [[cv.load_pt, "#1f4e79"], [cv.unload_pt, "#2e9e5b"]] as [[number, number] | undefined, string][]) {
+        if (!p) continue;
+        const m = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.9, 0.5), new THREE.MeshStandardMaterial({ color: c })); m.position.set(p[0], 0.45, p[1]); stat.add(m);
+      }
+    }
     const merged = mergeStatic(stat);
     scene.add(merged);
 
@@ -125,7 +151,7 @@ export default function SimScene3D({ model, plan, frame, className = "" }: Props
     const n = model.stations.length;
     const lamps = new THREE.InstancedMesh(new THREE.BoxGeometry(1.35, 0.02, 0.95), new THREE.MeshStandardMaterial({ color: "#ffffff", roughness: 0.6 }), n);
     const beacons = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.07, 0.07, 0.16, 12), new THREE.MeshStandardMaterial({ color: "#ffffff", emissive: "#222222" }), n);
-    const tmp = new THREE.Object3D(), col = new THREE.Color();
+    const tmp = new THREE.Object3D(), col = new THREE.Color(), white0 = new THREE.Color("#ffffff");
     model.stations.forEach((s, i) => {
       tmp.position.set(s.mx, 0.012, s.my); tmp.rotation.set(0, (-(s.rot ?? 0) * Math.PI) / 180, 0); tmp.scale.set(1, 1, 1); tmp.updateMatrix(); lamps.setMatrixAt(i, tmp.matrix);
       tmp.position.set(s.mx, 1.45, s.my); tmp.updateMatrix(); beacons.setMatrixAt(i, tmp.matrix);
@@ -139,7 +165,13 @@ export default function SimScene3D({ model, plan, frame, className = "" }: Props
     const carts = new THREE.InstancedMesh(new THREE.BoxGeometry(0.9, 0.5, 0.6), new THREE.MeshStandardMaterial({ color: "#ffffff", roughness: 0.6 }), 16);
     bodies.castShadow = true; carts.castShadow = true; bodies.count = 0; heads.count = 0; carts.count = 0;
     scene.add(bodies, heads, carts);
-    const white = new THREE.Color("#ffffff");
+    // cintres : tige + barre, sous le rail
+    const hookGeo = new THREE.BoxGeometry(0.42, 0.03, 0.03); hookGeo.translate(0, -0.28, 0);
+    const stemGeo = new THREE.BoxGeometry(0.02, 0.28, 0.02); stemGeo.translate(0, -0.14, 0);
+    const hooks = new THREE.InstancedMesh(mergeGeometries([hookGeo, stemGeo])!, new THREE.MeshStandardMaterial({ color: "#ffffff", metalness: 0.4, roughness: 0.4 }), cv ? MAX_CARRIERS : 1);
+    hooks.count = 0; scene.add(hooks);
+    for (let i = 0; i < (cv ? MAX_CARRIERS : 1); i++) hooks.setColorAt(i, white0);
+    const white = white0;
     for (let i = 0; i < MAX_BUNDLES; i++) bundles.setColorAt(i, white);
     for (let i = 0; i < MAX_ACTORS; i++) bodies.setColorAt(i, white);
     for (let i = 0; i < 16; i++) carts.setColorAt(i, white);
@@ -152,8 +184,20 @@ export default function SimScene3D({ model, plan, frame, className = "" }: Props
       if (lamps.instanceColor) lamps.instanceColor.needsUpdate = true;
       if (beacons.instanceColor) beacons.instanceColor.needsUpdate = true;
       let k = 0;
+      let h = 0;
+      for (const c of f.carriers) {
+        if (h >= MAX_CARRIERS) break;
+        tmp.position.set(c.x, railH, c.y); tmp.rotation.set(0, 0, 0); tmp.scale.set(1, 1, 1); tmp.updateMatrix();
+        hooks.setMatrixAt(h, tmp.matrix); hooks.setColorAt(h, col.set(c.loaded ? "#4b2a6b" : "#c9b8da")); h++;
+      }
+      hooks.count = h; hooks.instanceMatrix.needsUpdate = true; if (hooks.instanceColor) hooks.instanceColor.needsUpdate = true;
       for (const b of f.bundles) {
         if (k >= MAX_BUNDLES) break;
+        if (b.kind === 7) {      // pièces suspendues au cintre
+          tmp.position.set(b.x, railH - 0.55, b.y); tmp.rotation.set(0, 0, 0); tmp.scale.set(1, 4, 0.25); tmp.updateMatrix();
+          bundles.setMatrixAt(k, tmp.matrix); bundles.setColorAt(k, col.set(b.rework ? "#d64541" : lotColor(b.lot))); k++;
+          continue;
+        }
         const carried = b.kind === 3 || b.kind === 4;
         const y = carried ? (b.kind === 4 ? 0.55 : 0.95) + (b.z - 1) * 0.12 : b.kind === 1 ? 0.86 : 0.82 + Math.min(b.z, 14) * 0.12;
         const sz = 0.55 + Math.min(1.2, b.qty / 20) * 0.5;

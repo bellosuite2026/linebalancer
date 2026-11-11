@@ -15,6 +15,12 @@ Trace (`trace.events`, triés par temps) :
                                                 poste 3 porté par opérateur 4 transporteur 5 terminé 6 source
   [t, 2, acteur, t_fin, chemin]                 déplacement le long de trace.paths[chemin]
   [t, 3, acteur, état]                          état d'un acteur (opérateurs puis transporteurs)
+  [t, 4, cintre, t_fin, s0, s1]                 cintre qui roule sur la boucle du convoyeur de l'abscisse s0 à
+                                                s1 (m, s1 peut dépasser la longueur : modulo)
+  [t, 5, cintre, lieu, réf]                     cintre arrêté : 0 stock de cintres vides (chargement) 1 dérivation
+                                                du poste réf 2 au poste réf 3 attente d'insertion après le poste réf
+                                                4 chargement 5 déchargement
+Avec un convoyeur, un paquet porté par un cintre a le lieu 7 (réf = cintre).
 """
 from __future__ import annotations
 
@@ -27,6 +33,7 @@ from typing import Optional
 import simpy
 
 from engine.des import distributions as D
+from engine.des.conveyor_sim import ConveyorMixin
 from engine.des.model import normalize_model
 from engine.des.paths import PathTable
 
@@ -39,7 +46,9 @@ O_IDLE, O_WALK, O_WORK, O_SETUP, O_CARRY, O_BREAK, O_WAIT = range(7)
 # états des transporteurs
 T_IDLE, T_EMPTY, T_LOADED, T_LOADING, T_WAIT, T_BREAK = range(6)
 # lieux des paquets
-L_QUEUE, L_PROCESS, L_OUT, L_OPERATOR, L_TRANSPORTER, L_DONE, L_SOURCE = range(7)
+L_QUEUE, L_PROCESS, L_OUT, L_OPERATOR, L_TRANSPORTER, L_DONE, L_SOURCE, L_CARRIER = range(8)
+# cintres arrêtés
+C_EMPTY, C_SPUR, C_STATION, C_MERGE, C_LOAD, C_UNLOAD = range(6)
 
 
 class Tracker:
@@ -138,14 +147,17 @@ class BQueue:
 
 
 class Bundle:
-    __slots__ = ("idx", "lot", "qty", "fresh", "rework", "t0", "loc")
+    __slots__ = ("idx", "lot", "qty", "fresh", "rework", "t0", "loc", "carrier", "step", "rail_t")
 
     def __init__(self, idx, lot, qty, fresh, rework, t0):
         self.idx, self.lot, self.qty, self.fresh, self.rework, self.t0 = idx, lot, qty, fresh, rework, t0
         self.loc = None
+        self.carrier: Optional[int] = None     # cintre du convoyeur
+        self.step = 0                           # rang de la gamme à faire ensuite (convoyeur)
+        self.rail_t = 0.0                       # minutes passées sur le rail
 
 
-class Simulator:
+class Simulator(ConveyorMixin):
     def __init__(self, model: dict, seed: Optional[int] = None, trace: Optional[bool] = None):
         self.m = normalize_model(model)
         S = self.m["settings"]
@@ -203,6 +215,7 @@ class Simulator:
         self.transport_m = 0.0
         self.capacity_event = self.env.event()
         self.notes: list[str] = []
+        self._init_conveyor()
 
     # ------------------------------------------------------------------ trace
     def ev(self, *row):
@@ -346,6 +359,8 @@ class Simulator:
             tr.set(S_WORK)
             self._op_state(oid, O_WORK)
             self._loc(b, L_PROCESS, self.sidx[sid])
+            if b.carrier is not None:
+                self._cv_park(b.carrier, 2, self.sidx[sid])
             per_piece = st["minutes"] / max(1e-6, self.eff * o["efficiency"])
             dur = st["handling_min"] + D.sample_total(self.rng, st["dist"], per_piece, b.qty)
             yield from self._work(sid, dur)
@@ -356,6 +371,13 @@ class Simulator:
                 n_def = sum(1 for _ in range(b.qty) if self.rng.random() < p)
                 if n_def:
                     self.defects[sid] += n_def
+                    if n_def >= b.qty and self.cv and b.carrier is not None:
+                        # cintre entier défectueux : il repart par le convoyeur vers le poste de retouche
+                        b.rework = True
+                        self.bundle_table[b.idx][2] = 1
+                        b.step = self.route.index(st["rework_to"]) - 1 if st["rework_to"] in self.route else b.step
+                        n_def = 0
+                if n_def:
                     if n_def >= b.qty:
                         rb = b
                         rb.rework = True
@@ -405,6 +427,8 @@ class Simulator:
 
     def _output(self, sid: str, tr: Tracker, b: Bundle, oid: str, pos: int, req):
         """Sortie du paquet ; renvoie True si l'opérateur a déjà été libéré (poste bloqué sans lui)."""
+        if self.cv and b.carrier is not None:
+            return (yield from self._cv_output(sid, tr, b, oid, req))
         S = self.m["settings"]
         nxt = self.route[pos + 1] if 0 <= pos < len(self.route) - 1 else None
         if nxt is None:
@@ -568,14 +592,20 @@ class Simulator:
             self.tr_tr[tid] = Tracker(self, 6, T_IDLE)
         # encours de départ : paquets déjà devant les postes (hors 1er poste)
         size = m["source"]["bundle_size"]
+        wip0 = []
         for pos, sid in enumerate(self.route):
             if pos == 0:
                 continue
             for _ in range(min(m["source"]["start_wip_bundles"], self.st[sid]["queue_capacity"])):
+                if self.cv:
+                    wip0.append((sid, pos))
+                    continue
                 b = self._new_bundle(0, size, False)
                 self.initial += size
                 self.q[sid].put(b)
                 self._loc(b, L_QUEUE, self.sidx[sid])
+        if self.cv:
+            self._cv_start(wip0)
         for sid, st in self.st.items():
             if not st["operators"]:
                 self.notes.append(f"Poste {sid} sans opérateur : les paquets s'y accumulent.")
@@ -585,7 +615,7 @@ class Simulator:
                 self.env.process(self._failures(sid))
         for tid in self.trs:
             self.env.process(self._transporter(tid))
-        self.env.process(self._source())
+        self.env.process(self._cv_source() if self.cv else self._source())
         self.env.process(self._breaks())
         self.env.process(self._snapshots())
         self.env.run(until=self.T)
@@ -675,6 +705,8 @@ class Simulator:
             "defects": sum(self.defects.values()), "launched": self.launched,
             "target_per_hour": target,
         }
+        cv_k, cv_det = self._cv_result(T)
+        kpis.update(cv_k)
         res = {
             "success": True, "seed": self.seed, "shift_minutes": T, "breaks": m["shift"]["breaks"],
             "kpis": kpis, "stations": stations, "operators": ops, "transporters": trs,
@@ -684,7 +716,7 @@ class Simulator:
             "lead_time": {"hist": hist, "count": len(lead), "sample": [round(x, 1) for x in lead[:: max(1, len(lead) // 400)]]},
             "conservation": {"initial": self.initial, "launched": self.launched, "done": self.done,
                              "in_system": in_sys, "ok": self.initial + self.launched == self.done + in_sys},
-            "notes": self.notes,
+            "notes": self.notes, "conveyor": cv_det or None,
         }
         if self.trace_on:
             res["trace"] = {
@@ -697,7 +729,9 @@ class Simulator:
                 "station_states": ["work", "starved", "blocked", "down", "setup", "wait_operator", "break", "transfer"],
                 "operator_states": ["idle", "walk", "work", "setup", "carry", "break", "wait"],
                 "transporter_states": ["idle", "empty", "loaded", "loading", "wait", "break"],
-                "loc_kinds": ["queue", "process", "out", "operator", "transporter", "done", "source"],
+                "loc_kinds": ["queue", "process", "out", "operator", "transporter", "done", "source", "carrier"],
+                "carriers": self.cv_ids if self.cv else [],
+                "carrier_parks": ["empty", "spur", "station", "merge", "load", "unload"],
             }
         return res
 

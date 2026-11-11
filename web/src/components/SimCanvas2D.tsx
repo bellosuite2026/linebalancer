@@ -2,7 +2,7 @@
 // leurs paquets empilés, opérateurs et transporteurs qui se déplacent le long des allées.
 import { useEffect, useRef, useState } from "react";
 import { MACHINE_CATALOG, rectCorners, type Machine, type WorkshopPlan } from "../lib/workshop";
-import { STATE_COLOR, STATION_STATES, lotColor, type DesModel, type Frame } from "../lib/des";
+import { STATE_COLOR, STATION_STATES, lotColor, railPoint, type DesModel, type Frame } from "../lib/des";
 
 interface Props { model: DesModel; plan: WorkshopPlan | null; frame: Frame | null; selected?: string | null; onSelect?: (sid: string | null) => void; className?: string }
 
@@ -17,8 +17,9 @@ export default function SimCanvas2D({ model, plan, frame, selected, onSelect, cl
   // emprise : salle du plan ou postes
   const bounds = () => {
     if (plan) return { x0: -0.5, y0: -0.5, x1: plan.width_m + 0.5, y1: plan.length_m + 0.5 };
-    const xs = model.stations.flatMap((s) => [s.x, s.qx, s.mx]).concat([model.source.x, model.sink.x]);
-    const ys = model.stations.flatMap((s) => [s.y, s.qy, s.my]).concat([model.source.y, model.sink.y]);
+    const rp = model.conveyor?.enabled ? model.conveyor.pts ?? [] : [];
+    const xs = model.stations.flatMap((s) => [s.x, s.qx, s.mx]).concat([model.source.x, model.sink.x], rp.map((p) => p[0]));
+    const ys = model.stations.flatMap((s) => [s.y, s.qy, s.my]).concat([model.source.y, model.sink.y], rp.map((p) => p[1]));
     return { x0: Math.min(...xs) - 1.5, y0: Math.min(...ys) - 1.5, x1: Math.max(...xs) + 1.5, y1: Math.max(...ys) + 1.5 };
   };
 
@@ -84,6 +85,31 @@ export default function SimCanvas2D({ model, plan, frame, selected, onSelect, cl
       g.beginPath(); pts.forEach(([x, y], k) => (k ? g.lineTo(X(x), Y(y)) : g.moveTo(X(x), Y(y)))); g.stroke();
     }
     g.setLineDash([]);
+    // convoyeur suspendu : boucle principale, sens de marche, dérivations + aiguillages, chargement / déchargement
+    const cv = model.conveyor?.enabled && model.conveyor.pts?.length ? model.conveyor : null;
+    if (cv) {
+      const pts = cv.pts!;
+      g.strokeStyle = "rgba(123,79,160,.85)"; g.lineWidth = Math.max(2.5, v.s * 0.09); g.lineJoin = "round";
+      g.beginPath(); pts.forEach(([x, y], i) => (i ? g.lineTo(X(x), Y(y)) : g.moveTo(X(x), Y(y)))); g.closePath(); g.stroke();
+      g.strokeStyle = "rgba(123,79,160,.55)"; g.lineWidth = Math.max(1.2, v.s * 0.04);
+      for (const sp of Object.values(cv.spurs ?? {})) {
+        g.beginPath(); g.moveTo(X(sp.pt[0]), Y(sp.pt[1])); g.lineTo(X(sp.to[0]), Y(sp.to[1])); g.stroke();
+        g.fillStyle = "#7b4fa0"; const r = Math.max(2.5, v.s * 0.07);
+        g.beginPath(); g.moveTo(X(sp.pt[0]), Y(sp.pt[1]) - r); g.lineTo(X(sp.pt[0]) + r, Y(sp.pt[1])); g.lineTo(X(sp.pt[0]), Y(sp.pt[1]) + r); g.lineTo(X(sp.pt[0]) - r, Y(sp.pt[1])); g.fill();
+      }
+      const L = cv.length_m ?? 0;
+      g.fillStyle = "rgba(255,255,255,.95)";
+      for (let s0 = 1.5; s0 < L; s0 += 3) {     // flèches : sens de marche du rail
+        const [ax, ay] = railPoint(cv, s0), [bx, by] = railPoint(cv, s0 + 0.25);
+        const ang = Math.atan2(Y(by) - Y(ay), X(bx) - X(ax)), r = Math.max(3, v.s * 0.07);
+        g.save(); g.translate(X(ax), Y(ay)); g.rotate(ang); g.beginPath(); g.moveTo(r, 0); g.lineTo(-r * 0.7, -r * 0.7); g.lineTo(-r * 0.7, r * 0.7); g.fill(); g.restore();
+      }
+      const tagR = (p: [number, number] | undefined, txt: string) => {
+        if (!p) return; g.fillStyle = "#7b4fa0"; g.fillRect(X(p[0]) - 13, Y(p[1]) - 8, 26, 16);
+        g.fillStyle = "#fff"; g.font = "700 9px sans-serif"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(txt, X(p[0]), Y(p[1]));
+      };
+      tagR(cv.load_pt, "CHG"); tagR(cv.unload_pt, "DÉCH");
+    }
     // source / sortie
     const tag = (x: number, y: number, txt: string, col: string) => {
       g.fillStyle = col; g.beginPath(); g.arc(X(x), Y(y), Math.max(7, v.s * 0.28), 0, Math.PI * 2); g.fill();
@@ -124,7 +150,19 @@ export default function SimCanvas2D({ model, plan, frame, selected, onSelect, cl
     if (!frame) return;
     // paquets : carrés colorés par lot, empilés dans les files, quantité affichée
     const bs = Math.max(5, s * 0.22);
+    // cintres du convoyeur : crochet violet (plein = chargé)
+    const cr = Math.max(2, s * 0.08);
+    for (const c of frame.carriers) {
+      g.beginPath(); g.arc(X(c.x), Y(c.y), cr, 0, Math.PI * 2);
+      g.fillStyle = c.loaded ? "#4b2a6b" : "#d9cce6"; g.fill(); g.lineWidth = 0.8; g.strokeStyle = "#fff"; g.stroke();
+    }
     for (const b of frame.bundles) {
+      if (b.kind === 7) {    // pièces suspendues à un cintre
+        const w = Math.max(4, s * 0.16);
+        g.fillStyle = lotColor(b.lot); g.fillRect(X(b.x) - w / 2, Y(b.y) + cr * 0.6, w, w * 1.1);
+        if (b.rework) { g.lineWidth = 1.5; g.strokeStyle = "#d64541"; g.strokeRect(X(b.x) - w / 2, Y(b.y) + cr * 0.6, w, w * 1.1); }
+        continue;
+      }
       const off = b.kind === 3 || b.kind === 4 ? (b.z - 1) * bs * 0.5 : Math.min(b.z, 12) * bs * 0.38;
       const x = X(b.x) + (b.kind === 3 || b.kind === 4 ? bs * 0.6 : 0), y = Y(b.y) - off;
       g.fillStyle = lotColor(b.lot); g.fillRect(x - bs / 2, y - bs / 2, bs, bs * 0.7);

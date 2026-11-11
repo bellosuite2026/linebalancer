@@ -6,15 +6,15 @@ import type { Problem, ProblemRow } from "../lib/types";
 import {
   CATEGORY_COLOR, MACHINE_CATALOG, MACHINE_CATEGORIES, MACHINE_SOURCES, STATUS_LABEL, ZONES, backgroundUrl, checkPlan, dimLabelAt, dimSegments, dimText, dxfToWalls, elCenter, elPoly, emptyPlan,
   fileToImage, hitTest, inventory, machineType, moveEl, resizeRoom, nearestWallAngle, newMachine, nextLabel, operatorPoint, pngToPdf, polyLen,
-  r2, saveBlob, settingsOf, snapMeasure, svgToPng, uid, uploadBackground, walkRoute,
+  r2, railLength, saveBlob, settingsOf, snapMeasure, svgToPng, uid, uploadBackground, walkRoute,
   type Aisle, type Dim, type DimMode, type Door, type El, type Machine, type MachineStatus, type OperatorSide, type P, type PlanSettings,
-  type PlanSummary, type Wall, type WorkshopPlan, type Zone,
+  type PlanSummary, type Rail, type Wall, type WorkshopPlan, type Zone,
 } from "../lib/workshop";
 
 import MachineSymbol from "../components/MachineSymbol";
 const PlanScene3D = lazy(() => import("../components/PlanScene3D"));
 
-type Tool = "select" | "pan" | "erase" | "measure" | "wall" | "pillar" | "door" | "aisle" | "zone" | "machine" | "calibrate" | "background";
+type Tool = "select" | "pan" | "erase" | "measure" | "wall" | "pillar" | "door" | "aisle" | "zone" | "machine" | "rail" | "calibrate" | "background";
 const TOOLS: { id: Tool; label: string; key?: string; hint: string; icon: string; dash?: boolean }[] = [
   { id: "select", label: "Sélection", key: "V", icon: "M5 3l13 8-5.5 1.5L10 18z", hint: "Touchez un élément pour le choisir · Maj+clic ou « multiple » pour en ajouter · glissez dans le vide pour encadrer · glissez la sélection pour la déplacer · poignées : taille ● et rotation ◯." },
   { id: "pan", label: "Main", key: "H", icon: "M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3", hint: "Glissez pour vous déplacer dans le plan (ou deux doigts, molette pour zoomer)." },
@@ -26,6 +26,7 @@ const TOOLS: { id: Tool; label: string; key?: string; hint: string; icon: string
   { id: "aisle", label: "Allée", icon: "M3 7h18M3 17h18M5 12h3M10.5 12h3M16 12h3", hint: "Glissez pour tracer une allée de circulation (rectangle)." },
   { id: "zone", label: "Zone", icon: "M4 4h16v16H4z", dash: true, hint: "Glissez pour tracer une zone (coupe, montage…)." },
   { id: "machine", label: "Machine", icon: "M3 13h18v3H3zM13 6h6v7h-6zM6 8h7v2", hint: "Choisissez une machine dans la bibliothèque puis touchez le plan pour la poser (ou glissez-la depuis la liste)." },
+  { id: "rail", label: "Convoyeur", icon: "M3 6h18v12H3zM7 6v4M12 6v4M17 6v4", hint: "Convoyeur suspendu : touchez les angles de la boucle principale un par un ; touchez le 1er point, double-clic ou Entrée pour la fermer. Les dérivations vers les postes sont créées par la simulation." },
   { id: "calibrate", label: "Calibrer", icon: "M3 12h18M3 8v8M21 8v8M8 10v4M13 10v4", hint: "Touchez deux points du fond de plan dont vous connaissez la distance réelle." },
   { id: "background", label: "Déplacer le fond", icon: "M3 5h18v14H3zM3 16l5-5 4 4 3-3 6 6", hint: "Glissez pour caler le fond de plan sur la salle." },
 ];
@@ -75,6 +76,7 @@ export default function WorkshopPlanPage() {
   const [aspect, setAspect] = useState(0.62);
   const [bgUrl, setBgUrl] = useState<string | null>(null);
   const [calib, setCalib] = useState<P[]>([]);
+  const [railPts, setRailPts] = useState<P[]>([]);
   const [calibDist, setCalibDist] = useState("");
   const [preview, setPreview] = useState<El | null>(null);
   const [msg, setMsg] = useState<{ kind: "ok" | "err" | "warn"; text: string } | null>(null);
@@ -101,7 +103,7 @@ export default function WorkshopPlanPage() {
   const S = useMemo(() => new Set(sel), [sel]);
 
   const resetMeasure = () => { setMPts([]); setMDone(null); setWalkA(null); setMCursor(null); };
-  const setTool = (t: Tool) => { setToolState(t); setCalib([]); resetMeasure(); setHover(null); setPreview(null); };
+  const setTool = (t: Tool) => { setToolState(t); setCalib([]); setRailPts([]); resetMeasure(); setHover(null); setPreview(null); };
 
   // ---------------------------------------------------------------- chargement
   const fit = useCallback((p: WorkshopPlan) => {
@@ -229,7 +231,7 @@ export default function WorkshopPlanPage() {
     if (e.kind === "pillar") return [{ kind: "resize", p: [e.x + e.w / 2, e.y + e.d / 2] }];
     if (e.kind === "aisle" || e.kind === "zone") return [{ kind: "resize", p: [e.x + e.w, e.y + e.h] }];
     if (e.kind === "wall") return [{ kind: "end1", p: [e.x1, e.y1] }, { kind: "end2", p: [e.x2, e.y2] }];
-    if (e.kind === "dim") return e.pts.map((p, i) => ({ kind: "pt" as const, p, idx: i }));
+    if (e.kind === "dim" || e.kind === "rail") return e.pts.map((p, i) => ({ kind: "pt" as const, p, idx: i }));
     return [];
   })();
 
@@ -258,6 +260,12 @@ export default function WorkshopPlanPage() {
     if (mMode === "chain") { setMPts((pts) => [...pts, p]); return; }
     if (mPts.length === 0) { setMPts([p]); return; }
     finishMeasure({ mode: mMode, pts: [mPts[0], p] });
+  };
+  const finishRail = (pts = railPts) => {
+    if (pts.length < 3 || !writable) { setRailPts([]); return; }
+    const n: Rail = { id: uid(), kind: "rail", pts, height: 2.1, radius: 0.5, label: "Convoyeur suspendu" };
+    setEls((els) => [...els, n]); setSel([n.id]); setRailPts([]);
+    setMsg({ kind: "ok", text: `Boucle de convoyeur ajoutée (${fmt.n(railLength(n), 1)} m). La simulation y branche une dérivation par poste.` });
   };
   const finishChain = () => { if (mMode === "chain" && mPts.length >= 2) finishMeasure({ mode: "chain", pts: mPts }); };
 
@@ -399,6 +407,9 @@ export default function WorkshopPlanPage() {
     } else if (d.mode === "wallEnd" && d.orig?.kind === "wall") {
       const [px, py] = snapToWallEnds([mx, my], d.id);
       setEl(d.id!, { ...d.orig, ...(d.end === 1 ? { x1: px, y1: py } : { x2: px, y2: py }) });
+    } else if (d.mode === "dimPt" && d.orig?.kind === "rail" && d.idx != null) {
+      const p = snapP([mx, my]);
+      setEl(d.id!, { ...d.orig, pts: d.orig.pts.map((q, i) => (i === d.idx ? p : q)) });
     } else if (d.mode === "dimPt" && d.orig?.kind === "dim" && d.idx != null) {
       const p = measureSnap([mx, my], e.altKey).p;
       setEl(d.id!, { ...d.orig, pts: d.orig.pts.map((q, i) => (i === d.idx ? p : q)) });
@@ -488,6 +499,11 @@ export default function WorkshopPlanPage() {
         const n: El = { id: uid(), kind: "door", x, y, width: 1.2, rot: w ? r2(w.angle) : 0, exit: true };
         setEls((els) => [...els, n]); setSel([n.id]);
       } else if (tool === "machine") placeAt([mx, my]);
+      else if (tool === "rail") {
+        const p = snapP([mx, my]);
+        if (railPts.length >= 3 && Math.hypot(p[0] - railPts[0][0], p[1] - railPts[0][1]) <= Math.max(tol, 0.3)) finishRail();
+        else setRailPts([...railPts, p]);
+      }
       else if (tool === "calibrate") {
         const next = calib.length >= 2 ? [[mx, my] as P] : [...calib, [mx, my] as P];
         setCalib(next);
@@ -513,8 +529,10 @@ export default function WorkshopPlanPage() {
       if (mod && k === "y") { ev.preventDefault(); doRedo(); return; }
       if (mod && k === "a" && !view3d) { ev.preventDefault(); setTool("select"); setSel(plan.elements.map((x) => x.id)); return; }
       if (ev.key === "Enter" && tool === "measure") { finishChain(); return; }
+      if (ev.key === "Enter" && tool === "rail") { finishRail(); return; }
       if (ev.key === "Escape") {
         if (tool === "measure" && (mPts.length || mDone || walkA)) { resetMeasure(); return; }
+        if (tool === "rail" && railPts.length) { setRailPts([]); return; }
         if (sel.length) { setSel([]); return; }
         setTool("select"); return;
       }
@@ -812,7 +830,7 @@ export default function WorkshopPlanPage() {
             onDrop={(e) => { const k = e.dataTransfer.getData("text/x-machine"); if (k) { e.preventDefault(); placeAt(toM(e.clientX, e.clientY), k); } }}>
             <svg ref={svgRef} viewBox={`${view.x} ${view.y} ${view.w} ${vh}`} onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}
               onPointerLeave={() => { setHover(null); if (tool === "measure" && !drag.current) setMCursor(null); }}
-              onDoubleClick={() => { if (tool === "measure") finishChain(); }}
+              onDoubleClick={() => { if (tool === "measure") finishChain(); if (tool === "rail") finishRail(); }}
               onWheel={onWheel} style={{ touchAction: "none", cursor: cursorStyle }} xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <pattern id="hatch" width="0.3" height="0.3" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="0.3" stroke="#c9c2b0" strokeWidth="0.06" /></pattern>
@@ -861,7 +879,17 @@ export default function WorkshopPlanPage() {
                   </g>
                 );
               })}
+              {plan.elements.filter((e): e is Rail => e.kind === "rail").map((r) => (
+                <g key={r.id}>
+                  <polygon points={r.pts.map((p) => p.join(",")).join(" ")} fill="none" stroke={S.has(r.id) ? "#1f4e79" : "#7b4fa0"} strokeWidth={S.has(r.id) ? 0.12 : 0.08} strokeLinejoin="round" />
+                  <polygon points={r.pts.map((p) => p.join(",")).join(" ")} fill="none" stroke="#fff" strokeWidth={0.02} strokeDasharray="0.3 0.3" />
+                  <text x={r.pts[0][0]} y={r.pts[0][1] - fs * 0.6} fontSize={fs * 0.8} fill="#7b4fa0" fontWeight={700}>{r.label} · {fmt.n(r.height, 1)} m</text>
+                </g>))}
               {plan.elements.filter((e): e is Dim => e.kind === "dim").map((dm) => renderDim(dm, { selected: S.has(dm.id) }))}
+              {tool === "rail" && railPts.length > 0 && <g data-noexport>
+                <polyline points={railPts.map((p) => p.join(",")).join(" ")} fill="none" stroke="#7b4fa0" strokeWidth={0.08} strokeDasharray="0.25 0.15" />
+                {railPts.map((p, i) => <circle key={i} cx={p[0]} cy={p[1]} r={i === 0 ? 0.22 : 0.12} fill={i === 0 ? "#fff" : "#7b4fa0"} stroke="#7b4fa0" strokeWidth={0.05} />)}
+              </g>}
               {/* ----- surcouches non exportées : sélection, survol gomme, poignées, mesure */}
               <g data-noexport>
                 {selEls.length > 1 && selEls.map((el) => { const b = elPoly(el); return <polygon key={`s${el.id}`} points={b.map((p) => p.join(",")).join(" ")} fill="#2f6ea5" fillOpacity={0.08} stroke="#2f6ea5" strokeWidth={sw * 1.5} strokeDasharray={`${sw * 6} ${sw * 4}`} />; })}
@@ -926,7 +954,7 @@ export default function WorkshopPlanPage() {
 function MultiProps({ els, writable, onDel, onDup, onRot, onAlign, onClear }: {
   els: El[]; writable: boolean; onDel: () => void; onDup: () => void; onRot: (d: number) => void; onAlign: (a: "x" | "y") => void; onClear: () => void;
 }) {
-  const names: Record<El["kind"], string> = { machine: "machine", wall: "mur", pillar: "poteau", door: "porte", aisle: "allée", zone: "zone", dim: "cote" };
+  const names: Record<El["kind"], string> = { machine: "machine", wall: "mur", pillar: "poteau", door: "porte", aisle: "allée", zone: "zone", dim: "cote", rail: "convoyeur" };
   const counts = new Map<string, number>();
   for (const e of els) counts.set(e.kind, (counts.get(e.kind) ?? 0) + 1);
   const nm = els.filter((e) => e.kind === "machine").length;
@@ -956,7 +984,7 @@ function Props({ el, plan, writable, upd, onDup, onDel, onRot, orgId }: {
     try { const d = JSON.parse(localStorage.getItem(gammeDraftKey(orgId)) || "null"); return (d?.ws ?? []).map((w: { id: string }) => w.id).filter(Boolean) as string[]; }
     catch { return [] as string[]; }
   }, [orgId]);
-  const title = { machine: "Machine", wall: "Mur", pillar: "Poteau", door: "Porte / issue", aisle: "Allée", zone: "Zone", dim: "Cote" }[el.kind];
+  const title = { machine: "Machine", wall: "Mur", pillar: "Poteau", door: "Porte / issue", aisle: "Allée", zone: "Zone", dim: "Cote", rail: "Convoyeur suspendu" }[el.kind];
   return (
     <div className="wp-props">
       <div className="card-head"><h3>{title}</h3>
@@ -1011,6 +1039,15 @@ function Props({ el, plan, writable, upd, onDup, onDel, onRot, orgId }: {
           <p className="small"><b>{dimText(el)}</b>{el.note ? ` · ${el.note}` : ""}</p>
           <p className="muted small">{({ dist: "Distance", chain: "Mesure en chaîne", area: "Surface", walk: "Chemin à pied" } as Record<string, string>)[el.mode]} · affichée sur le plan et dans les exports PNG/PDF. Faites glisser ses points (poignées) pour l'ajuster.</p>
           <label>Note<input value={el.note ?? ""} maxLength={60} onChange={(e) => upd({ note: e.target.value || undefined } as Partial<Dim>)} /></label>
+        </>}
+        {el.kind === "rail" && <>
+          <label>Nom<input value={el.label} maxLength={40} onChange={(e) => upd({ label: e.target.value } as Partial<Rail>)} /></label>
+          <div className="form-grid tight2">
+            <label>Hauteur du rail (m)<input type="number" step={0.1} min={1.2} max={4} value={el.height} onChange={(e) => upd({ height: Math.min(4, Math.max(1.2, num(e.target.value))) } as Partial<Rail>)} /></label>
+            <label>Rayon des courbes (m)<input type="number" step={0.1} min={0} max={5} value={el.radius} onChange={(e) => upd({ radius: Math.min(5, Math.max(0, num(e.target.value))) } as Partial<Rail>)} /></label>
+            <label>Vitesse (m/min)<input type="number" step={1} min={1} max={120} value={el.speed ?? 18} onChange={(e) => upd({ speed: Math.min(120, Math.max(1, num(e.target.value))) } as Partial<Rail>)} /></label>
+          </div>
+          <p className="muted small">Boucle principale de {fmt.n(railLength(el), 1)} m ({el.pts.length} angles). Glissez les poignées pour la modifier. Chargement près de l'entrée de la ligne, déchargement près de la sortie ; les cintres, aiguillages et limites d'encours se règlent dans la simulation.</p>
         </>}
         {el.kind === "zone" && <div className="form-grid tight2">
           <label>Type<select value={el.zone} onChange={(e) => upd({ zone: e.target.value, name: ZONES[e.target.value]?.label ?? "" } as Partial<Zone>)}>
