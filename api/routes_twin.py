@@ -206,7 +206,11 @@ def register(app: FastAPI, queue: JobQueue, auth: SupabaseAuth, store: SupabaseS
     @app.get("/v1/orgs/{org_id}/simulations/{sim_id}", tags=["jumeau"])
     def get_sim(org_id: str, sim_id: str, p: Principal = Depends(principal)):
         org_id = membership(org_id, p)
-        return call(store.get_simulation, p.token, org_id, uid(sim_id, "Simulation"))
+        sim = call(store.get_simulation, p.token, org_id, uid(sim_id, "Simulation"))
+        if sim.get("kind") == "opt":          # variantes d'implantation (modèles complets) : inutiles au front
+            lay = sim.get("layout") or {}
+            sim = {**sim, "layout": {"variants": [{"name": v.get("name"), "layout": v.get("layout")} for v in lay.get("variants") or []]}}
+        return sim
 
     def _done(org_id: str, sim_id: str, p: Principal) -> dict:
         org_id = membership(org_id, p)

@@ -347,6 +347,20 @@ class DesRequest(BaseModel):
     plan_id: Optional[str] = Field(default=None, description="Plan d'atelier pour les chemins à pied")
 
 
+class OptimizeRequest(BaseModel):
+    """Optimiseur (phase 2.3) : recherche multi-objectif sur le modèle DES."""
+    name: str = Field(default="", max_length=120)
+    model: Optional[dict[str, Any]] = Field(default=None, description="Modèle édité ; par défaut : modèle généré")
+    plan_id: Optional[str] = None
+    config: dict[str, Any] = Field(default_factory=dict, description="objectifs, contraintes, variables, budget")
+
+
+class OptApplyIn(BaseModel):
+    solution: int = Field(ge=1, le=100)
+    save_layout: bool = True
+    replications: int = Field(default=5, ge=1, le=20)
+
+
 # ------------------------------------------------------------------ logique par blocs (Process Flow)
 class FlowIn(BaseModel):
     name: str = Field(default="Flux", min_length=1, max_length=120)

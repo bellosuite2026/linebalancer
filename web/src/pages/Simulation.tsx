@@ -169,7 +169,7 @@ export default function Simulation() {
         <div>
           <h1>Simulation de l'atelier</h1>
           <p className="muted">{data.problem_name || model.name} · {data.summary.stations} postes · {data.summary.operators} opérateurs · SAM {fmt.n(data.summary.sam_total, 2)} min ·
-            {" "}<Link to={`/calculs/${runId}`}>calcul</Link> · <Link to={`/jumeau/${runId}`}>jumeau numérique</Link> · <Link to={`/flux/${runId}`}>logique par blocs (Process Flow)</Link></p>
+            {" "}<Link to={`/calculs/${runId}`}>calcul</Link> · <Link to={`/jumeau/${runId}`}>jumeau numérique</Link> · <Link to={`/flux/${runId}`}>logique par blocs (Process Flow)</Link> · <Link to={`/optimiseur/${runId}${planId ? `?plan=${planId}` : ""}`}>optimiseur</Link></p>
         </div>
         <div className="actions">
           <label className="small">Plan d'atelier{" "}
