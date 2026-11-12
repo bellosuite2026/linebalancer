@@ -83,3 +83,25 @@ Moteur : `engine/des/flow.py` (SimPy, déterministe avec graine). Page `/flux/:r
 - Animation : jetons présents par bloc (● n) au fil du temps ; les blocs d'opération liés à un poste colorent ce poste sur le plan (travail / attente / bloqué).
 - Stockage : table `process_flows` (migration 20261111000009, RLS par atelier : membres en lecture, owner/admin/methodes/chef_ligne en écriture).
 - Limites : pas de sous-graphes réutilisables ; une seule loi de temps par opération ; les opérateurs ne se déplacent pas dans ce mode (ressources abstraites) ; animation du plan limitée aux états des postes liés.
+
+## Phase 2.3 — Optimiseur (type OptQuest), livré le 2026-11-12
+Moteur : `engine/des/optimize.py` (pur Python, appelle le simulateur DES). API : `api/optimizer.py` + routes dans `api/routes_des.py`. Page `/optimiseur/:runId` (bouton « Optimiseur » d'un calcul, lien depuis la simulation 3D).
+
+| Variable | Domaine |
+|---|---|
+| Effectifs / affectations | renforts (+1 opératrice) sur les postes les plus chargés (max réglable) ; retraits d'opératrices peu chargées, leur poste étant repris par la voisine la moins chargée |
+| Taille de paquet | 5, 8, 10, 12, 15, 20, 25, 30 (+ valeur actuelle) |
+| Encours max | plafond de lancement (CONWIP) = facteur × nombre de postes paquets (sans plafond, 1, 1,5, 2, 3, 4) |
+| Agents de liaison | 0 à N (max réglable) |
+| Convoyeur suspendu | nombre de cintres (auto, 2 à 6 par poste) et encours par poste (2 à 8 cintres) |
+| Placement des postes | implantation actuelle, en ligne / en U (sans plan d'atelier), postes échangés entre machines du même type (2-opt glouton sur l'enchaînement de la gamme et les trajets des opératrices multi-postes ; chemins recalculés par les allées du plan) |
+
+- Objectifs (au moins deux) : pièces / jour (max), **coût minute** = salaires de la journée (opératrices + agents de liaison × minutes payées × coût d'une minute) ÷ minutes produites (pièces × SAM) (min), encours moyen (min), marche + transport (min). Le coût par pièce est aussi affiché.
+- Contraintes : débit minimal (pcs/h), encours moyen max, effectif max, coût minute max (domination sous contraintes de Deb ; sans solution admissible, les moins hors limites sont montrées).
+- Recherche : NSGA-II léger (tri non dominé + distance d'encombrement), population initiale = configuration actuelle + hypercube latin ; chaque essai = moyenne de 1 à 5 réplications avec graines communes ; cache des configurations déjà simulées ; arrêt au budget de temps (10 à 90 s sur Render gratuit), au nombre d'essais ou quand plus rien de nouveau n'est généré. Progression (essais, génération, meilleur débit) enregistrée toutes les 2,5 s.
+- Stockage : `twin_simulations` (`kind = 'opt'`, migration 20261112000010) ; `layout.variants` = modèles des implantations candidates (non renvoyés au navigateur) ; `results.pareto` = front de Pareto (≤ 30 solutions), `results.cloud` = essais (nuage du graphique).
+- « Appliquer » (`POST /v1/orgs/{org}/optimizations/{sid}/apply`) : crée une simulation DES de la solution (5 réplications, animation 2D/3D) et, si le placement change, enregistre l'implantation du calcul (ligne / U, ou postes réaffectés aux machines du plan).
+
+Exemple (chemise, fichiers exemple, cadence 1,2, RPW 17 postes, journée 8 h avec pauses, API Render gratuite, budget 45 s : 80 configurations, 160 journées simulées) : actuel 370 pcs/j, encours 255 pcs, coût minute 0,0802 TND. Le front propose notamment : encours max 17 paquets → même production, encours 194 (−24 %), traversée 295 → 279 min ; paquets de 5 + encours max 17 → 365 pcs/j (−1,4 %), encours 90 (−65 %) ; renforts aux postes 5 et 17, un retrait, paquets de 30, implantation en U → 390 pcs/j (+5 %) pour un coût minute quasi identique (0,0806).
+
+Limites : les essais utilisent peu de réplications (écarts < 1–2 % à confirmer avec « Appliquer », 5 réplications) ; renforts / retraits sur des listes de postes candidats (8 plus chargés / moins chargés) ; les compétences des renforts sont supposées acquises ; placement limité à des variantes (pas de dessin libre de l'implantation) ; un seul calcul à la fois par serveur gratuit (la recherche partage le processeur de l'API).

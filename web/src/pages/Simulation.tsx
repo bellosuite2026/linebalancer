@@ -103,7 +103,7 @@ export default function Simulation() {
         const s = await api<DesSim>(`${base}/simulations/${id}`);
         setSim(s);
         if (s.status === "queued" || s.status === "running") poll(id);
-        else { setBusy(false); if (s.status === "done") { setT(0); setPlaying(true); setSp((p) => { p.set("sim", id); return p; }, { replace: true }); } }
+        else { setBusy(false); setData((d) => (d ? { ...d, simulations: d.simulations.map((x) => (x.id === id ? { ...x, status: s.status } : x)) } : d)); if (s.status === "done") { setT(0); setPlaying(true); setSp((p) => { p.set("sim", id); return p; }, { replace: true }); } }
       } catch (e) { setErr((e as Error).message); setBusy(false); }
     }, 1800);
   };
