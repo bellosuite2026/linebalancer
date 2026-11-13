@@ -18,7 +18,7 @@ _T95 = [12.706, 4.303, 3.182, 2.776, 2.571, 2.447, 2.365, 2.306, 2.262, 2.228, 2
 
 KPI_KEYS = ["pieces", "per_hour", "lead_time_avg", "wip_avg", "wip_max", "operator_util_avg", "walk_m",
             "transport_m", "defects", "rail_util_pct", "carriers_in_circulation", "rail_time_avg", "station_time_avg",
-            "rail_share_pct", "recirculations", "reassigned"]
+            "rail_share_pct", "recirculations", "reassigned", "liaison_m", "moves_m", "bundles_done"]
 
 
 def t95(df: int) -> float:
@@ -52,6 +52,8 @@ def run_scenario(model: dict, replications: int = 1, seed: Optional[int] = None,
         for s in res["stations"]:
             station_util[s["id"]].append(s["utilization_pct"])
     summary = {k: ci([kp.get(k) for kp in kpis]) for k in KPI_KEYS}
+    summary["lead_time_basis"] = "measured" if all(kp.get("lead_time_basis") == "measured" for kp in kpis) else (
+        "little" if any(kp.get("lead_time_basis") for kp in kpis) else None)
     summary["bottleneck"] = Counter(kp["bottleneck"] for kp in kpis).most_common(1)[0][0]
     first["replications"] = {"n": n, "seeds": [base_seed + r for r in range(n)], "kpis": summary,
                              "values": {k: [kp.get(k) for kp in kpis] for k in KPI_KEYS},
@@ -89,7 +91,7 @@ COMPARISON_ROWS = [
     ("pieces", "Pièces produites"), ("per_hour", "Pièces / heure"), ("lead_time_avg", "Temps de traversée moyen (min)"),
     ("wip_avg", "Encours moyen (pièces)"), ("wip_max", "Encours max (pièces)"),
     ("operator_util_avg", "Occupation opérateurs (%)"), ("walk_m", "Marche des opérateurs (m)"),
-    ("transport_m", "Transport des paquets (m)"), ("defects", "Pièces en retouche"),
+    ("liaison_m", "Trajets des agents de liaison (m)"), ("transport_m", "Transport des paquets, en charge (m)"), ("defects", "Pièces en retouche"),
     ("rail_util_pct", "Convoyeur : occupation du rail (%)"), ("carriers_in_circulation", "Convoyeur : cintres en circulation"),
     ("rail_time_avg", "Convoyeur : temps sur rail par cintre (min)"),
     ("station_time_avg", "Convoyeur : temps aux postes par cintre (min)"),

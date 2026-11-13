@@ -210,6 +210,7 @@ class Simulator(ConveyorMixin):
         self.live: dict[int, Bundle] = {}
         self.launched = self.initial = self.done = 0
         self.lead: list[float] = []
+        self.bundles_done = 0
         self.completions: list[tuple[float, int]] = []
         self.wip_series: list[list] = []
         self.transport_m = 0.0
@@ -495,6 +496,7 @@ class Simulator(ConveyorMixin):
         self._loc(b, L_DONE, 0)
         self.done += b.qty
         self.completions.append((self.env.now, b.qty))
+        self.bundles_done += 1
         if b.fresh and not b.rework:
             self.lead.append(self.env.now - b.t0)
         self.live.pop(b.idx, None)
@@ -510,7 +512,8 @@ class Simulator(ConveyorMixin):
             left = lot["qty"] if lot["qty"] > 0 else math.inf
             while left > 0:
                 n = int(min(size, left))
-                while cap and sum(1 for b in self.live.values() if b.fresh) >= cap:
+                # plafond d'encours = TOUS les paquets présents dans la ligne (encours de départ compris)
+                while cap and len(self.live) >= cap:
                     yield self.capacity_event
                 b = self._new_bundle(li, n, True)
                 b.t0 = self.env.now
@@ -592,11 +595,14 @@ class Simulator(ConveyorMixin):
             self.tr_tr[tid] = Tracker(self, 6, T_IDLE)
         # encours de départ : paquets déjà devant les postes (hors 1er poste)
         size = m["source"]["bundle_size"]
+        cap = m["source"].get("wip_cap_bundles")
         wip0 = []
         for pos, sid in enumerate(self.route):
             if pos == 0:
                 continue
             for _ in range(min(m["source"]["start_wip_bundles"], self.st[sid]["queue_capacity"])):
+                if cap and len(wip0) + len(self.live) >= cap:
+                    break                    # l'encours de départ respecte aussi le plafond
                 if self.cv:
                     wip0.append((sid, pos))
                     continue
@@ -653,12 +659,13 @@ class Simulator(ConveyorMixin):
                 "down_min": round(acc[S_DOWN], 1),
             })
         active = lambda s: s["states"]["work"] + s["states"]["setup"] + s["states"]["down"] + s["states"]["wait_operator"]  # noqa: E731
-        # goulot : poste le plus actif ; à ±1 point près, celui dont la charge par serveur est la plus forte
-        # (le 1er poste, toujours alimenté en flux tiré, ne doit pas masquer le vrai goulot)
+        # goulot : parmi les postes les plus actifs (à 10 points près : le remplissage de la ligne en début de
+        # journée fait paraître le vrai goulot moins occupé que ses voisins amont), celui dont la charge par
+        # serveur (minutes / opératrices) est la plus forte ; le 1er poste, toujours alimenté, ne masque rien
         bott = None
         if stations:
             top = max(active(s) for s in stations)
-            cands = [s for s in stations if active(s) >= top - 1.0]
+            cands = [s for s in stations if active(s) >= top - 10.0]
             bott = max(cands, key=lambda s: (s["minutes"] / max(1, s["servers"]), active(s)))["id"]
         ops = []
         for oid, o in self.ops.items():
@@ -692,16 +699,29 @@ class Simulator(ConveyorMixin):
         prod_minutes = T - sum(b - a for a, b in self.breaks)
         target = m["settings"]["target_per_hour"]
         wip_vals = [w[1] for w in self.wip_series]
+        # temps de traversée : mesuré sur les paquets lancés ET terminés dans la journée ; sinon (paquets trop gros
+        # pour traverser la ligne en une journée) estimé par la loi de Little : encours moyen / débit
+        wip_avg = statistics.mean(wip_vals) if wip_vals else 0.0
+        if lead:
+            lt_avg, lt_basis = round(statistics.mean(lead), 1), "measured"
+        elif self.done > 0 and wip_avg > 0:
+            lt_avg, lt_basis = round(wip_avg / (self.done / T), 1), "little"
+        else:
+            lt_avg, lt_basis = None, None
+        liaison_m = round(sum(self.tr_dist.values()), 1)
         kpis = {
             "pieces": self.done, "per_hour": round(self.done / T * 60, 1),
             "per_hour_worked": round(self.done / max(1e-6, prod_minutes) * 60, 1),
-            "lead_time_avg": round(statistics.mean(lead), 1) if lead else None,
+            "lead_time_avg": lt_avg, "lead_time_basis": lt_basis,
             "lead_time_p90": round(lead[int(0.9 * (len(lead) - 1))], 1) if lead else None,
+            "bundles_done": self.bundles_done, "bundles_measured": len(lead),
             "wip_avg": round(statistics.mean(wip_vals), 1) if wip_vals else 0,
             "wip_max": max(wip_vals) if wip_vals else 0,
             "bottleneck": bott, "operators": len(ops),
             "operator_util_avg": round(statistics.mean([o["utilization_pct"] for o in ops]), 1) if ops else 0,
             "walk_m": round(sum(self.op_walk.values()), 1), "transport_m": round(self.transport_m, 1),
+            "liaison_m": liaison_m, "moves_m": round(sum(self.op_walk.values()) + liaison_m, 1),
+            "wip_cap_pieces": (m["source"]["wip_cap_bundles"] * m["source"]["bundle_size"]) if m["source"].get("wip_cap_bundles") else None,
             "defects": sum(self.defects.values()), "launched": self.launched,
             "target_per_hour": target,
         }

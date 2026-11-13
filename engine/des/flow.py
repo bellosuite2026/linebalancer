@@ -690,7 +690,9 @@ class FlowSim:
         pools = [{"name": k, "capacity": r.capacity, "utilization_pct": round(100.0 * self.pool_busy[k] / (T * r.capacity), 1)}
                  for k, r in self.pools.items()]
         kpis = {"pieces": round(self.done_pp, 1), "per_hour": round(self.done_pp / T * 60, 1),
-                "lead_time_avg": round(statistics.mean(lead), 1) if lead else None,
+                "lead_time_avg": (round(statistics.mean(lead), 1) if lead else
+                                  (round(statistics.mean(wips) / (self.done_pp / T), 1) if wips and self.done_pp > 0 and statistics.mean(wips) > 0 else None)),
+                "lead_time_basis": "measured" if lead else ("little" if self.done_pp > 0 and wips else None),
                 "lead_time_p90": round(lead[int(0.9 * (len(lead) - 1))], 1) if lead else None,
                 "wip_avg": round(statistics.mean(wips), 1) if wips else 0, "wip_max": max(wips) if wips else 0,
                 "bottleneck": bott, "tokens": self.next_id, "done_tokens": self.done_tokens,

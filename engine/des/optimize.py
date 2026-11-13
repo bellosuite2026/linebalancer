@@ -279,13 +279,14 @@ def evaluate(model: dict, cfg: dict, seeds: list[int]) -> dict:
         vals["per_hour"].append(float(k["per_hour"] or 0))
         vals["wip_avg"].append(float(k["wip_avg"] or 0))
         vals["walk_m"].append(float(k["walk_m"] or 0) + float(k["transport_m"] or 0))
-        vals["lead_time_avg"].append(float(k["lead_time_avg"] or 0))
+        if k.get("lead_time_avg") is not None and pcs > 0:
+            vals["lead_time_avg"].append(float(k["lead_time_avg"]))
         vals["operator_util_avg"].append(float(k["operator_util_avg"] or 0))
         cost = cfg["cost_per_minute"] * people * T
         vals["cost_minute"].append(cost / (pcs * sam) if pcs > 0 and sam > 0 else 99.0)
         bott.append(k["bottleneck"])
     kpis = {k: ci(v) for k, v in vals.items()}
-    mean = {k: (kpis[k]["mean"] if kpis[k]["mean"] is not None else 0.0) for k in kpis}
+    mean = {k: (kpis[k]["mean"] if kpis[k]["mean"] is not None else (None if k == "lead_time_avg" else 0.0)) for k in kpis}
     mean["cost_minute"] = round(sum(vals["cost_minute"]) / len(vals["cost_minute"]), 4)
     kpis["cost_minute"]["mean"] = mean["cost_minute"]
     pcs_mean = mean["pieces"]

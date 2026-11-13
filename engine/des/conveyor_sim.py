@@ -188,7 +188,7 @@ class ConveyorMixin:
             left = lot["qty"] if lot["qty"] > 0 else float("inf")
             while left > 0:
                 n = int(min(size, left))
-                while cap and sum(1 for b in self.live.values() if b.fresh) >= cap:
+                while cap and len(self.live) >= cap:   # encours de départ compris
                     yield self.capacity_event
                 c = yield self.empty.get()
                 yield from self._wait_break()

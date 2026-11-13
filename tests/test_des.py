@@ -206,3 +206,41 @@ def test_machine_library_complete_and_web_copy_in_sync():
         assert v["w"] > 0 and v["d"] > 0 and v["h"] > 0 and v["shape"] and v["source"]
     web = Path(__file__).resolve().parents[1] / "web" / "src" / "lib" / "machineLibrary.ts"
     assert web.read_text(encoding="utf-8") == render(), "relancer scripts/build_machine_library.py"
+
+
+# ---------------------------------------------------------------- régressions indicateurs (2026-11-13, sim 38323c63)
+def _big_bundles():
+    # 7 postes, paquets de 30, plafond 7 paquets, 1 paquet d'encours de départ par poste, agent de liaison
+    return line([2.1, 1.8, 3.5, 2.1, 2.7, 3.1, 0.9], settings={"transfer": "transporter"},
+                source={"bundle_size": 30, "start_wip_bundles": 1, "wip_cap_bundles": 7},
+                transporters=[{"capacity": 2, "speed_m_per_min": 40}])
+
+
+def test_wip_cap_counts_starting_wip():
+    r = run_experiment(_big_bundles(), replications=2, trace=False)["scenarios"][0]["result"]
+    k = r["kpis"]
+    assert k["wip_max"] <= 7 * 30 and k["wip_cap_pieces"] == 210
+    assert r["conservation"]["ok"]
+
+
+def test_lead_time_estimated_when_no_launched_bundle_finishes():
+    k = simulate(_big_bundles())["kpis"]
+    assert k["pieces"] > 0 and k["bundles_done"] >= 1
+    assert k["lead_time_avg"] is not None and k["lead_time_avg"] > 0
+    assert k["lead_time_basis"] in ("measured", "little")
+    small = simulate(line([0.5, 0.6], source={"bundle_size": 5, "start_wip_bundles": 0}))["kpis"]
+    assert small["lead_time_basis"] == "measured" and small["bundles_measured"] > 0
+
+
+def test_liaison_agent_distance_reported():
+    k = simulate(_big_bundles())["kpis"]
+    assert k["walk_m"] == 0            # opératrices fixes
+    assert k["liaison_m"] > 0 and k["moves_m"] == pytest.approx(k["walk_m"] + k["liaison_m"], abs=0.2)
+
+
+def test_bottleneck_moves_after_reinforcement():
+    m = line([2.0, 3.0, 4.0])
+    assert simulate(m)["kpis"]["bottleneck"] == "3"
+    m["stations"][2]["operators"] = ["W3", "R3"]
+    m["stations"][2]["servers"] = 2
+    assert simulate(m)["kpis"]["bottleneck"] == "2"    # le renfort déplace le goulot vers le poste suivant le plus chargé

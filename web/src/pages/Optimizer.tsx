@@ -282,7 +282,6 @@ function Scatter({ res, ax, ay, sel, onPick }: { res: OptResults; ax: ObjKey; ay
       <text x={(W + P.l) / 2} y={H - 6} textAnchor="middle" fontSize="12" fill="#334">{OBJ[ax].label} ({OBJ[ax].unit}) {OBJ[ax].sense === "max" ? "→ mieux" : "← mieux"}</text>
       <text x={14} y={(H - P.b) / 2} textAnchor="middle" fontSize="12" fill="#334" transform={`rotate(-90 14 ${(H - P.b) / 2})`}>{OBJ[ay].label} ({OBJ[ay].unit}) {OBJ[ay].sense === "max" ? "↑ mieux" : "↓ mieux"}</text>
       {(res.cloud ?? []).map((c, i) => <circle key={i} cx={pts.sx(Number(c.mean[ax] ?? 0))} cy={pts.sy(Number(c.mean[ay] ?? 0))} r={3} fill={c.feasible ? "#c4cad2" : "#f3c9c4"} />)}
-      <polyline fill="none" stroke="#3b7dd8" strokeOpacity={0.35} strokeDasharray="4 3" points={front.map((s) => `${pts.sx(Number(s.mean[ax]))},${pts.sy(Number(s.mean[ay]))}`).join(" ")} />
       {front.map((s) => (
         <g key={s.key} onClick={() => onPick(s.id!)} style={{ cursor: "pointer" }}>
           <circle cx={pts.sx(Number(s.mean[ax]))} cy={pts.sy(Number(s.mean[ay]))} r={sel === s.id ? 8 : 6} fill="#3b7dd8" stroke={sel === s.id ? "#1f2d3d" : "#fff"} strokeWidth={2} />
