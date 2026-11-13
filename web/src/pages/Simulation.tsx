@@ -15,6 +15,7 @@ import ErrorBoundary, { hasWebGL } from "../components/ErrorBoundary";
 import { Bars, Gantt, Histogram, Legend, LineChart, StateBars, StatePie } from "../components/SimCharts";
 import JobProgress, { jobPhase, Waking } from "../components/JobProgress";
 import OptimizeButton from "../components/OptimizeButton";
+import NumField from "../components/NumField";
 
 const SimScene3D = lazy(() => import("../components/SimScene3D"));
 const SPEEDS = [1, 10, 30, 60, 120, 300, 600];
@@ -325,7 +326,7 @@ export default function Simulation() {
             </details>
           ))}
           {forms.length < 3 && <button className="btn small" onClick={() => setForms([...forms, emptyForm(forms.length === 1 ? "Paquets de 5" : "Avec agent de liaison")].map((f, i, arr) => (i === arr.length - 1 ? (forms.length === 1 ? { ...f, bundle_size: "5" } : { ...f, transporters: "1", transfer: "transporter" }) : f)))}>+ Scénario à comparer</button>}
-          <label>Réplications (graines)<input type="number" min={1} max={20} value={reps} onChange={(e) => setReps(Math.max(1, Math.min(20, +e.target.value)))} /></label>
+          <label>Réplications (graines)<NumField min={1} max={20} value={reps} onChange={setReps} /></label>
           {writable ? <button className="btn primary full" disabled={busy} onClick={run}>{busy ? (sim?.status === "running" ? "Simulation en cours…" : "En file d'attente…") : "▶ Lancer la simulation"}</button>
             : <p className="muted small">Votre rôle (lecteur) permet de consulter les simulations.</p>}
           {data.simulations.length > 0 && <>

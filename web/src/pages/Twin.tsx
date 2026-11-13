@@ -8,6 +8,7 @@ import {
 } from "../lib/twin";
 import type { ProblemRow, Run } from "../lib/types";
 import { MACHINE_CATALOG, ZONES, machineType, operatorPoint, type Machine, type WorkshopPlan } from "../lib/workshop";
+import NavControls, { type NavApi } from "../components/NavControls";
 import type { SceneBundle, SceneStation, SceneStationState, SceneWorker } from "../components/PlanScene3D";
 
 const PlanScene3D = lazy(() => import("../components/PlanScene3D"));
@@ -243,6 +244,10 @@ function LinePlan({ data, layout, setLayout, res, startHHMM, editable, placement
   const [speed, setSpeed] = useState(30);
   const svgRef = useRef<SVGSVGElement>(null);
   const drag = useRef<{ sid: string; dx: number; dy: number } | null>(null);
+  // vue 2D : zoom z (1 = tout voir) et coin haut-gauche en fraction du plan (suit le plan si ses bornes changent)
+  const [vb, setVb] = useState<{ fx: number; fy: number; z: number }>({ fx: 0, fy: 0, z: 1 });
+  const panDrag = useRef<{ sx: number; sy: number; fx: number; fy: number; id: number } | null>(null);
+  const navApi = useRef<NavApi | null>(null);
   const shift = res?.shift_minutes ?? 480;
   const tracks = useMemo(() => (res ? buildTracks(res) : []), [res]);
   const workerTracks = useMemo(() => (res ? buildWorkerTracks(res) : []), [res]);
@@ -332,9 +337,38 @@ function LinePlan({ data, layout, setLayout, res, startHHMM, editable, placement
     return pts[pts.length - 1];
   };
 
-  const toMeters = (e: React.PointerEvent) => {
-    const svg = svgRef.current!; const r = svg.getBoundingClientRect();
-    return { x: (e.clientX - r.left) * (W / r.width) / PX + minX, y: (e.clientY - r.top) * (H / r.height) / PX + minY };
+  const vbW = W / vb.z, vbH = H / vb.z, vbX = vb.fx * W, vbY = vb.fy * H;
+  const toUser = (cx: number, cy: number) => {
+    const svg = svgRef.current!; const ctm = svg.getScreenCTM();
+    if (!ctm) return { x: 0, y: 0 };
+    const pt = svg.createSVGPoint(); pt.x = cx; pt.y = cy; const m = pt.matrixTransform(ctm.inverse()); return { x: m.x, y: m.y };
+  };
+  const toMeters = (e: React.PointerEvent) => { const u = toUser(e.clientX, e.clientY); return { x: u.x / PX + minX, y: u.y / PX + minY }; };
+  const zoomAround = (k: number, cx?: number, cy?: number) => setVb((v) => {
+    const z = Math.max(0.5, Math.min(12, v.z * k)); k = z / v.z;
+    const ux = cx != null && cy != null ? toUser(cx, cy).x : v.fx * W + W / v.z / 2;
+    const uy = cx != null && cy != null ? toUser(cx, cy).y : v.fy * H + H / v.z / 2;
+    const x0 = v.fx * W, y0 = v.fy * H;
+    return { z, fx: (ux - (ux - x0) / k) / W, fy: (uy - (uy - y0) / k) / H };
+  });
+  navApi.current = {
+    zoom: (f) => zoomAround(f),
+    pan: (dx, dy) => setVb((v) => ({ ...v, fx: v.fx + dx / v.z, fy: v.fy + dy / v.z })),
+    fit: () => setVb({ fx: 0, fy: 0, z: 1 }),
+    center: () => setVb((v) => ({ ...v, fx: 0.5 - 0.5 / v.z, fy: 0.5 - 0.5 / v.z })),
+  };
+  const wheelRef = useRef<(e: WheelEvent) => void>(() => {});
+  wheelRef.current = (e: WheelEvent) => { e.preventDefault(); zoomAround(e.deltaY > 0 ? 1 / 1.12 : 1.12, e.clientX, e.clientY); };
+  useEffect(() => {
+    const el = svgRef.current; if (!el) return;
+    const h = (e: WheelEvent) => wheelRef.current(e);
+    el.addEventListener("wheel", h, { passive: false }); return () => el.removeEventListener("wheel", h);
+  }, [scene3d]);
+  const onBgDown = (e: React.PointerEvent<SVGSVGElement>) => {
+    const t = e.target as Element;
+    if (drag.current || !(t === svgRef.current || t.classList.contains("twin-grid") || t.closest(".twin-underlay"))) return;
+    panDrag.current = { sx: e.clientX, sy: e.clientY, fx: vb.fx, fy: vb.fy, id: e.pointerId };
+    svgRef.current?.setPointerCapture?.(e.pointerId);
   };
   const onDown = (sid: string) => (e: React.PointerEvent) => {
     if (!editable) return;
@@ -343,12 +377,18 @@ function LinePlan({ data, layout, setLayout, res, startHHMM, editable, placement
     (e.target as Element).setPointerCapture?.(e.pointerId);
   };
   const onMove = (e: React.PointerEvent) => {
+    const p = panDrag.current;
+    if (p) {
+      const r = svgRef.current!.getBoundingClientRect(); const k = vbW / (r.width || 1);
+      setVb((v) => ({ ...v, fx: p.fx - ((e.clientX - p.sx) * k) / W, fy: p.fy - ((e.clientY - p.sy) * k) / H }));
+      return;
+    }
     const d = drag.current; if (!d) return;
     const m = toMeters(e);
     const snap = (v: number) => Math.round(v * 10) / 10;
     setLayout({ kind: "free", positions: { ...pos, [d.sid]: { x: snap(m.x - d.dx), y: snap(m.y - d.dy) } } });
   };
-  const onUp = () => { drag.current = null; };
+  const onUp = () => { drag.current = null; panDrag.current = null; };
 
   // État courant
   const stState = new Map<number, { queue: number; working: Set<string> }>();
@@ -446,8 +486,9 @@ function LinePlan({ data, layout, setLayout, res, startHHMM, editable, placement
       {scene3d ? <Suspense fallback={<div className="p3d-fallback twin-3d" role="status">Chargement du moteur 3D…</div>}>
         <PlanScene3D plan={planMode ? wplan : null} stations={sceneStations} states={sceneStates} bundles={sceneBundles} workers={sceneWorkers}
           className="twin-3d" title={planMode ? `Jumeau 3D · ${wplan!.name}` : "Jumeau 3D · ligne"} />
-      </Suspense> : <div className="twin-canvas">
-        <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} style={{ minWidth: Math.min(W, 1100) }} onPointerMove={onMove} onPointerUp={onUp} onPointerLeave={onUp}>
+      </Suspense> : <NavControls api={navApi} mode="2d" zoomPct={vb.z * 100} className="twin-canvas">
+        <svg ref={svgRef} viewBox={`${vbX} ${vbY} ${vbW} ${vbH}`} onPointerDown={onBgDown} onPointerMove={onMove} onPointerUp={onUp} onPointerLeave={onUp}
+          onDoubleClick={(e) => { if (e.target === svgRef.current) navApi.current?.fit(); }}>
           <defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0L10,5L0,10z" fill="#9aa6b5" /></marker>
             <marker id="arrw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0L10,5L0,10z" fill="#c0392b" /></marker></defs>
           {Array.from({ length: Math.ceil(maxX - minX) }, (_, i) => <line key={`gx${i}`} x1={X(Math.ceil(minX) + i)} x2={X(Math.ceil(minX) + i)} y1={0} y2={H} className="twin-grid" />)}
@@ -518,7 +559,7 @@ function LinePlan({ data, layout, setLayout, res, startHHMM, editable, placement
           {dots.map((d) => <rect key={d.key} x={d.x - 3.5} y={d.y - 3.5} width={7} height={7} rx={1.5}
             fill={d.kind === "w" ? "#ffffff" : d.kind === "m" ? "#1f4e79" : "#7b8794"} stroke="#1f2a37" strokeWidth={0.6} />)}
         </svg>
-      </div>
+      </NavControls>
       }
       <div className="legend">
         <span><i style={{ background: "#3fa66b" }} />occupation &lt; 75 %</span><span><i style={{ background: "#f0b429" }} />75–92 %</span>

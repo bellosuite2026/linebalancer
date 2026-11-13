@@ -18,6 +18,7 @@ import type { WorkshopPlan } from "../lib/workshop";
 import SimCanvas2D from "../components/SimCanvas2D";
 import ErrorBoundary from "../components/ErrorBoundary";
 import { Legend } from "../components/SimCharts";
+import NumField from "../components/NumField";
 
 type BType = "source" | "queue" | "operation" | "delay" | "decision" | "split" | "join" | "inspect" | "batch" | "unbatch" | "acquire" | "release" | "attribute" | "sink";
 interface Block { id: string; type: BType; label: string; params: Record<string, any>; x?: number; y?: number }
@@ -287,7 +288,7 @@ function Editor() {
         <button className="btn small" onClick={regenerate}>↻ Générer depuis la gamme</button>
         <button className="btn small" onClick={validate}>Valider</button>
         {writable && <button className="btn small" onClick={save}>{dirty ? "Enregistrer" : "Enregistré"}</button>}
-        <label className="small">Réplications <input type="number" min={1} max={20} value={reps} onChange={(e) => setReps(Math.max(1, Math.min(20, +e.target.value)))} style={{ width: "4rem" }} /></label>
+        <label className="small">Réplications <NumField min={1} max={20} value={reps} onChange={setReps} style={{ width: "4rem" }} /></label>
         {writable && <button className="btn small primary" disabled={busy} onClick={run}>{busy ? "Exécution…" : "▶ Exécuter"}</button>}
       </div>
       {jobPhase(launching, sim?.status) && <JobProgress phase={jobPhase(launching, sim?.status)!} progress={(sim?.results as { progress?: Record<string, number> } | undefined)?.progress}

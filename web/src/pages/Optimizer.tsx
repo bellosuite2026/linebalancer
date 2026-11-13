@@ -7,6 +7,7 @@ import { api, fmt, post } from "../lib/api";
 import { canWrite, useSession } from "../lib/session";
 import type { CI, DesModelResponse } from "../lib/des";
 import JobProgress, { jobPhase, Waking } from "../components/JobProgress";
+import NumField from "../components/NumField";
 
 type ObjKey = "pieces" | "cost_minute" | "wip_avg" | "walk_m";
 const OBJ: Record<ObjKey, { label: string; unit: string; sense: "max" | "min"; d: number }> = {
@@ -199,8 +200,8 @@ export default function Optimizer() {
           <label className="check"><input type="checkbox" checked={vary.layout} onChange={(e) => setVary({ ...vary, layout: e.target.checked })} /> Placement des postes (ligne, U, échanges sur machines du même type)</label>
           <h3>Recherche</h3>
           <div className="row small">
-            <label>Durée max (s)<input type="number" min={10} max={90} value={budget} onChange={(e) => setBudget(Math.max(10, Math.min(90, +e.target.value)))} /></label>
-            <label>Réplications / essai<input type="number" min={1} max={5} value={reps} onChange={(e) => setReps(Math.max(1, Math.min(5, +e.target.value)))} /></label>
+            <label>Durée max (s)<NumField min={10} max={90} value={budget} onChange={setBudget} /></label>
+            <label>Réplications / essai<NumField min={1} max={5} value={reps} onChange={setReps} /></label>
           </div>
           <p className="muted small">Algorithme génétique multi-objectif (NSGA-II) : chaque essai est simulé (journée complète, pauses, variabilité) avec les mêmes graines pour comparer à armes égales.</p>
           {writable && <button className="btn optimize full" disabled={busy || !!running} onClick={start}>{running ? "Optimisation en cours…" : "⚡ Lancer l'optimisation"}</button>}

@@ -12,6 +12,7 @@ import {
 } from "../lib/workshop";
 
 import MachineSymbol from "../components/MachineSymbol";
+import NavControls, { type NavApi } from "../components/NavControls";
 const PlanScene3D = lazy(() => import("../components/PlanScene3D"));
 
 type Tool = "select" | "pan" | "erase" | "measure" | "wall" | "pillar" | "door" | "aisle" | "zone" | "machine" | "rail" | "calibrate" | "background";
@@ -208,6 +209,15 @@ export default function WorkshopPlanPage() {
       const k = w / v.w;
       return { w, x: mx - (mx - v.x) * k, y: my - (my - v.y) * k };
     });
+  };
+  // barre de navigation commune (zoom, tout voir, recentrer, flèches, raccourcis clavier)
+  const navApi = useRef<NavApi | null>(null);
+  const fitW = Math.max(plan.width_m + 2, (plan.length_m + 2) / (aspect || 0.6));
+  navApi.current = {
+    zoom: (f) => zoomAt(1 / f),
+    pan: (dx, dy) => setView((v) => ({ ...v, x: v.x + dx * v.w, y: v.y + dy * v.w * aspect })),
+    fit: () => fit(plan),
+    center: () => setView((v) => ({ ...v, x: plan.width_m / 2 - v.w / 2, y: plan.length_m / 2 - (v.w * aspect) / 2 })),
   };
   const hr = Math.max(0.06, view.w / 110);           // rayon des poignées (m)
   const tol = Math.max(0.12, view.w / 120);          // tolérance de touche (m)
@@ -828,6 +838,8 @@ export default function WorkshopPlanPage() {
             </Suspense>
           </div> : <div ref={wrapRef} className="wp-canvas" onDragOver={(e) => e.preventDefault()}
             onDrop={(e) => { const k = e.dataTransfer.getData("text/x-machine"); if (k) { e.preventDefault(); placeAt(toM(e.clientX, e.clientY), k); } }}>
+            <NavControls api={navApi} mode="2d" zoomPct={(fitW / view.w) * 100} className="wp-nav"
+              skipKey={(e) => e.key.startsWith("Arrow") && sel.length > 0 && writable}>
             <svg ref={svgRef} viewBox={`${view.x} ${view.y} ${view.w} ${vh}`} onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}
               onPointerLeave={() => { setHover(null); if (tool === "measure" && !drag.current) setMCursor(null); }}
               onDoubleClick={() => { if (tool === "measure") finishChain(); if (tool === "rail") finishRail(); }}
@@ -917,6 +929,7 @@ export default function WorkshopPlanPage() {
                 {calib.length === 2 && <line x1={calib[0][0]} y1={calib[0][1]} x2={calib[1][0]} y2={calib[1][1]} stroke="#c0392b" strokeWidth={Math.max(0.03, view.w / 500)} strokeDasharray="0.2 0.1" />}
               </g>}
             </svg>
+            </NavControls>
           </div>}
           {!view3d && <div className="legend small"><span>● opératrice (côté de travail)</span><span>contour rouge = à vérifier</span><span>hachures rouges = en panne</span><span>pointillés = réserve</span><span>cotes en bleu, chemin à pied en vert</span><span>Pincez / molette pour zoomer, deux doigts ou clic droit pour vous déplacer</span></div>}
         </section>

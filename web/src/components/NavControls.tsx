@@ -51,9 +51,12 @@ function Click({ onClick, title, children, className = "" }: { onClick: () => vo
 }
 
 /** Enveloppe une vue (canvas, svg, scène 3D) et y superpose la barre de navigation. */
-export default function NavControls({ api, mode, zoomPct, children, className = "" }: {
+export default function NavControls({ api, mode, zoomPct, children, className = "", skipKey }: {
   api: React.MutableRefObject<NavApi | null>; mode: "2d" | "3d"; zoomPct?: number | null; children: ReactNode; className?: string;
+  /** vrai = la page garde cette touche pour elle (ex. flèches qui déplacent la sélection) */
+  skipKey?: (e: KeyboardEvent) => boolean;
 }) {
+  const skip = useRef(skipKey); skip.current = skipKey;
   const id = useRef(0);
   if (!id.current) id.current = nextId++;
   const wrap = useRef<HTMLDivElement>(null);
@@ -61,7 +64,7 @@ export default function NavControls({ api, mode, zoomPct, children, className = 
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (activeId !== id.current || isTyping(e.target) || e.ctrlKey || e.metaKey || e.altKey) return;
+      if (activeId !== id.current || isTyping(e.target) || e.ctrlKey || e.metaKey || e.altKey || skip.current?.(e)) return;
       const n = a(); if (!n) return;
       const k = e.key;
       let done = true;

@@ -255,7 +255,7 @@ tr.row-over td { background: #fdf6f5; }
 .twin-controls { display: flex; gap: .7rem; align-items: center; flex-wrap: wrap; margin-bottom: .6rem; }
 .twin-controls input[type=range] { flex: 1 1 220px; }
 .twin-clock { font-size: 1.35rem; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--brand); min-width: 4.2rem; }
-.twin-canvas { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: #fbfbf9; touch-action: none; }
+.twin-canvas { overflow: hidden; height: auto; cursor: grab; border: 1px solid var(--line); border-radius: 10px; background: #fbfbf9; touch-action: none; }
 .twin-canvas svg { display: block; width: 100%; height: auto; user-select: none; }
 .twin-grid { stroke: #efede7; stroke-width: 1; }
 .twin-worker { pointer-events: none; }
@@ -492,3 +492,6 @@ select.on-select { border-color: var(--brand); background: #e6effa; font-weight:
   .nav-presets .nav-btn { font-size: 13px; }
 }
 @media (max-width: 700px) { .nav-bar { top: auto; bottom: 8px; right: 6px; } .nav-pad { display: none; } }
+.twin-canvas svg { max-height: 72vh; }
+.twin-canvas:active { cursor: grabbing; }
+.wp-nav { height: 100%; }
