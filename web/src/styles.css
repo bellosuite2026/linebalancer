@@ -492,6 +492,7 @@ select.on-select { border-color: var(--brand); background: #e6effa; font-weight:
   .nav-presets .nav-btn { font-size: 13px; }
 }
 @media (max-width: 700px) { .nav-bar { top: auto; bottom: 8px; right: 6px; } .nav-pad { display: none; } }
+.twin-canvas { min-height: 250px; }
 .twin-canvas svg { max-height: 72vh; }
 .twin-canvas:active { cursor: grabbing; }
 .wp-nav { height: 100%; }

@@ -196,7 +196,7 @@ export default function SimCanvas2D({ model, plan, frame, selected, onSelect, cl
     // files trop hautes : compteur
     // acteurs : opérateurs (disque + tête) et transporteurs (chariot + charge)
     if (detail) {
-      const r = Math.max(5, s * 0.2), bsz = Math.max(16, Math.min(34, s * 0.55));
+      const r = Math.max(7, s * 0.24), bsz = Math.max(18, Math.min(34, s * 0.6));
       const bubble = (k: Bubble, x: number, y: number) => g.drawImage(bubbleCanvas(k), x - bsz / 2, y - r * 1.4 - bsz, bsz, bsz);
       const near = (x: number, y: number) => { let b = model.stations[0], bd = Infinity; for (const st of model.stations) { const d = (st.x - x) ** 2 + (st.y - y) ** 2; if (d < bd) { bd = d; b = st; } } return b; };
       frame.stations.forEach((code, i) => {      // panne : mécanicien de l'autre côté de la machine

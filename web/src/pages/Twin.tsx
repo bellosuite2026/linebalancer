@@ -337,7 +337,9 @@ function LinePlan({ data, layout, setLayout, res, startHHMM, editable, placement
     return pts[pts.length - 1];
   };
 
-  const vbW = W / vb.z, vbH = H / vb.z, vbX = vb.fx * W, vbY = vb.fy * H;
+  // marge à droite pour que la barre de navigation ne masque pas la fin de la ligne
+  const Wb = W + Math.max(2.6 * PX, W * 0.1);
+  const vbW = Wb / vb.z, vbH = H / vb.z, vbX = vb.fx * Wb, vbY = vb.fy * H;
   const toUser = (cx: number, cy: number) => {
     const svg = svgRef.current!; const ctm = svg.getScreenCTM();
     if (!ctm) return { x: 0, y: 0 };
@@ -346,16 +348,16 @@ function LinePlan({ data, layout, setLayout, res, startHHMM, editable, placement
   const toMeters = (e: React.PointerEvent) => { const u = toUser(e.clientX, e.clientY); return { x: u.x / PX + minX, y: u.y / PX + minY }; };
   const zoomAround = (k: number, cx?: number, cy?: number) => setVb((v) => {
     const z = Math.max(0.5, Math.min(12, v.z * k)); k = z / v.z;
-    const ux = cx != null && cy != null ? toUser(cx, cy).x : v.fx * W + W / v.z / 2;
+    const ux = cx != null && cy != null ? toUser(cx, cy).x : v.fx * Wb + Wb / v.z / 2;
     const uy = cx != null && cy != null ? toUser(cx, cy).y : v.fy * H + H / v.z / 2;
-    const x0 = v.fx * W, y0 = v.fy * H;
-    return { z, fx: (ux - (ux - x0) / k) / W, fy: (uy - (uy - y0) / k) / H };
+    const x0 = v.fx * Wb, y0 = v.fy * H;
+    return { z, fx: (ux - (ux - x0) / k) / Wb, fy: (uy - (uy - y0) / k) / H };
   });
   navApi.current = {
     zoom: (f) => zoomAround(f),
     pan: (dx, dy) => setVb((v) => ({ ...v, fx: v.fx + dx / v.z, fy: v.fy + dy / v.z })),
     fit: () => setVb({ fx: 0, fy: 0, z: 1 }),
-    center: () => setVb((v) => ({ ...v, fx: 0.5 - 0.5 / v.z, fy: 0.5 - 0.5 / v.z })),
+    center: () => setVb((v) => ({ ...v, fx: (W / 2 - Wb / v.z / 2) / Wb, fy: 0.5 - 0.5 / v.z })),
   };
   const wheelRef = useRef<(e: WheelEvent) => void>(() => {});
   wheelRef.current = (e: WheelEvent) => { e.preventDefault(); zoomAround(e.deltaY > 0 ? 1 / 1.12 : 1.12, e.clientX, e.clientY); };
@@ -365,8 +367,7 @@ function LinePlan({ data, layout, setLayout, res, startHHMM, editable, placement
     el.addEventListener("wheel", h, { passive: false }); return () => el.removeEventListener("wheel", h);
   }, [scene3d]);
   const onBgDown = (e: React.PointerEvent<SVGSVGElement>) => {
-    const t = e.target as Element;
-    if (drag.current || !(t === svgRef.current || t.classList.contains("twin-grid") || t.closest(".twin-underlay"))) return;
+    if (drag.current || e.button > 0) return;   // un poste saisi (mode édition) garde la main
     panDrag.current = { sx: e.clientX, sy: e.clientY, fx: vb.fx, fy: vb.fy, id: e.pointerId };
     svgRef.current?.setPointerCapture?.(e.pointerId);
   };
@@ -380,7 +381,7 @@ function LinePlan({ data, layout, setLayout, res, startHHMM, editable, placement
     const p = panDrag.current;
     if (p) {
       const r = svgRef.current!.getBoundingClientRect(); const k = vbW / (r.width || 1);
-      setVb((v) => ({ ...v, fx: p.fx - ((e.clientX - p.sx) * k) / W, fy: p.fy - ((e.clientY - p.sy) * k) / H }));
+      setVb((v) => ({ ...v, fx: p.fx - ((e.clientX - p.sx) * k) / Wb, fy: p.fy - ((e.clientY - p.sy) * k) / H }));
       return;
     }
     const d = drag.current; if (!d) return;

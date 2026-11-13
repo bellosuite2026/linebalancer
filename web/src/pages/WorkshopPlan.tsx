@@ -110,7 +110,7 @@ export default function WorkshopPlanPage() {
   const fit = useCallback((p: WorkshopPlan) => {
     const a = (wrapRef.current?.clientHeight || 500) / (wrapRef.current?.clientWidth || 800);
     const w = Math.max(p.width_m + 2, (p.length_m + 2) / a);
-    setView({ x: -1 - (w - p.width_m - 2) / 2, y: -1, w });
+    setView({ x: -1 - (w - p.width_m - 2) / 2, y: -1 - Math.max(0, w * a - p.length_m - 2) / 2, w });
   }, []);
 
   useEffect(() => {
