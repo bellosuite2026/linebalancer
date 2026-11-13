@@ -7,13 +7,15 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import NavControls, { type NavApi } from "./NavControls";
 import { orbitNav } from "../lib/nav3d";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
-import { addMachineBody } from "../lib/machines3d";
+import { addMachineBody, addMachineDetails } from "../lib/machines3d";
+import { isSeated, operatorRoles } from "../lib/simIcons";
 import { STATE_COLOR, STATION_STATES, lotColor, type DesModel, type Frame } from "../lib/des";
 
 const MAX_CARRIERS = 2000;
 import type { Machine, WorkshopPlan } from "../lib/workshop";
 
-interface Props { model: DesModel; plan: WorkshopPlan | null; frame: Frame | null; className?: string }
+interface Props { model: DesModel; plan: WorkshopPlan | null; frame: Frame | null; className?: string; detail?: boolean }
+type AvatarsModule = typeof import("../lib/avatars3d");
 
 const MAX_BUNDLES = 1200, MAX_ACTORS = 260;
 
@@ -49,7 +51,12 @@ function mergeStatic(src: THREE.Group): THREE.Group {
   return out;
 }
 
-export default function SimScene3D({ model, plan, frame, className = "" }: Props) {
+export default function SimScene3D({ model, plan, frame, className = "", detail = false }: Props) {
+  // personnages détaillés : module chargé à la demande (chunk séparé) seulement en style détaillé
+  const [av, setAv] = useState<AvatarsModule | null>(null);
+  useEffect(() => { if (detail && !av) import("../lib/avatars3d").then(setAv).catch(() => setAv(null)); }, [detail, av]);
+  const lastFrame = useRef<Frame | null>(null);
+  lastFrame.current = frame;
   const host = useRef<HTMLDivElement>(null);
   const api = useRef<{ update: (f: Frame | null) => void } | null>(null);
   const [fail, setFail] = useState("");
@@ -57,6 +64,8 @@ export default function SimScene3D({ model, plan, frame, className = "" }: Props
 
   useEffect(() => {
     const el = host.current; if (!el) return;
+    if (detail && !av) return;
+    const D = detail && av ? av : null;
     let renderer: THREE.WebGLRenderer;
     try {
       renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
@@ -108,6 +117,7 @@ export default function SimScene3D({ model, plan, frame, className = "" }: Props
           const m = e as Machine;
           const root = new THREE.Group(); root.position.set(m.x, 0, m.y); root.rotation.y = (-m.rot * Math.PI) / 180;
           addMachineBody(root, m.type, m.w, m.d, used.has(m.id) ? "service" : m.status === "panne" ? "panne" : "reserve");
+          if (D) addMachineDetails(root, m.type, m.w, m.d);
           stat.add(root);
         }
       }
@@ -115,7 +125,9 @@ export default function SimScene3D({ model, plan, frame, className = "" }: Props
     for (const s of model.stations) {
       if (!plan || !s.machine_ids.length) {
         const root = new THREE.Group(); root.position.set(s.mx, 0, s.my); root.rotation.y = (-(s.rot ?? 0) * Math.PI) / 180;
-        addMachineBody(root, s.machine || (s.machine_type in { manuel: 1 } ? "table_travail" : "piqueuse_plate"), 1.2, 0.6);
+        const mt = s.machine || (s.machine_type in { manuel: 1 } ? "table_travail" : "piqueuse_plate");
+        addMachineBody(root, mt, 1.2, 0.6);
+        if (D) addMachineDetails(root, isSeated(s) && !s.machine ? "piqueuse_plate" : mt, 1.2, 0.6);
         stat.add(root);
       }
       const cart = new THREE.Group(); cart.position.set(s.qx, 0, s.qy); cart.rotation.y = (-(s.rot ?? 0) * Math.PI) / 180;
@@ -149,6 +161,7 @@ export default function SimScene3D({ model, plan, frame, className = "" }: Props
         const m = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.9, 0.5), new THREE.MeshStandardMaterial({ color: c })); m.position.set(p[0], 0.45, p[1]); stat.add(m);
       }
     }
+    if (D) D.addSourceSink(stat, model.source, model.sink);
     const merged = mergeStatic(stat);
     scene.add(merged);
 
@@ -163,11 +176,20 @@ export default function SimScene3D({ model, plan, frame, className = "" }: Props
       lamps.setColorAt(i, col.set(STATE_COLOR.starved)); beacons.setColorAt(i, col);
     });
     scene.add(lamps, beacons);
-    const bundles = new THREE.InstancedMesh(new THREE.BoxGeometry(0.36, 0.11, 0.26), new THREE.MeshStandardMaterial({ color: "#ffffff", roughness: 0.8 }), MAX_BUNDLES);
+    const bundles = new THREE.InstancedMesh(D ? D.bundleGeometry() : new THREE.BoxGeometry(0.36, 0.11, 0.26), new THREE.MeshStandardMaterial({ color: "#ffffff", roughness: 0.8 }), MAX_BUNDLES);
     bundles.castShadow = true; bundles.count = 0; scene.add(bundles);
     const bodies = new THREE.InstancedMesh(new THREE.CapsuleGeometry(0.17, 0.5, 3, 8), new THREE.MeshStandardMaterial({ color: "#ffffff", roughness: 0.85 }), MAX_ACTORS);
     const heads = new THREE.InstancedMesh(new THREE.SphereGeometry(0.12, 12, 10), new THREE.MeshStandardMaterial({ color: "#d9aa87", roughness: 0.9 }), MAX_ACTORS);
-    const carts = new THREE.InstancedMesh(new THREE.BoxGeometry(0.9, 0.5, 0.6), new THREE.MeshStandardMaterial({ color: "#ffffff", roughness: 0.6 }), 16);
+    const carts = new THREE.InstancedMesh(D ? D.cartGeometry() : new THREE.BoxGeometry(0.9, 0.5, 0.6), new THREE.MeshStandardMaterial({ color: "#ffffff", roughness: 0.6 }), 16);
+    const crowd = D ? new D.AvatarCrowd(MAX_ACTORS + 64) : null;
+    if (crowd) scene.add(crowd.group);
+    const roles = operatorRoles(model);
+    const seedOf = (id: string) => { let h = 7; for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0; return h; };
+    const nearestStation = (x: number, z: number) => {
+      let best = model.stations[0], bd = Infinity;
+      for (const st of model.stations) { const d = (st.x - x) ** 2 + (st.y - z) ** 2; if (d < bd) { bd = d; best = st; } }
+      return best;
+    };
     bodies.castShadow = true; carts.castShadow = true; bodies.count = 0; heads.count = 0; carts.count = 0;
     scene.add(bodies, heads, carts);
     // cintres : tige + barre, sous le rail
@@ -211,6 +233,41 @@ export default function SimScene3D({ model, plan, frame, className = "" }: Props
       }
       bundles.count = k; bundles.instanceMatrix.needsUpdate = true; if (bundles.instanceColor) bundles.instanceColor.needsUpdate = true;
       let o = 0, t = 0;
+      if (crowd) {
+        crowd.begin();
+        const now = performance.now() / 1000;
+        for (const a of f.actors) {
+          const seed = seedOf(a.id);
+          if (a.kind === "operator") {
+            const info = roles.get(a.id);
+            const st = a.state === 1 || a.state === 4 ? null : nearestStation(a.x, a.y);
+            const head = st ? Math.atan2(st.my - a.y, st.mx - a.x) : a.heading;
+            const p = a.state === 1 ? "walk" : a.state === 4 ? "carry" : a.state === 2 ? (isSeated(st ?? info?.station) ? "sew" : "stand_work")
+              : a.state === 3 ? "stand_work" : a.state === 5 ? "break" : a.state === 6 ? "wait" : "idle";
+            crowd.add(a.x, a.y, head, info?.role ?? "operatrice", p, now * (a.state === 1 || a.state === 4 ? 9 : 5) + (seed % 17), seed);
+            if (a.state === 3) crowd.bubble("setup", a.x, 2.0, a.y);
+            else if (a.state === 5) crowd.bubble("break", a.x, 2.0, a.y);
+            else if (a.state === 6) crowd.bubble("wait", a.x, 2.0, a.y);
+          } else if (t < 16) {
+            tmp.position.set(a.x, 0, a.y); tmp.rotation.set(0, -a.heading, 0); tmp.scale.set(1, 1, 1); tmp.updateMatrix();
+            carts.setMatrixAt(t, tmp.matrix); carts.setColorAt(t, col.set(a.load ? "#16a085" : "#7f8c8d")); t++;
+            const moving = a.state === 1 || a.state === 2;
+            crowd.add(a.x - Math.cos(a.heading) * 0.95, a.y - Math.sin(a.heading) * 0.95, a.heading, "liaison", moving ? "push" : a.state === 4 ? "wait" : a.state === 5 ? "break" : "idle", now * 8 + (seed % 13), seed);
+            if (a.state === 4) crowd.bubble("wait", a.x, 2.0, a.y); else if (a.state === 5) crowd.bubble("break", a.x, 2.0, a.y);
+          }
+        }
+        // pannes : un mécanicien répare de l'autre côté de la machine
+        f.stations.forEach((code, i) => {
+          if (STATION_STATES[code] !== "down") return;
+          const s = model.stations[i]; let vx = s.mx - s.x, vz = s.my - s.y; const L = Math.hypot(vx, vz) || 1; vx /= L; vz /= L;
+          crowd.add(s.mx + vx * 0.7, s.my + vz * 0.7, Math.atan2(-vz, -vx), "mecanicien", "repair", now * 6 + i, i * 7 + 3);
+          crowd.bubble("down", s.mx, 1.95, s.my);
+        });
+        crowd.end();
+        bodies.count = 0; heads.count = 0; carts.count = t;
+        carts.instanceMatrix.needsUpdate = true; if (carts.instanceColor) carts.instanceColor.needsUpdate = true;
+        return;
+      }
       for (const a of f.actors) {
         if (a.kind === "operator" && o < MAX_ACTORS) {
           const walking = a.state === 1 || a.state === 4;
@@ -231,14 +288,15 @@ export default function SimScene3D({ model, plan, frame, className = "" }: Props
       if (carts.instanceColor) carts.instanceColor.needsUpdate = true;
     };
     api.current = { update };
+    if (lastFrame.current) update(lastFrame.current);
 
     const resize = () => { const w = el.clientWidth, h = Math.max(200, el.clientHeight); renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); };
     const ro = new ResizeObserver(resize); ro.observe(el); resize();
     let raf = 0;
-    const loop = () => { controls.update(); renderer.render(scene, camera); raf = requestAnimationFrame(loop); };
+    const loop = () => { controls.update(); crowd?.face(camera); renderer.render(scene, camera); raf = requestAnimationFrame(loop); };
     loop();
     return () => {
-      cancelAnimationFrame(raf); ro.disconnect(); controls.dispose();
+      cancelAnimationFrame(raf); ro.disconnect(); controls.dispose(); crowd?.dispose();
       scene.traverse((o) => {
         if (o.userData.shared) return;
         if (o instanceof THREE.Mesh || o instanceof THREE.InstancedMesh) { o.geometry.dispose(); }
@@ -246,7 +304,7 @@ export default function SimScene3D({ model, plan, frame, className = "" }: Props
       });
       renderer.dispose(); el.removeChild(renderer.domElement); api.current = null; nav.current = null;
     };
-  }, [model, plan]);
+  }, [model, plan, detail, av]);
 
   useEffect(() => { api.current?.update(frame); }, [frame]);
 

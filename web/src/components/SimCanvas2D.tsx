@@ -1,13 +1,15 @@
 // Vue 2D (canvas) de la simulation : plan d'atelier, postes colorés par état, chariots d'encours avec
 // leurs paquets empilés, opérateurs et transporteurs qui se déplacent le long des allées.
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import NavControls, { type NavApi } from "./NavControls";
 import { MACHINE_CATALOG, rectCorners, type Machine, type WorkshopPlan } from "../lib/workshop";
-import { STATE_COLOR, STATION_STATES, lotColor, railPoint, type DesModel, type Frame } from "../lib/des";
+import { bubbleCanvas, drawPerson2D, operatorRoles, type Bubble } from "../lib/simIcons";
+import { OP_COLOR, OP_STATES, STATE_COLOR, STATION_STATES, lotColor, railPoint, type DesModel, type Frame } from "../lib/des";
 
-interface Props { model: DesModel; plan: WorkshopPlan | null; frame: Frame | null; selected?: string | null; onSelect?: (sid: string | null) => void; className?: string }
+interface Props { model: DesModel; plan: WorkshopPlan | null; frame: Frame | null; selected?: string | null; onSelect?: (sid: string | null) => void; className?: string; detail?: boolean }
 
-export default function SimCanvas2D({ model, plan, frame, selected, onSelect, className = "" }: Props) {
+export default function SimCanvas2D({ model, plan, frame, selected, onSelect, className = "", detail = false }: Props) {
+  const roles = useMemo(() => operatorRoles(model), [model]);
   const ref = useRef<HTMLCanvasElement>(null);
   const [, force] = useState(0);
   const view = useRef<{ s: number; ox: number; oy: number } | null>(null);
@@ -193,6 +195,37 @@ export default function SimCanvas2D({ model, plan, frame, selected, onSelect, cl
     }
     // files trop hautes : compteur
     // acteurs : opérateurs (disque + tête) et transporteurs (chariot + charge)
+    if (detail) {
+      const r = Math.max(5, s * 0.2), bsz = Math.max(16, Math.min(34, s * 0.55));
+      const bubble = (k: Bubble, x: number, y: number) => g.drawImage(bubbleCanvas(k), x - bsz / 2, y - r * 1.4 - bsz, bsz, bsz);
+      const near = (x: number, y: number) => { let b = model.stations[0], bd = Infinity; for (const st of model.stations) { const d = (st.x - x) ** 2 + (st.y - y) ** 2; if (d < bd) { bd = d; b = st; } } return b; };
+      frame.stations.forEach((code, i) => {      // panne : mécanicien de l'autre côté de la machine
+        if (STATION_STATES[code] !== "down") return;
+        const st = model.stations[i]; let vx = st.mx - st.x, vy = st.my - st.y; const L = Math.hypot(vx, vy) || 1; vx /= L; vy /= L;
+        const mx = X(st.mx + vx * 0.7), my = Y(st.my + vy * 0.7);
+        drawPerson2D(g, mx, my, r, Math.atan2(-vy, -vx), "mecanicien", STATE_COLOR.down);
+        bubble("down", mx + r * 1.6, my + r * 1.2);
+      });
+      for (const a of frame.actors) {
+        const x = X(a.x), y = Y(a.y);
+        if (a.kind === "operator") {
+          const moving = a.state === 1 || a.state === 4;
+          const st = moving ? null : near(a.x, a.y);
+          const h = st ? Math.atan2(st.my - a.y, st.mx - a.x) : a.heading;
+          drawPerson2D(g, x, y, r, h, roles.get(a.id)?.role ?? "operatrice", OP_COLOR[OP_STATES[a.state] ?? "idle"] ?? "#76858b", a.state === 4);
+          if (a.state === 3) bubble("setup", x, y); else if (a.state === 5) bubble("break", x, y); else if (a.state === 6) bubble("wait", x, y);
+        } else {
+          const w = Math.max(10, s * 0.6), hh = Math.max(7, s * 0.4);
+          g.save(); g.translate(x, y); g.rotate(a.heading);
+          g.fillStyle = a.load ? "#16a085" : "#7f8c8d"; g.fillRect(-w / 2, -hh / 2, w, hh);
+          g.strokeStyle = "#2c3e50"; g.lineWidth = 1; g.strokeRect(-w / 2, -hh / 2, w, hh);
+          g.restore();
+          drawPerson2D(g, x - Math.cos(a.heading) * (w / 2 + r * 0.9), y - Math.sin(a.heading) * (w / 2 + r * 0.9), r, a.heading, "liaison", a.state === 1 || a.state === 2 ? OP_COLOR.walk : OP_COLOR.idle);
+          if (a.state === 4) bubble("wait", x, y); else if (a.state === 5) bubble("break", x, y);
+        }
+      }
+      return;
+    }
     for (const a of frame.actors) {
       const x = X(a.x), y = Y(a.y);
       if (a.kind === "operator") {

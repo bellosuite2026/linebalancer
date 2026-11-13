@@ -168,3 +168,32 @@ export function addMachineBody(g: THREE.Group, type: string, w: number, d: numbe
   }
   return top;
 }
+
+/** Détails du style « détaillé » : cônes de fil, lampe, pédale, tiroir, bac de pièces (machines à coudre),
+ *  fer et centrale vapeur (repassage), table lumineuse (contrôle). Même repère que addMachineBody. */
+export function addMachineDetails(g: THREE.Group, type: string, w: number, d: number) {
+  const shape = MACHINE_CATALOG[type]?.shape ?? (type === "piqueuse_plate" ? "sew_flat" : "");
+  const y0 = TABLE_H + 0.025, hx = w / 2 - 0.3, hz = -d / 2 + 0.2;
+  if (shape.startsWith("sew_")) {
+    const cones = ["#d64541", "#f4f1ea", "#2c3e50", "#e8c547"];
+    const n = shape === "sew_overlock" ? 4 : 2;
+    box(g, 0.02, 0.5, 0.02, hx + 0.05, y0 + 0.25, -d / 2 + 0.05, "#c8c8c8");
+    for (let i = 0; i < n; i++) {
+      const c = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.045, 0.11, 8), mat(cones[i % cones.length]));
+      c.position.set(hx - 0.05 + i * 0.07, y0 + 0.06, -d / 2 + 0.06); c.castShadow = true; g.add(c);
+    }
+    box(g, 0.015, 0.3, 0.015, hx - 0.38, y0 + 0.15, hz - 0.05, DARK);                // bras de lampe
+    box(g, 0.14, 0.03, 0.05, hx - 0.33, y0 + 0.3, hz + 0.02, "#f7f3d6");             // lampe LED
+    box(g, 0.24, 0.05, 0.14, 0.05, 0.05, d / 2 - 0.15, DARK);                         // pédale
+    box(g, 0.36, 0.12, Math.max(0.2, d - 0.2), -w / 2 + 0.3, TABLE_H - 0.1, 0, WOOD); // tiroir
+    box(g, 0.3, 0.08, 0.22, -w / 2 + 0.25, y0 + 0.04, 0.02, "#6f7780");              // bac de pièces
+    box(g, 0.26, 0.05, 0.18, -w / 2 + 0.25, y0 + 0.1, 0.02, "#5b95e0");              // pièces en attente
+  } else if (shape === "ironing") {
+    box(g, 0.2, 0.08, 0.1, 0.1, y0 + 0.08, 0.05, "#b8455a");
+    box(g, 0.3, 0.3, 0.25, -w / 2 + 0.25, 0.15, -d / 2 + 0.2, "#e2e4df");
+  } else if (shape === "inspection") {
+    box(g, Math.min(0.9, w * 0.7), 0.02, Math.min(0.5, d * 0.6), 0, y0 + 0.02, 0, "#fdfbe8");
+    box(g, 0.02, 0.6, 0.02, -w / 2 + 0.1, y0 + 0.3, -d / 2 + 0.1, DARK);
+    box(g, 0.6, 0.03, 0.08, -w / 2 + 0.38, y0 + 0.6, -d / 2 + 0.12, "#f7f3d6");
+  }
+}

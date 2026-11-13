@@ -495,3 +495,5 @@ select.on-select { border-color: var(--brand); background: #e6effa; font-weight:
 .twin-canvas svg { max-height: 72vh; }
 .twin-canvas:active { cursor: grabbing; }
 .wp-nav { height: 100%; }
+.sim-roles { display: flex; flex-wrap: wrap; gap: .4rem .9rem; align-items: center; margin: .2rem 0 .4rem; }
+.sim-roles i { display: inline-block; width: .8rem; height: .8rem; border-radius: 50%; margin-right: .3rem; vertical-align: -1px; }

@@ -16,6 +16,7 @@ import { Bars, Gantt, Histogram, Legend, LineChart, StateBars, StatePie } from "
 import JobProgress, { jobPhase, Waking } from "../components/JobProgress";
 import OptimizeButton from "../components/OptimizeButton";
 import NumField from "../components/NumField";
+import { BUBBLE_LABEL, ROLE_COLOR, ROLE_LABEL, loadStyle, saveStyle, type SimStyle } from "../lib/simIcons";
 
 const SimScene3D = lazy(() => import("../components/SimScene3D"));
 const SPEEDS = [1, 10, 30, 60, 120, 300, 600];
@@ -69,6 +70,8 @@ export default function Simulation() {
   const [busy, setBusy] = useState(false);
   const webgl = useMemo(() => hasWebGL(), []);
   const [view, setView] = useState<View>(() => (hasWebGL() ? "both" : "2d"));
+  const [style, setStyleState] = useState<SimStyle>(loadStyle);
+  const setStyle = (v: SimStyle) => { setStyleState(v); saveStyle(v); };
   const [scIdx, setScIdx] = useState(0);
   const [tab, setTab] = useState<Tab>("states");
   const [picked, setPicked] = useState<string | null>(null);
@@ -370,12 +373,19 @@ export default function Simulation() {
             <div className="seg" aria-label="Vue">
               {(["2d", "3d", "both"] as View[]).map((v) => <button key={v} className={view === v ? "on" : ""} onClick={() => setView(v)}>{v === "both" ? "2D + 3D" : v.toUpperCase()}</button>)}
             </div>
+            <div className="seg" aria-label="Style des personnages" title="Détaillé : ouvriers animés par rôle, bulles d'état, machines et accessoires détaillés. Simple : silhouettes légères (appareils modestes, très grandes lignes).">
+              {(["simple", "detailed"] as SimStyle[]).map((v) => <button key={v} className={style === v ? "on" : ""} onClick={() => setStyle(v)}>{v === "simple" ? "Style simple" : "Style détaillé"}</button>)}
+            </div>
             <Legend keys={STATION_STATES.slice(0, 6)} labels={STATE_LABEL} colors={STATE_COLOR} />
           </div>
+          {style === "detailed" && <div className="legend small sim-roles">
+            {(Object.keys(ROLE_LABEL) as (keyof typeof ROLE_LABEL)[]).map((r) => <span key={r}><i style={{ background: ROLE_COLOR[r] }} />{ROLE_LABEL[r]}</span>)}
+            <span className="muted">Bulles : ⌛ {BUBBLE_LABEL.wait.toLowerCase()} · ☕ {BUBBLE_LABEL.break.toLowerCase()} · ⚙ {BUBBLE_LABEL.setup.toLowerCase()} · 🔧 {BUBBLE_LABEL.down.toLowerCase()}</span>
+          </div>}
           <div className={`sim-stage ${view}`}>
-            {view !== "3d" && <ErrorBoundary label="Vue 2D indisponible"><SimCanvas2D model={vModel!} plan={plan} frame={frame} selected={picked} onSelect={setPicked} /></ErrorBoundary>}
+            {view !== "3d" && <ErrorBoundary label="Vue 2D indisponible"><SimCanvas2D model={vModel!} plan={plan} frame={frame} selected={picked} onSelect={setPicked} detail={style === "detailed"} /></ErrorBoundary>}
             {view !== "2d" && <ErrorBoundary label="Vue 3D indisponible"><Suspense fallback={<div className="sim3d p3d-loading">Chargement de la vue 3D…</div>}>
-              {webgl ? <SimScene3D model={vModel!} plan={plan} frame={frame} /> : <div className="sim3d"><p className="notice warn">Ce navigateur ne peut pas créer de contexte WebGL : la 3D n'est pas disponible ici, la vue 2D l'est.</p></div>}
+              {webgl ? <SimScene3D model={vModel!} plan={plan} frame={frame} detail={style === "detailed"} /> : <div className="sim3d"><p className="notice warn">Ce navigateur ne peut pas créer de contexte WebGL : la 3D n'est pas disponible ici, la vue 2D l'est.</p></div>}
             </Suspense></ErrorBoundary>}
           </div>
           {cursor ? <div className="sim-timeline">
