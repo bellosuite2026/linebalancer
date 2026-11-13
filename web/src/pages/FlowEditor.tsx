@@ -2,6 +2,8 @@
 // licence MIT), génération depuis la gamme, validation, sauvegarde, exécution par le moteur à événements
 // discrets et animation des jetons sur le graphe + états des postes liés sur le plan.
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import JobProgress, { jobPhase, Waking } from "../components/JobProgress";
+import OptimizeButton from "../components/OptimizeButton";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import {
   addEdge, Background, Controls, Handle, MiniMap, Position, ReactFlow, ReactFlowProvider, useEdgesState, useNodesState,
@@ -138,6 +140,8 @@ function Editor() {
   const [sim, setSim] = useState<FlowSim | null>(null);
   const [reps, setReps] = useState(3);
   const [busy, setBusy] = useState(false);
+  const [launching, setLaunching] = useState(false);
+  const [since, setSince] = useState(Date.now());
   const [t, setT] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState(60);
@@ -224,9 +228,9 @@ function Editor() {
   useEffect(() => () => window.clearTimeout(pollRef.current), []);
   const run = async () => {
     const v = await validate(); if (!v || !v.ok) { setMsg({ kind: "err", text: "Corrigez les erreurs du graphe avant de l'exécuter." }); return; }
-    setBusy(true); setMsg(null);
-    try { const s = await post<FlowSim>(`${base}/runs/${runId}/flow/simulate`, { graph: current(), replications: reps, flow_id: flowId || null }); setSim(s); openSim(s.id); }
-    catch (e) { setMsg({ kind: "err", text: (e as Error).message }); setBusy(false); }
+    setBusy(true); setMsg(null); setLaunching(true); setSince(Date.now());
+    try { const s = await post<FlowSim>(`${base}/runs/${runId}/flow/simulate`, { graph: current(), replications: reps, flow_id: flowId || null }); setLaunching(false); setSim(s); openSim(s.id); }
+    catch (e) { setMsg({ kind: "err", text: (e as Error).message }); setBusy(false); setLaunching(false); }
   };
 
   // ---------------------------------------------------------------- résultats + animation
@@ -259,7 +263,7 @@ function Editor() {
     bundles: [], actors: [], done: 0, wip: 0, carriers: [],
   } : null), [model, res, live, t]);
 
-  if (!data || !graph) return <div className="page">{msg ? <p className="notice err">{msg.text}</p> : <p className="muted">Génération du graphe depuis la gamme…</p>}</div>;
+  if (!data || !graph) return msg ? <div className="page"><p className="notice err">{msg.text}</p></div> : <Waking label="Génération du graphe depuis la gamme…" />;
   const g = graph;
   const setG = (patch: Partial<Graph>) => { setGraph({ ...g, ...patch }); setDirty(true); };
   const rk = sim?.results && res?.replications?.kpis;
@@ -272,6 +276,7 @@ function Editor() {
         <div><h1>Logique par blocs (Process Flow)</h1>
           <p className="muted">{data.problem_name || "Gamme"} · <Link to={`/calculs/${runId}`}>calcul</Link> · <Link to={`/simulation/${runId}`}>simulation 3D</Link> · les jetons (paquets, composants) circulent de bloc en bloc ; les opérations liées à un poste animent le plan.</p></div>
         <div className="actions">
+          <OptimizeButton runId={runId!} writable={writable} showWhy={false} />
           <label className="small">Graphe <select value={flowId} onChange={(e) => openFlow(e.target.value)}>
             <option value="">Généré depuis la gamme</option>{data.flows.map((f) => <option key={f.id} value={f.id}>{f.name} ({fmt.date(f.updated_at)})</option>)}</select></label>
         </div>
@@ -285,6 +290,8 @@ function Editor() {
         <label className="small">Réplications <input type="number" min={1} max={20} value={reps} onChange={(e) => setReps(Math.max(1, Math.min(20, +e.target.value)))} style={{ width: "4rem" }} /></label>
         {writable && <button className="btn small primary" disabled={busy} onClick={run}>{busy ? "Exécution…" : "▶ Exécuter"}</button>}
       </div>
+      {jobPhase(launching, sim?.status) && <JobProgress phase={jobPhase(launching, sim?.status)!} progress={(sim?.results as { progress?: Record<string, number> } | undefined)?.progress}
+        kind="flow" since={since} title="Exécution du graphe (Process Flow) en cours…" detail={`${reps} réplication(s)`} />}
       {val && (val.errors.length || val.warnings.length) ? <ul className="pf-issues small">
         {val.errors.map((e, i) => <li key={`e${i}`} className="error" onClick={() => e.blocks[0] && setSel(e.blocks[0])}>✕ {e.msg}{e.blocks.length ? ` (${e.blocks.length} bloc${e.blocks.length > 1 ? "s" : ""})` : ""}</li>)}
         {val.warnings.map((e, i) => <li key={`w${i}`} className="warning" onClick={() => e.blocks[0] && setSel(e.blocks[0])}>⚠ {e.msg}</li>)}
@@ -323,12 +330,11 @@ function Editor() {
         </aside>
       </div>
 
-      {sim && (sim.status === "queued" || sim.status === "running") && <p className="notice warn">Exécution en cours… le serveur gratuit peut mettre une minute à se réveiller.</p>}
       {sim?.status === "failed" && <p className="notice err">Échec : {sim.error}</p>}
       {res && <section className="card">
         <div className="kpis">
           <div className="kpi"><span>Produits finis</span><b>{rk ? ciTxt(rk.pieces, 0) : fmt.n(res.kpis.pieces, 0)}</b><small>{fmt.n(res.kpis.per_hour, 1)} pcs/h · {res.replications?.n ?? 1} réplication(s)</small></div>
-          <div className="kpi"><span>Temps de traversée</span><b>{rk ? ciTxt(rk.lead_time_avg, 0) : fmt.n(res.kpis.lead_time_avg, 0)} min</b><small>de la coupe à la sortie</small></div>
+          <div className="kpi"><span>Temps de traversée</span><b>{rk ? ciTxt(rk.lead_time_avg, 0) : fmt.n(res.kpis.lead_time_avg, 0)} min</b><small>{(res.kpis as { lead_time_basis?: string }).lead_time_basis === "little" ? "estimé (encours ÷ débit) : aucun lot lancé n'a fini dans la journée" : "de la coupe à la sortie"}</small></div>
           <div className="kpi"><span>Encours moyen</span><b>{rk ? ciTxt(rk.wip_avg, 0) : fmt.n(res.kpis.wip_avg, 0)} pcs</b><small>max {fmt.n(res.kpis.wip_max, 0)}</small></div>
           <div className="kpi warn"><span>Goulot</span><b>{res.blocks.find((b) => b.id === res.kpis.bottleneck)?.label ?? "—"}</b><small>bloc d'opération le plus occupé</small></div>
           <div className="kpi"><span>Conservation</span><b>{res.conservation.ok ? "✓" : "✕"}</b><small>{fmt.n(res.conservation.launched, 0)} lancées = {fmt.n(res.conservation.done, 0)} finies + {fmt.n(res.conservation.in_system, 0)} en cours</small></div>

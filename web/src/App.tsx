@@ -23,6 +23,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 const Simulation = lazy(() => import("./pages/Simulation"));
 const FlowEditor = lazy(() => import("./pages/FlowEditor"));
 const Optimizer = lazy(() => import("./pages/Optimizer"));
+import OptimizerHome from "./pages/OptimizerHome";
 
 export default function App() {
   const { session, loading, recovery, orgs, orgsLoaded, orgsError, refreshOrgs, isSuperAdmin } = useSession();
@@ -59,6 +60,7 @@ export default function App() {
         <Route path="/jumeau/:runId" element={<Twin />} />
         <Route path="/simulation/:runId" element={<ErrorBoundary label="La page de simulation n'a pas pu s'afficher"><Suspense fallback={<div className="page muted">Chargement…</div>}><Simulation /></Suspense></ErrorBoundary>} />
         <Route path="/flux/:runId" element={<ErrorBoundary label="L'éditeur de flux n'a pas pu s'afficher"><Suspense fallback={<div className="page muted">Chargement…</div>}><FlowEditor /></Suspense></ErrorBoundary>} />
+        <Route path="/optimiseur" element={<OptimizerHome />} />
         <Route path="/optimiseur/:runId" element={<ErrorBoundary label="L'optimiseur n'a pas pu s'afficher"><Suspense fallback={<div className="page muted">Chargement…</div>}><Optimizer /></Suspense></ErrorBoundary>} />
         <Route path="/atelier/plan" element={<WorkshopPlan />} />
         <Route path="/atelier" element={<Account />} />

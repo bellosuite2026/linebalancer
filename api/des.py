@@ -80,7 +80,7 @@ def prepare(model: dict, workshop_plan: Optional[dict]) -> dict:
     return ensure_paths(copy.deepcopy(model), workshop_plan)
 
 
-def run(model: dict, scenarios: list[dict], replications: int, workshop_plan: Optional[dict]) -> dict:
+def run(model: dict, scenarios: list[dict], replications: int, workshop_plan: Optional[dict], progress=None) -> dict:
     scenarios = scenarios[: LIMITS["scenarios"]] or [{"name": "Référence", "overrides": {}}]
     n_st = len(model.get("stations") or [])
     T = float((model.get("shift") or {}).get("minutes") or 480)
@@ -94,20 +94,21 @@ def run(model: dict, scenarios: list[dict], replications: int, workshop_plan: Op
         reps -= 1
     items, notes_all = [], []
     budget = TRACE_BUDGET // len(scenarios)
-    for sc in scenarios:
+    for si, sc in enumerate(scenarios):
         base, notes = absent(model, sc.get("absent") or [])
         m = apply_overrides(base, sc.get("overrides") or {})
         if m.get("transporters") or notes:
             m["paths"] = {**compute_paths(m, workshop_plan, bool(m.get("transporters"))), **(m.get("paths") or {})}
         m.setdefault("settings", {})["max_trace_events"] = budget
-        exp = run_experiment(m, [{"name": sc.get("name") or "Scénario", "overrides": {}}], reps)
+        cb = (lambda d, n, si=si: progress(si * n + d, n * len(scenarios))) if progress else None
+        exp = run_experiment(m, [{"name": sc.get("name") or "Scénario", "overrides": {}}], reps, progress=cb)
         it = exp["scenarios"][0]
         it["overrides"], it["absent"] = sc.get("overrides") or {}, sc.get("absent") or []
         it["result"]["notes"] = notes + it["result"].get("notes", [])
         items.append(it)
         notes_all += notes
     from engine.des.experiment import comparison
-    return {"engine": "des-3.0", "replications": reps, "scenarios": items, "comparison": comparison(items)}
+    return {"engine": "des-3.1", "replications": reps, "scenarios": items, "comparison": comparison(items)}
 
 
 # --------------------------------------------------------------------------- exports

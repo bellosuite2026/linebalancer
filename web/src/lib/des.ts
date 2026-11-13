@@ -56,7 +56,9 @@ export interface ScenarioResult {
   kpis: { pieces: number; per_hour: number; per_hour_worked: number; lead_time_avg: number | null; lead_time_p90: number | null; wip_avg: number; wip_max: number;
     bottleneck: string; operators: number; operator_util_avg: number; walk_m: number; transport_m: number; defects: number; launched: number; target_per_hour: number | null;
     rail_util_pct?: number | null; carriers_in_circulation?: number | null; rail_time_avg?: number | null; station_time_avg?: number | null;
-    rail_share_pct?: number | null; recirculations?: number | null; reassigned?: number | null };
+    rail_share_pct?: number | null; recirculations?: number | null; reassigned?: number | null;
+    lead_time_basis?: "measured" | "little" | null; bundles_done?: number; bundles_measured?: number; liaison_m?: number; moves_m?: number;
+    wip_cap_pieces?: number | null };
   stations: StationRes[]; operators: OperatorRes[]; transporters: TransporterRes[];
   throughput: { hourly: number[]; cumulative: [number, number][]; target_per_hour: number | null };
   wip_series: [number, number][]; lead_time: { hist: { edges: number[]; counts: number[] }; count: number; sample: number[] };
@@ -64,7 +66,9 @@ export interface ScenarioResult {
   trace?: Trace; replications: { n: number; seeds: number[]; kpis: Record<string, CI> & { bottleneck: string | CI }; station_util: Record<string, CI> }; model: DesModel;
 }
 export interface DesScenario { name: string; overrides: Record<string, unknown>; absent: string[]; result: ScenarioResult }
-export interface DesResults { engine: string; replications: number; scenarios: DesScenario[]; comparison: { key: string; label: string; values: CI[] }[] }
+export interface JobProgressInfo { pct?: number; done?: number; total?: number; evals?: number; max_evals?: number; elapsed_s?: number;
+  budget_s?: number; gen?: number; best_pieces?: number }
+export interface DesResults { progress?: JobProgressInfo; engine: string; replications: number; scenarios: DesScenario[]; comparison: { key: string; label: string; values: CI[] }[] }
 export interface DesSim {
   id: string; name: string; status: "queued" | "running" | "done" | "failed"; kind: string; error?: string; created_at: string;
   results?: DesResults | null; scenarios?: { name: string }[]; layout?: DesModel;

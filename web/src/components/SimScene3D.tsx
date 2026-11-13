@@ -4,6 +4,8 @@
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import NavControls, { type NavApi } from "./NavControls";
+import { orbitNav } from "../lib/nav3d";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { addMachineBody } from "../lib/machines3d";
 import { STATE_COLOR, STATION_STATES, lotColor, type DesModel, type Frame } from "../lib/des";
@@ -51,6 +53,7 @@ export default function SimScene3D({ model, plan, frame, className = "" }: Props
   const host = useRef<HTMLDivElement>(null);
   const api = useRef<{ update: (f: Frame | null) => void } | null>(null);
   const [fail, setFail] = useState("");
+  const nav = useRef<NavApi | null>(null);
 
   useEffect(() => {
     const el = host.current; if (!el) return;
@@ -77,6 +80,8 @@ export default function SimScene3D({ model, plan, frame, className = "" }: Props
     const z0 = plan ? 0 : Math.min(...ys) - 2, z1 = plan ? plan.length_m : Math.max(...ys) + 2;
     const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, span = Math.max(x1 - x0, z1 - z0, 6);
     camera.position.set(cx + span * 0.15, span * 0.75, z1 + span * 0.55); controls.target.set(cx, 0, cz); controls.update();
+    controls.minDistance = Math.max(1, span * 0.05); controls.maxDistance = span * 5;
+    nav.current = orbitNav(camera, controls, { cx, cz, span, home: camera.position.clone(), homeTarget: controls.target.clone() });
     sun.position.set(cx - span * 0.3, span, cz - span * 0.2); sun.target.position.set(cx, 0, cz); scene.add(sun.target);
     const sc = sun.shadow.camera as THREE.OrthographicCamera; sc.left = -span; sc.right = span; sc.top = span; sc.bottom = -span; sc.far = span * 3; sc.updateProjectionMatrix();
 
@@ -239,12 +244,12 @@ export default function SimScene3D({ model, plan, frame, className = "" }: Props
         if (o instanceof THREE.Mesh || o instanceof THREE.InstancedMesh) { o.geometry.dispose(); }
         if (o instanceof THREE.Sprite) { o.material.map?.dispose(); o.material.dispose(); }
       });
-      renderer.dispose(); el.removeChild(renderer.domElement); api.current = null;
+      renderer.dispose(); el.removeChild(renderer.domElement); api.current = null; nav.current = null;
     };
   }, [model, plan]);
 
   useEffect(() => { api.current?.update(frame); }, [frame]);
 
   if (fail) return <div className={`sim3d ${className}`}><p className="notice warn">{fail}</p></div>;
-  return <div ref={host} className={`sim3d ${className}`} role="img" aria-label="Simulation 3D de l'atelier" />;
+  return <NavControls api={nav} mode="3d"><div ref={host} className={`sim3d ${className}`} role="img" aria-label="Simulation 3D de l'atelier" /></NavControls>;
 }

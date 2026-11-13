@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import NavControls, { type NavApi } from "./NavControls";
+import { orbitNav } from "../lib/nav3d";
 import { addMachineBody } from "../lib/machines3d";
 import { MACHINE_CATALOG, ZONES, operatorPoint, type Machine, type WorkshopPlan } from "../lib/workshop";
 
@@ -236,6 +238,7 @@ export default function PlanScene3D({ plan, stations = EMPTY_STATIONS, states = 
   const workerActors = useRef(new Map<string, THREE.Group>());
   const offsets = useRef({ x: 0, z: 0 });
   const [ready, setReady] = useState(false);
+  const nav = useRef<NavApi | null>(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -474,6 +477,7 @@ export default function PlanScene3D({ plan, stations = EMPTY_STATIONS, states = 
       controls.target.copy(target);
       controls.update();
     };
+    nav.current = orbitNav(camera, controls, { cx: width / 2, cz: length / 2, cy: 0.7, span, home: camera.position.clone(), homeTarget: target.clone() });
     return () => {
       for (const material of zoneMaterials) material.dispose();
     };
@@ -530,13 +534,15 @@ export default function PlanScene3D({ plan, stations = EMPTY_STATIONS, states = 
     <section className={`p3d ${className}`} aria-label={title}>
       <header className="p3d-bar">
         <h3 className="p3d-h">{title}</h3>
-        <span className="p3d-help">Glisser : orbiter · molette/pincer : zoomer · Maj + glisser : déplacer</span>
+        <span className="p3d-help">Glisser : orbiter · molette/pincer : zoomer · Maj + glisser : déplacer · boutons à droite : zoom, déplacement, rotation, vues</span>
         <button className="btn small" onClick={() => resetRef.current?.()} disabled={!ready} title="Réinitialiser la caméra">Réinitialiser la vue</button>
       </header>
-      <div className="p3d-stage" ref={hostRef}>
-        {!ready && !error && <div className="p3d-loading" role="status">Préparation de la scène 3D…</div>}
-        {error && <p className="p3d-err" role="alert">{error}</p>}
-      </div>
+      <NavControls api={nav} mode="3d" className="p3d-navwrap">
+        <div className="p3d-stage" ref={hostRef}>
+          {!ready && !error && <div className="p3d-loading" role="status">Préparation de la scène 3D…</div>}
+          {error && <p className="p3d-err" role="alert">{error}</p>}
+        </div>
+      </NavControls>
     </section>
   );
 }

@@ -1,6 +1,7 @@
 // Vue 2D (canvas) de la simulation : plan d'atelier, postes colorés par état, chariots d'encours avec
 // leurs paquets empilés, opérateurs et transporteurs qui se déplacent le long des allées.
 import { useEffect, useRef, useState } from "react";
+import NavControls, { type NavApi } from "./NavControls";
 import { MACHINE_CATALOG, rectCorners, type Machine, type WorkshopPlan } from "../lib/workshop";
 import { STATE_COLOR, STATION_STATES, lotColor, railPoint, type DesModel, type Frame } from "../lib/des";
 
@@ -23,12 +24,31 @@ export default function SimCanvas2D({ model, plan, frame, selected, onSelect, cl
     return { x0: Math.min(...xs) - 1.5, y0: Math.min(...ys) - 1.5, x1: Math.max(...xs) + 1.5, y1: Math.max(...ys) + 1.5 };
   };
 
+  const fitS = useRef(1);
   const fit = () => {
     const c = ref.current; if (!c) return;
     const b = bounds(), W = c.clientWidth, H = c.clientHeight;
     const s = Math.min(W / (b.x1 - b.x0), H / (b.y1 - b.y0));
+    fitS.current = s;
     view.current = { s, ox: (W - s * (b.x1 - b.x0)) / 2 - b.x0 * s, oy: (H - s * (b.y1 - b.y0)) / 2 - b.y0 * s };
     bgKey.current = "";
+  };
+  // ---- navigation (boutons, clavier)
+  const nav = useRef<NavApi | null>(null);
+  const zoomAround = (k: number, mx?: number, my?: number) => {
+    const c = ref.current, v = view.current; if (!c || !v) return;
+    const s = Math.max(fitS.current * 0.2, Math.min(fitS.current * 40, v.s * k)); k = s / v.s;
+    const px = mx ?? c.clientWidth / 2, py = my ?? c.clientHeight / 2;
+    view.current = { s, ox: px - (px - v.ox) * k, oy: py - (py - v.oy) * k }; bgKey.current = ""; force((n) => n + 1);
+  };
+  nav.current = {
+    zoom: (f) => zoomAround(f),
+    pan: (dx, dy) => { const c = ref.current, v = view.current; if (!c || !v) return; view.current = { ...v, ox: v.ox - dx * c.clientWidth, oy: v.oy - dy * c.clientHeight }; bgKey.current = ""; force((n) => n + 1); },
+    fit: () => { fit(); force((n) => n + 1); },
+    center: () => {
+      const c = ref.current, v = view.current; if (!c || !v) return; const b = bounds();
+      view.current = { s: v.s, ox: c.clientWidth / 2 - ((b.x0 + b.x1) / 2) * v.s, oy: c.clientHeight / 2 - ((b.y0 + b.y1) / 2) * v.s }; bgKey.current = ""; force((n) => n + 1);
+    },
   };
 
   // fond statique (murs, allées, machines) mis en cache dans un canvas hors écran
@@ -195,9 +215,7 @@ export default function SimCanvas2D({ model, plan, frame, selected, onSelect, cl
     const wheel = (ev: WheelEvent) => {
       ev.preventDefault(); const v = view.current; if (!v) return;
       const r = c.getBoundingClientRect(), mx = ev.clientX - r.left, my = ev.clientY - r.top;
-      const k = ev.deltaY > 0 ? 1 / 1.15 : 1.15;
-      view.current = { s: v.s * k, ox: mx - (mx - v.ox) * k, oy: my - (my - v.oy) * k }; bgKey.current = "";
-      force((n) => n + 1);
+      zoomAround(ev.deltaY > 0 ? 1 / 1.15 : 1.15, mx, my);
     };
     const ro = new ResizeObserver(() => { fit(); force((n) => n + 1); });
     ro.observe(c);
@@ -210,15 +228,32 @@ export default function SimCanvas2D({ model, plan, frame, selected, onSelect, cl
     const r = ref.current!.getBoundingClientRect(), v = view.current!;
     return [(ev.clientX - r.left - v.ox) / v.s, (ev.clientY - r.top - v.oy) / v.s];
   };
+  const zoomPct = view.current ? (view.current.s / fitS.current) * 100 : 100;
+  // pincement à deux doigts (tablette)
+  const pts = useRef(new Map<number, { x: number; y: number }>());
+  const pinch = useRef<{ d: number } | null>(null);
   return (
+    <NavControls api={nav} mode="2d" zoomPct={zoomPct} className={`sim2d-wrap ${className}`}>
     <canvas ref={ref} className={`sim2d ${className}`} role="img" aria-label="Simulation 2D de l'atelier"
-      onPointerDown={(ev) => { (ev.target as HTMLElement).setPointerCapture(ev.pointerId); const v = view.current!; drag.current = { x: ev.clientX, y: ev.clientY, ox: v.ox, oy: v.oy, moved: false }; }}
+      onPointerDown={(ev) => {
+        (ev.target as HTMLElement).setPointerCapture(ev.pointerId); pts.current.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+        if (pts.current.size === 2) { const [a, b] = [...pts.current.values()]; pinch.current = { d: Math.hypot(a.x - b.x, a.y - b.y) }; drag.current = null; return; }
+        const v = view.current!; drag.current = { x: ev.clientX, y: ev.clientY, ox: v.ox, oy: v.oy, moved: false };
+      }}
+      onPointerCancel={(ev) => { pts.current.delete(ev.pointerId); pinch.current = null; drag.current = null; }}
       onPointerMove={(ev) => {
+        if (pts.current.has(ev.pointerId)) pts.current.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+        if (pinch.current && pts.current.size === 2) {
+          const [a, b] = [...pts.current.values()]; const d = Math.hypot(a.x - b.x, a.y - b.y); const r = ref.current!.getBoundingClientRect();
+          if (pinch.current.d > 0) zoomAround(d / pinch.current.d, (a.x + b.x) / 2 - r.left, (a.y + b.y) / 2 - r.top);
+          pinch.current.d = d; return;
+        }
         const d = drag.current; if (!d || !view.current) return;
         if (Math.abs(ev.clientX - d.x) + Math.abs(ev.clientY - d.y) > 4) d.moved = true;
         if (d.moved) { view.current = { ...view.current, ox: d.ox + ev.clientX - d.x, oy: d.oy + ev.clientY - d.y }; bgKey.current = ""; force((n) => n + 1); }
       }}
       onPointerUp={(ev) => {
+        pts.current.delete(ev.pointerId); if (pinch.current) { if (pts.current.size < 2) pinch.current = null; drag.current = null; return; }
         const d = drag.current; drag.current = null;
         if (d && !d.moved && onSelect) {
           const [x, y] = toM(ev);
@@ -227,5 +262,6 @@ export default function SimCanvas2D({ model, plan, frame, selected, onSelect, cl
         }
       }}
       onDoubleClick={() => { fit(); force((n) => n + 1); }} />
+    </NavControls>
   );
 }

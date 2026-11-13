@@ -1,9 +1,10 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { api, fmt, post } from "../lib/api";
-import { canManage, useSession } from "../lib/session";
+import { canManage, canWrite, useSession } from "../lib/session";
 import type { Line, Run } from "../lib/types";
 import StatusBadge from "../components/StatusBadge";
+import OptimizeButton from "../components/OptimizeButton";
 
 export default function Dashboard() {
   const { currentOrg } = useSession();
@@ -89,10 +90,11 @@ export default function Dashboard() {
 }
 
 export function RunTable({ runs }: { runs: Run[] }) {
+  const writable = canWrite(useSession().currentOrg);
   return (
     <div className="table-wrap">
       <table>
-        <thead><tr><th>Date</th><th>Type</th><th>Solveur</th><th>Statut</th><th>Stations</th><th>Cycle (min)</th><th>Rendement</th><th></th></tr></thead>
+        <thead><tr><th>Date</th><th>Type</th><th>Solveur</th><th>Statut</th><th>Stations</th><th>Cycle (min)</th><th>Rendement</th><th></th><th></th></tr></thead>
         <tbody>
           {runs.map((r) => (
             <tr key={r.id}>
@@ -104,6 +106,7 @@ export function RunTable({ runs }: { runs: Run[] }) {
               <td>{r.kind === "min_cycle" ? fmt.n(r.min_cycle_time) : fmt.n(r.actual_cycle_time)}</td>
               <td>{r.efficiency != null ? `${fmt.n(r.efficiency, 1)} %` : "—"}</td>
               <td><Link to={`/calculs/${r.id}`} className="link">Voir</Link></td>
+              <td><OptimizeButton run={r} runId={r.id} writable={writable} size="small" showWhy={false} /></td>
             </tr>
           ))}
         </tbody>

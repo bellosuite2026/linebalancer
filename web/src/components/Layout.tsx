@@ -26,6 +26,7 @@ export default function Layout({ children }: { children: ReactNode }) {
           <NavLink to="/calculs">Historique</NavLink>
           <NavLink to="/production">Production</NavLink>
           <NavLink to="/jumeau">Jumeau numérique</NavLink>
+          <NavLink to="/optimiseur" className={({ isActive }) => `nav-opt${isActive ? " active" : ""}`}>⚡ Optimiseur</NavLink>
           <NavLink to="/atelier/plan">Plan de l'atelier</NavLink>
           <NavLink to="/atelier" end>Atelier</NavLink>
           {isSuperAdmin && <NavLink to="/admin" className={({ isActive }) => `nav-admin${isActive ? " active" : ""}`}>Super admin</NavLink>}

@@ -46,6 +46,19 @@ def register(app: FastAPI, queue: JobQueue, store: SupabaseStore, principal, h: 
     load_plan, saved_layout, effective_layout = h["load_plan"], h["saved_layout"], h["effective_layout"]
     org_name, safe_update, now = h["org_name"], h["safe_update"], h["now"]
 
+    def progress_cb(token: str, sim_id: str):
+        """Progression des simulations : {pct, done, total, elapsed_s} écrite au plus toutes les 2 s."""
+        t0, last = time.monotonic(), [0.0]
+
+        def cb(done: int, total: int) -> None:
+            if done < total and time.monotonic() - last[0] < 2.0:
+                return
+            last[0] = time.monotonic()
+            safe_update(token, sim_id, {"results": {"progress": {
+                "pct": min(99, round(100 * done / max(1, total))), "done": done, "total": total,
+                "elapsed_s": round(time.monotonic() - t0, 1)}}})
+        return cb
+
     def workshop_row(org_id: str, plan_id: Optional[str], p) -> Optional[dict]:
         if not plan_id:
             return None
@@ -91,9 +104,9 @@ def register(app: FastAPI, queue: JobQueue, store: SupabaseStore, principal, h: 
         token, sim_id, reps = p.token, row["id"], body.replications
 
         def work() -> dict:
-            safe_update(token, sim_id, {"status": "running", "started_at": now()})
+            safe_update(token, sim_id, {"status": "running", "started_at": now(), "results": {"progress": {"pct": 0}}})
             try:
-                results = des.run(model, scenarios, reps, wp)
+                results = des.run(model, scenarios, reps, wp, progress_cb(token, sim_id))
             except Exception as e:  # noqa: BLE001
                 log.exception("Simulation DES %s en échec", sim_id)
                 safe_update(token, sim_id, {"status": "failed", "error": str(e)[:2000], "finished_at": now()})
@@ -203,9 +216,9 @@ def register(app: FastAPI, queue: JobQueue, store: SupabaseStore, principal, h: 
         token, des_id, reps = p.token, row["id"], body.replications
 
         def work() -> dict:
-            safe_update(token, des_id, {"status": "running", "started_at": now()})
+            safe_update(token, des_id, {"status": "running", "started_at": now(), "results": {"progress": {"pct": 0}}})
             try:
-                results = des.run(model, scenarios, reps, wp)
+                results = des.run(model, scenarios, reps, wp, progress_cb(token, des_id))
             except Exception as e:  # noqa: BLE001
                 safe_update(token, des_id, {"status": "failed", "error": str(e)[:2000], "finished_at": now()})
                 raise
@@ -295,9 +308,9 @@ def register(app: FastAPI, queue: JobQueue, store: SupabaseStore, principal, h: 
         reps = max(1, min(body.replications, int(des.WORK_BUDGET // max(1.0, len(graph["blocks"]) * T * 2))))
 
         def work() -> dict:
-            safe_update(token, sim_id, {"status": "running", "started_at": now()})
+            safe_update(token, sim_id, {"status": "running", "started_at": now(), "results": {"progress": {"pct": 0}}})
             try:
-                res = run_flow_experiment(graph, reps, sids)
+                res = run_flow_experiment(graph, reps, sids, progress_cb(token, sim_id))
             except Exception as e:  # noqa: BLE001
                 log.exception("Flux %s en échec", sim_id)
                 safe_update(token, sim_id, {"status": "failed", "error": str(e)[:2000], "finished_at": now()})

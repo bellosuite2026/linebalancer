@@ -2,10 +2,11 @@
 // API) sur le modèle à événements discrets — effectifs, taille de paquet, encours max, agents de liaison,
 // cintres, placement des postes. Front de Pareto, détail des solutions, « Appliquer » = scénario simulé.
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import { api, fmt, post } from "../lib/api";
 import { canWrite, useSession } from "../lib/session";
 import type { CI, DesModelResponse } from "../lib/des";
+import JobProgress, { jobPhase, Waking } from "../components/JobProgress";
 
 type ObjKey = "pieces" | "cost_minute" | "wip_avg" | "walk_m";
 const OBJ: Record<ObjKey, { label: string; unit: string; sense: "max" | "min"; d: number }> = {
@@ -18,18 +19,27 @@ interface Mean { pieces: number; per_hour: number; cost_minute: number; cost_pie
   lead_time_avg: number; operator_util_avg: number; people: number; operators: number; transporters: number; bottleneck: string }
 interface Solution { id?: number; key: string; genes: Record<string, unknown>; mean: Mean; kpis: Record<string, CI>; feasible: boolean;
   changes: string[]; vs_base?: Record<string, number | null> }
-interface OptResults { engine?: string; progress?: { pct?: number; evals?: number; elapsed_s?: number; gen?: number; best_pieces?: number };
+interface OptResults { engine?: string; progress?: { pct?: number; evals?: number; max_evals?: number; budget_s?: number; elapsed_s?: number; gen?: number; best_pieces?: number };
   pareto?: Solution[]; base?: Solution; cloud?: { mean: Partial<Mean>; feasible: boolean }[]; evals?: number; simulations?: number;
   elapsed_s?: number; stopped_by?: string; feasible_found?: boolean; variants?: string[];
   config?: { objectives: ObjKey[]; replications: number; cost_per_minute: number } }
 interface OptSim { id: string; status: string; name: string; error?: string | null; created_at?: string; results?: OptResults | null }
+
+/** Solution recommandée : le coût minute le plus bas sans perdre de production (sinon la plus productive). */
+function recommend(pareto: Solution[], base?: Solution): Solution | null {
+  const ok = pareto.filter((s) => s.feasible !== false);
+  const pool = ok.length ? ok : pareto;
+  if (!pool.length) return null;
+  const keep = base ? pool.filter((s) => s.mean.pieces >= base.mean.pieces) : pool;
+  if (keep.length) return [...keep].sort((a, b) => a.mean.cost_minute - b.mean.cost_minute || a.mean.wip_avg - b.mean.wip_avg)[0];
+  return [...pool].sort((a, b) => b.mean.pieces - a.mean.pieces)[0];
+}
 
 const num = (v: string) => (v.trim() === "" ? null : Number(v.replace(",", ".")));
 
 export default function Optimizer() {
   const { runId } = useParams();
   const [sp, setSp] = useSearchParams();
-  const nav = useNavigate();
   const { currentOrg } = useSession();
   const org = currentOrg!;
   const base = `/v1/orgs/${org.id}`;
@@ -49,6 +59,10 @@ export default function Optimizer() {
   const [ax, setAx] = useState<ObjKey>("cost_minute"), [ay, setAy] = useState<ObjKey>("pieces");
   const [sel, setSel] = useState<number | null>(null);
   const [applying, setApplying] = useState<number | null>(null);
+  const [launching, setLaunching] = useState(false);
+  const [since, setSince] = useState(Date.now());
+  const [confirm, setConfirm] = useState<Solution | null>(null);
+  const [applied, setApplied] = useState<{ sol: number; url: string; layout: boolean } | null>(null);
 
   const load = useCallback(async (pid: string) => {
     setErr("");
@@ -92,7 +106,8 @@ export default function Optimizer() {
 
   const start = async () => {
     if (objs.length < 2) { setErr("Choisissez au moins deux objectifs."); return; }
-    setBusy(true); setErr("");
+    setBusy(true); setErr(""); setLaunching(true); setSince(Date.now()); setApplied(null);
+    window.scrollTo({ top: 0, behavior: "smooth" });
     const constraints = Object.fromEntries(Object.entries(cons).map(([k, v]) => [k, num(v)]));
     try {
       const s = await post<OptSim>(`${base}/runs/${runId}/optimize`, {
@@ -101,8 +116,8 @@ export default function Optimizer() {
         config: { objectives: objs, cost_per_minute: num(cost) ?? 0.06, constraints, vary, max_extra_operators: maxExtra,
           max_fewer_operators: maxFewer, max_transporters: maxTr, time_budget_s: budget, replications: reps },
       });
-      setSim(s); poll(s.id);
-    } catch (e) { setErr((e as Error).message); setBusy(false); }
+      setLaunching(false); setSim(s); poll(s.id);
+    } catch (e) { setErr((e as Error).message); setBusy(false); setLaunching(false); }
   };
 
   const apply = async (sol: Solution) => {
@@ -111,18 +126,24 @@ export default function Optimizer() {
     try {
       const r = await post<{ simulation: { id: string }; layout_saved: boolean; plan_id: string | null }>(
         `${base}/optimizations/${sim.id}/apply`, { solution: sol.id, save_layout: true, replications: 5 });
-      nav(`/simulation/${runId}?sim=${r.simulation.id}${r.plan_id ? `&plan=${r.plan_id}` : ""}`);
-    } catch (e) { setErr((e as Error).message); setApplying(null); }
+      setApplied({ sol: sol.id, url: `/simulation/${runId}?sim=${r.simulation.id}${r.plan_id ? `&plan=${r.plan_id}` : ""}`, layout: r.layout_saved });
+      setApplying(null); setConfirm(null);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch (e) { setErr((e as Error).message); setApplying(null); setConfirm(null); }
   };
 
   const res = sim?.status === "done" ? sim.results ?? null : null;
   const running = sim && (sim.status === "queued" || sim.status === "running");
-  const pr = sim?.results?.progress;
   const pareto = res?.pareto ?? [];
+  const reco = useMemo(() => recommend(pareto, res?.base), [pareto, res?.base]);
   const picked = pareto.find((s) => s.id === sel) ?? null;
+  const phase = jobPhase(launching, sim?.status);
+  const launchBtn = writable
+    ? <button className="btn optimize big" disabled={busy || !!running} onClick={start}>{running || launching ? "Optimisation en cours…" : "⚡ Lancer l'optimisation"}</button>
+    : <p className="notice warn small">Lecture seule (rôle « lecteur ») : vous pouvez consulter les optimisations ci-dessous, mais pas en lancer. Demandez au propriétaire de l'atelier le rôle « méthodes » ou « chef de ligne ».</p>;
 
-  if (err && !data) return <div className="page"><p className="error">{err}</p></div>;
-  if (!data) return <div className="page muted">Préparation du modèle…</div>;
+  if (err && !data) return <div className="page"><p className="notice err">{err}</p><Link to="/optimiseur">← Choisir un autre calcul</Link></div>;
+  if (!data) return <Waking label="Préparation du modèle de simulation…" />;
 
   return (
     <div className="page opt-page">
@@ -140,7 +161,16 @@ export default function Optimizer() {
             </select></label>
         </div>
       </div>
-      {err && <p className="error">{err}</p>}
+      {err && <p className="notice err">{err}</p>}
+      <div className="card opt-launch">
+        <div>
+          <h3 style={{ margin: 0 }}>Trouver de meilleurs réglages pour cette ligne</h3>
+          <p className="muted small" style={{ margin: ".3rem 0 0" }}>Objectifs : {objs.map((k) => OBJ[k].label.toLowerCase()).join(", ")} · durée max {budget} s · réglages avancés à gauche.</p>
+        </div>
+        {launchBtn}
+      </div>
+      {phase && <JobProgress phase={phase} progress={sim?.results?.progress} kind="opt" since={since} title="Recherche des meilleurs compromis…" />}
+      {applied && <p className="notice ok">Solution {applied.sol} appliquée : simulation créée (5 réplications){applied.layout ? " et nouvelle implantation enregistrée" : ""}. <Link className="btn small primary" to={applied.url}>Ouvrir la simulation →</Link></p>}
       <div className="opt-grid">
         <aside className="card opt-form">
           <h3>Objectifs</h3>
@@ -173,8 +203,7 @@ export default function Optimizer() {
             <label>Réplications / essai<input type="number" min={1} max={5} value={reps} onChange={(e) => setReps(Math.max(1, Math.min(5, +e.target.value)))} /></label>
           </div>
           <p className="muted small">Algorithme génétique multi-objectif (NSGA-II) : chaque essai est simulé (journée complète, pauses, variabilité) avec les mêmes graines pour comparer à armes égales.</p>
-          {writable ? <button className="btn primary" disabled={busy || !!running} onClick={start}>{running ? "Recherche en cours…" : "Lancer l'optimisation"}</button>
-            : <p className="muted small">Lecture seule : votre rôle ne permet pas de lancer une optimisation.</p>}
+          {writable && <button className="btn optimize full" disabled={busy || !!running} onClick={start}>{running ? "Optimisation en cours…" : "⚡ Lancer l'optimisation"}</button>}
           {hist.length > 0 && <>
             <h3>Historique</h3>
             <ul className="opt-hist">{hist.map((h) => (
@@ -183,14 +212,16 @@ export default function Optimizer() {
         </aside>
 
         <section className="opt-main">
-          {running && <div className="card">
-            <h3>Recherche en cours…</h3>
-            <div className="opt-bar"><i style={{ width: `${pr?.pct ?? 2}%` }} /></div>
-            <p className="muted small">{pr?.evals ?? 0} configurations simulées · génération {pr?.gen ?? 0} · {fmt.n(pr?.elapsed_s ?? 0, 0)} s
-              {pr?.best_pieces ? ` · meilleur débit ${fmt.n(pr.best_pieces, 0)} pcs/j` : ""}. Le serveur gratuit peut mettre une minute à se réveiller.</p>
+          {sim?.status === "failed" && <p className="notice err">Optimisation en échec : {sim.error}</p>}
+          {!sim && !launching && <div className="card empty-state"><b>Pas encore d'optimisation pour ce calcul</b>
+            {writable ? "Cliquez « Lancer l'optimisation » : en 10 à 90 secondes, les meilleurs compromis (débit, coût minute, encours, déplacements) s'afficheront ici, avec une solution recommandée." : "Aucune optimisation n'a encore été lancée sur ce calcul."}</div>}
+          {res && res.base && reco && <div className="card opt-reco">
+            <div className="row opt-head"><h3 style={{ margin: 0 }}><span className="badge-reco">Recommandée</span>Solution {reco.id}</h3>
+              {writable && <button className="btn primary" disabled={applying != null} onClick={() => setConfirm(reco)}>Appliquer cette solution</button>}</div>
+            <p className="small"><b>{fmt.n(reco.mean.pieces, 0)} pcs/j</b> (actuel {fmt.n(res.base.mean.pieces, 0)}) · coût minute {fmt.n(reco.mean.cost_minute, 4)} TND (actuel {fmt.n(res.base.mean.cost_minute, 4)}) · encours {fmt.n(reco.mean.wip_avg, 0)} pcs · effectif {reco.mean.people}</p>
+            <p className="small">{reco.changes.join(" · ") || "Aucun changement"}</p>
+            <p className="muted small">Choisie car c'est le coût minute le plus bas sans perdre de production. Les autres compromis sont dans le graphique et le tableau.</p>
           </div>}
-          {sim?.status === "failed" && <p className="error">Optimisation en échec : {sim.error}</p>}
-          {!sim && <div className="card muted">Réglez les objectifs puis lancez l'optimisation : le front de Pareto (meilleurs compromis) s'affichera ici.</div>}
           {res && res.base && <>
             <div className="card">
               <div className="row opt-head">
@@ -205,7 +236,7 @@ export default function Optimizer() {
               <Scatter res={res} ax={ax} ay={ay} sel={sel} onPick={setSel} />
               <p className="muted small"><i className="opt-dot grey" /> configurations essayées · <i className="opt-dot blue" /> compromis du front · <i className="opt-dot star" /> configuration actuelle. Cliquez un point pour le détail.</p>
             </div>
-            {picked && <SolutionCard s={picked} base={res.base} onApply={writable ? () => apply(picked) : undefined} applying={applying === picked.id} />}
+            {picked && <SolutionCard s={picked} base={res.base} onApply={writable ? () => setConfirm(picked) : undefined} applying={applying === picked.id} />}
             <div className="card table-wrap">
               <table className="opt-table">
                 <thead><tr><th>#</th><th>Pièces/j</th><th>pcs/h</th><th>Coût minute</th><th>Coût/pièce</th><th>Encours</th><th>Marche (m)</th><th>Effectif</th><th>Changements</th><th /></tr></thead>
@@ -213,8 +244,8 @@ export default function Optimizer() {
                   <tr className="opt-base"><td>Actuel</td><td>{fmt.n(res.base.mean.pieces, 0)}</td><td>{fmt.n(res.base.mean.per_hour, 1)}</td><td>{fmt.n(res.base.mean.cost_minute, 4)}</td>
                     <td>{fmt.n(res.base.mean.cost_piece, 3)}</td><td>{fmt.n(res.base.mean.wip_avg, 0)}</td><td>{fmt.n(res.base.mean.walk_m, 0)}</td><td>{res.base.mean.people}</td><td className="muted">Configuration actuelle</td><td /></tr>
                   {pareto.map((s) => (
-                    <tr key={s.key} className={sel === s.id ? "sel" : ""} onClick={() => setSel(s.id ?? null)}>
-                      <td>{s.id}</td>
+                    <tr key={s.key} className={sel === s.id ? "sel" : reco?.id === s.id ? "reco" : ""} onClick={() => setSel(s.id ?? null)}>
+                      <td>{s.id}{reco?.id === s.id && <span className="badge ok small"> ★</span>}</td>
                       <td>{fmt.n(s.mean.pieces, 0)} <Delta v={s.vs_base?.pieces} d={0} good="up" /></td>
                       <td>{fmt.n(s.mean.per_hour, 1)}</td>
                       <td>{fmt.n(s.mean.cost_minute, 4)} <Delta v={s.vs_base?.cost_minute} d={4} good="down" /></td>
@@ -223,7 +254,7 @@ export default function Optimizer() {
                       <td>{fmt.n(s.mean.walk_m, 0)}</td>
                       <td>{s.mean.people}</td>
                       <td className="small">{s.changes.join(" · ")}</td>
-                      <td>{writable && <button className="btn small" disabled={applying != null} onClick={(e) => { e.stopPropagation(); apply(s); }}>{applying === s.id ? "…" : "Appliquer"}</button>}</td>
+                      <td>{writable && <button className="btn small" disabled={applying != null} onClick={(e) => { e.stopPropagation(); setConfirm(s); }}>{applying === s.id ? "…" : "Appliquer"}</button>}</td>
                     </tr>))}
                 </tbody>
               </table>
@@ -232,6 +263,17 @@ export default function Optimizer() {
           </>}
         </section>
       </div>
+      {confirm && <div className="modal-back" onClick={() => applying == null && setConfirm(null)}>
+        <div className="modal" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
+          <h3>Appliquer la solution {confirm.id} ?</h3>
+          <ul className="small">{confirm.changes.map((c) => <li key={c}>{c}</li>)}</ul>
+          <p className="small">Une simulation 3D de cette solution sera créée (5 réplications){vary.layout ? " et, si le placement des postes change, la nouvelle implantation sera enregistrée pour ce calcul" : ""}. Le calcul d'équilibrage lui-même n'est pas modifié.</p>
+          <div className="row" style={{ justifyContent: "flex-end" }}>
+            <button className="btn" disabled={applying != null} onClick={() => setConfirm(null)}>Annuler</button>
+            <button className="btn primary" disabled={applying != null} onClick={() => apply(confirm)}>{applying != null ? "Création de la simulation…" : "Oui, appliquer"}</button>
+          </div>
+        </div>
+      </div>}
     </div>
   );
 }

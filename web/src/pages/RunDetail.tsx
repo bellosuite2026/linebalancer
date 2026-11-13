@@ -5,6 +5,7 @@ import { canWrite, useSession } from "../lib/session";
 import type { MinCycle, Result, Run } from "../lib/types";
 import ResultView from "../components/ResultView";
 import StatusBadge from "../components/StatusBadge";
+import OptimizeButton from "../components/OptimizeButton";
 
 export default function RunDetail() {
   const { id } = useParams();
@@ -62,6 +63,7 @@ export default function RunDetail() {
           <p className="muted">{SOLVER_LABEL[run.solver] ?? run.solver} · lancé le {fmt.date(run.created_at)}</p>
         </div>
         <div className="row">
+          {run.kind === "balance" && <OptimizeButton run={{ ...run, stations_used: bal?.stations_used ?? run.stations_used }} runId={run.id} writable={canWrite(org)} />}
           {run.status === "done" && (["pdf", "xlsx", "json"] as const).map((ext) => (
             <button key={ext} className="btn" disabled={exporting === ext} onClick={() => exportAs(ext)}>
               {exporting === ext ? "Préparation…" : ext === "pdf" ? "Rapport PDF" : ext === "xlsx" ? "Excel" : "JSON"}
@@ -87,6 +89,13 @@ export default function RunDetail() {
       )}
       {run.status === "done" && bal && <ResultView r={bal} />}
 
+      {run.status === "done" && !canWrite(org) && bal && bal.stations_used > 0 && (
+        <div className="row actions">
+          <Link className="btn" to={`/simulation/${run.id}`}>Simulation 3D</Link>
+          <Link className="btn" to={`/jumeau/${run.id}`}>Jumeau numérique</Link>
+          <Link className="btn" to={`/flux/${run.id}`}>Process Flow</Link>
+        </div>
+      )}
       {run.status === "done" && canWrite(org) && run.problem_id && (
         <div className="row actions">
           {run.kind === "balance" && <button className="btn" onClick={() => relaunch("min_cycle", run.solver)}>Chercher la cadence minimale</button>}
@@ -95,7 +104,6 @@ export default function RunDetail() {
           {bal && bal.stations_used > 0 && <Link className="btn" to={`/jumeau/${run.id}`}>Jumeau numérique</Link>}
           {bal && bal.stations_used > 0 && <Link className="btn" to={`/simulation/${run.id}`}>Simulation 3D</Link>}
           {bal && bal.stations_used > 0 && <Link className="btn" to={`/flux/${run.id}`}>Process Flow</Link>}
-          {bal && bal.stations_used > 0 && <Link className="btn" to={`/optimiseur/${run.id}`}>Optimiseur</Link>}
           <Link className="btn ghost" to="/calcul">Nouveau calcul</Link>
         </div>
       )}

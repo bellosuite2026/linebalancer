@@ -38,16 +38,21 @@ def ci(values: list[float]) -> dict:
             "n": len(vals)}
 
 
-def run_scenario(model: dict, replications: int = 1, seed: Optional[int] = None, trace: bool = True) -> dict:
+def run_scenario(model: dict, replications: int = 1, seed: Optional[int] = None, trace: bool = True,
+                 progress=None) -> dict:
     """Réplication 1 complète (trace + détails), réplications suivantes = indicateurs seulement."""
     n = max(1, min(LIMITS["replications"], int(replications)))
     m = normalize_model(model)
     base_seed = m["settings"]["seed"] if seed is None else int(seed)
     first = simulate(m, base_seed, trace)
+    if progress:
+        progress(1, n)
     kpis = [first["kpis"]]
     station_util = {s["id"]: [s["utilization_pct"]] for s in first["stations"]}
     for r in range(1, n):
         res = simulate(m, base_seed + r, False)
+        if progress:
+            progress(r + 1, n)
         kpis.append(res["kpis"])
         for s in res["stations"]:
             station_util[s["id"]].append(s["utilization_pct"])
@@ -62,15 +67,17 @@ def run_scenario(model: dict, replications: int = 1, seed: Optional[int] = None,
 
 
 def run_experiment(model: dict, scenarios: Optional[list[dict]] = None, replications: int = 1,
-                   trace: bool = True, max_trace_events: Optional[int] = None) -> dict:
+                   trace: bool = True, max_trace_events: Optional[int] = None, progress=None) -> dict:
+    """progress(done, total) : rappel après chaque journée simulée (réplication × scénario)."""
     """scenarios : [{"name": "...", "overrides": {...}}] (vide = modèle de base seul)."""
     scenarios = (scenarios or [{"name": "Référence", "overrides": {}}])[: LIMITS["scenarios"]]
     out = []
-    for sc in scenarios:
+    for i, sc in enumerate(scenarios):
         m = apply_overrides(model, sc.get("overrides") or {})
         if max_trace_events is not None:
             m.setdefault("settings", {})["max_trace_events"] = max_trace_events
-        res = run_scenario(m, replications, trace=trace)
+        cb = (lambda d, n, i=i: progress(i * n + d, n * len(scenarios))) if progress else None
+        res = run_scenario(m, replications, trace=trace, progress=cb)
         res["model"] = model_for_view(normalize_model(m))
         out.append({"name": str(sc.get("name") or "Scénario")[:60], "overrides": sc.get("overrides") or {},
                     "result": res})

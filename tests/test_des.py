@@ -172,7 +172,7 @@ def test_api_des_model_run_exports_and_isolation(tw):
     s = _wait(c, f"/v1/orgs/{org}/simulations/{sid}", ha)
     assert s["status"] == "done", s.get("error")
     res = s["results"]
-    assert res["engine"] == "des-3.0" and len(res["scenarios"]) == 3
+    assert res["engine"] == "des-3.1" and len(res["scenarios"]) == 3
     assert res["scenarios"][0]["result"]["replications"]["n"] == 3
     assert res["scenarios"][1]["result"]["transporters"][0]["loads"] > 0
     assert any("reprend" in n for n in res["scenarios"][2]["result"]["notes"])

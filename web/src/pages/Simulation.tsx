@@ -13,6 +13,8 @@ import type { WorkshopPlan } from "../lib/workshop";
 import SimCanvas2D from "../components/SimCanvas2D";
 import ErrorBoundary, { hasWebGL } from "../components/ErrorBoundary";
 import { Bars, Gantt, Histogram, Legend, LineChart, StateBars, StatePie } from "../components/SimCharts";
+import JobProgress, { jobPhase, Waking } from "../components/JobProgress";
+import OptimizeButton from "../components/OptimizeButton";
 
 const SimScene3D = lazy(() => import("../components/SimScene3D"));
 const SPEEDS = [1, 10, 30, 60, 120, 300, 600];
@@ -73,6 +75,8 @@ export default function Simulation() {
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState(60);
   const [openSt, setOpenSt] = useState(false);
+  const [launching, setLaunching] = useState(false);
+  const [since, setSince] = useState(Date.now());
 
   // ---------------------------------------------------------------- chargement
   const load = useCallback(async (pid: string) => {
@@ -111,12 +115,12 @@ export default function Simulation() {
 
   const run = async () => {
     if (!model) return;
-    setBusy(true); setErr("");
+    setBusy(true); setErr(""); setLaunching(true); setSince(Date.now());
     try {
       const scenarios = forms.map((f, i) => ({ name: f.name || `Scénario ${i + 1}`, overrides: i === 0 ? {} : formToOverrides(f), absent: i === 0 ? [] : f.absent }));
       const s = await post<DesSim>(`${base}/runs/${runId}/des`, { name: scenarios.map((x) => x.name).join(" / ").slice(0, 120), model, scenarios, replications: reps, plan_id: planId || null });
-      setSim(s); poll(s.id);
-    } catch (e) { setErr((e as Error).message); setBusy(false); }
+      setLaunching(false); setSim(s); poll(s.id);
+    } catch (e) { setErr((e as Error).message); setBusy(false); setLaunching(false); }
   };
 
   // ---------------------------------------------------------------- lecture
@@ -157,11 +161,24 @@ export default function Simulation() {
   const dist = S.dist ?? { kind: "normal", cv: 0.1 };
 
   if (err && !data) return <div className="page"><p className="notice err">{err}</p><Link to="/jumeau">← Jumeau numérique</Link></div>;
-  if (!data || !model) return <div className="page muted">Génération du modèle de simulation…</div>;
+  if (!data || !model) return <Waking label="Génération du modèle de simulation…" />;
 
   const opName = (id: string) => model.operators.find((o) => o.id === id)?.name ?? id;
   const kpi = res?.kpis, rk = res?.replications.kpis;
   const pickedSt = res?.stations.find((s) => s.id === picked);
+  const phase = jobPhase(launching, sim?.status);
+  const isConveyor = !!model.conveyor?.enabled || forms.some((f) => f.conveyor === "on");
+  // ---- indicateurs expliqués (aussi pour les simulations enregistrées avant la correction du 13/11/2026)
+  const rkMean = (k: string) => { const v = rk?.[k] as CI | undefined; return typeof v?.mean === "number" ? v.mean : null; };
+  const leadMean = rkMean("lead_time_avg");
+  const leadEst = kpi && (kpi.lead_time_basis === "little" || leadMean == null);
+  const leadVal = leadMean ?? (kpi && kpi.pieces > 0 && kpi.wip_avg > 0 ? kpi.wip_avg / (kpi.pieces / T) : null);
+  const liaisonM = kpi ? (kpi.liaison_m ?? res!.transporters.reduce((a, x) => a + x.distance_m, 0)) : 0;
+  const vSrc = vModel?.source;
+  const capPieces = vSrc?.wip_cap_bundles ? vSrc.wip_cap_bundles * vSrc.bundle_size : null;
+  const oldEngine = !!results && (results.engine ?? "") < "des-3.1";
+  const bottId = kpi ? String(typeof rk?.bottleneck === "object" ? (rk.bottleneck as CI)?.mean : rk?.bottleneck) : "";
+  const bottSt = res?.stations.find((s) => s.id === bottId);
 
   return (
     <div className="page sim-page">
@@ -169,9 +186,10 @@ export default function Simulation() {
         <div>
           <h1>Simulation de l'atelier</h1>
           <p className="muted">{data.problem_name || model.name} · {data.summary.stations} postes · {data.summary.operators} opérateurs · SAM {fmt.n(data.summary.sam_total, 2)} min ·
-            {" "}<Link to={`/calculs/${runId}`}>calcul</Link> · <Link to={`/jumeau/${runId}`}>jumeau numérique</Link> · <Link to={`/flux/${runId}`}>logique par blocs (Process Flow)</Link> · <Link to={`/optimiseur/${runId}${planId ? `?plan=${planId}` : ""}`}>optimiseur</Link></p>
+            {" "}<Link to={`/calculs/${runId}`}>calcul</Link> · <Link to={`/jumeau/${runId}`}>jumeau numérique</Link> · <Link to={`/flux/${runId}`}>logique par blocs (Process Flow)</Link></p>
         </div>
         <div className="actions">
+          <OptimizeButton run={{ status: "done", kind: "balance", stations_used: data.run.stations_used ?? data.summary.stations }} runId={runId!} writable={writable} planId={planId} />
           <label className="small">Plan d'atelier{" "}
             <select value={planId} onChange={(e) => { setPlanId(e.target.value); setSp((p) => { if (e.target.value) p.set("plan", e.target.value); else p.delete("plan"); return p; }, { replace: true }); load(e.target.value); }}>
               <option value="">Implantation du jumeau (sans plan)</option>
@@ -321,17 +339,29 @@ export default function Simulation() {
         {/* ------------------------------------------------ lecture */}
         <section className="card sim-view">
           {sim && sim.status === "failed" && <p className="notice err">Échec de la simulation : {sim.error}</p>}
-          {sim && (sim.status === "queued" || sim.status === "running") && <p className="notice warn">Simulation en cours ({forms.length} scénario(s) × {reps} réplication(s))… le serveur gratuit peut mettre une minute à se réveiller.</p>}
+          {phase && <JobProgress phase={phase} progress={sim?.results?.progress} kind="des" since={since}
+            title={isConveyor ? "Simulation du convoyeur suspendu en cours…" : "Simulation de la journée en cours…"}
+            detail={`${forms.length} scénario(s) × ${reps} réplication(s)`} />}
+          {oldEngine && <p className="notice warn small">Simulation calculée avant la correction des indicateurs du 13/11 : l'encours de départ n'était pas compté dans le plafond d'encours. Relancez-la pour des valeurs à jour{writable ? "" : " (un membre « méthodes » ou « chef de ligne » peut le faire)"}.</p>}
           {results && <div className="row sim-scen-tabs">
             {results.scenarios.map((s, i) => <button key={i} className={`chipbtn ${i === scIdx ? "on" : ""}`} style={{ borderColor: SCEN_COLORS[i] }} onClick={() => { setScIdx(i); }}>{s.name}</button>)}
             <span className="muted small">{results.replications} réplication(s) · ± = intervalle de confiance 95 %</span>
           </div>}
           {kpi && rk && <div className="kpis">
             <div className="kpi"><span>Pièces produites</span><b>{ciTxt(rk.pieces, 0)}</b><small>{fmt.n(kpi.per_hour, 1)} pcs/h{kpi.target_per_hour ? ` · objectif ${fmt.n(kpi.target_per_hour, 0)}/h` : ""}</small></div>
-            <div className="kpi"><span>Temps de traversée</span><b>{ciTxt(rk.lead_time_avg, 0)} min</b><small>p90 {fmt.n(kpi.lead_time_p90, 0)} min</small></div>
-            <div className="kpi"><span>Encours moyen</span><b>{ciTxt(rk.wip_avg, 0)}</b><small>max {fmt.n(kpi.wip_max, 0)} pièces</small></div>
-            <div className="kpi warn"><span>Goulot</span><b>Poste {String(typeof rk.bottleneck === "object" ? rk.bottleneck?.mean : rk.bottleneck)}</b><small>le plus occupé (travail + panne + attente opérateur)</small></div>
-            <div className="kpi"><span>Opérateurs</span><b>{ciTxt(rk.operator_util_avg, 0)} %</b><small>{fmt.n(kpi.walk_m, 0)} m à pied au total</small></div>
+            <div className="kpi" title="Temps entre l'entrée d'un paquet dans la ligne et sa sortie">
+              <span>Temps de traversée</span>
+              {leadEst ? <><b>≈ {fmt.n(leadVal, 0)} min</b><small className="est">estimé (encours ÷ débit) : aucun paquet lancé aujourd'hui n'a fini sa traversée{vSrc ? ` (paquets de ${vSrc.bundle_size})` : ""}</small></>
+                : <><b>{ciTxt(rk.lead_time_avg, 0)} min</b><small>mesuré sur {kpi.bundles_measured ?? res.lead_time.count} paquets · p90 {fmt.n(kpi.lead_time_p90, 0)} min</small></>}
+            </div>
+            <div className="kpi" title="Pièces présentes dans la ligne (files + en cours de couture + en transport), encours de départ compris">
+              <span>Encours moyen</span><b>{ciTxt(rk.wip_avg, 0)} pcs</b>
+              <small>max {fmt.n(kpi.wip_max, 0)} pcs{capPieces ? ` · plafond ${vSrc!.wip_cap_bundles} paquets × ${vSrc!.bundle_size} = ${capPieces} pcs` : ""}</small></div>
+            <div className="kpi warn" title="Poste qui limite la production : le plus chargé par opératrice parmi les plus occupés">
+              <span>Goulot</span><b>Poste {bottId}</b>
+              <small>{bottSt ? `${fmt.n(bottSt.minutes / Math.max(1, bottSt.servers), 2)} min/pc par opératrice · occupé ${fmt.n(bottSt.utilization_pct, 0)} %${bottSt.servers > 1 ? ` · ${bottSt.servers} opératrices` : ""}` : "le plus chargé"}</small></div>
+            <div className="kpi"><span>Opérateurs</span><b>{ciTxt(rk.operator_util_avg, 0)} %</b>
+              <small>marche des opératrices {fmt.n(kpi.walk_m, 0)} m{res.transporters.length ? ` · agent(s) de liaison ${fmt.n(liaisonM, 0)} m` : ""}</small></div>
             {kpi.rail_util_pct != null && res?.conveyor && <div className="kpi"><span>Convoyeur</span><b>{ciTxt(rk.carriers_in_circulation, 0)} cintres</b>
               <small>rail occupé {fmt.n(kpi.rail_util_pct, 0)} % · sur rail {fmt.n(kpi.rail_share_pct, 0)} % du temps</small></div>}
           </div>}
@@ -393,7 +423,9 @@ export default function Simulation() {
           <Bars values={res.throughput.hourly} target={kpi?.target_per_hour} label="Débit horaire" />
         </>}
         {tab === "lead" && <>
-          <p className="small muted">Temps de traversée des paquets lancés pendant la journée ({res.lead_time.count} paquets) · moyenne {fmt.n(kpi?.lead_time_avg, 0)} min · p90 {fmt.n(kpi?.lead_time_p90, 0)} min.</p>
+          {res.lead_time.count > 0
+            ? <p className="small muted">Temps de traversée des paquets lancés et terminés pendant la journée ({res.lead_time.count} paquets) · moyenne {fmt.n(kpi?.lead_time_avg, 0)} min · p90 {fmt.n(kpi?.lead_time_p90, 0)} min.</p>
+            : <div className="hint">Aucun paquet lancé pendant la journée n'a eu le temps de traverser toute la ligne{vSrc ? ` (paquets de ${vSrc.bundle_size} pièces)` : ""} : les {fmt.n(kpi?.pieces, 0)} pièces sorties viennent de l'encours de départ{kpi?.bundles_done ? ` (${kpi.bundles_done} paquets terminés)` : ""}. Temps de traversée estimé par la loi de Little (encours moyen ÷ débit) : <b>≈ {fmt.n(leadVal, 0)} min</b>. Des paquets plus petits raccourcissent la traversée.</div>}
           <Histogram edges={res.lead_time.hist.edges} counts={res.lead_time.hist.counts} color={SCEN_COLORS[scIdx]} />
         </>}
         {tab === "operators" && <>

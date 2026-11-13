@@ -713,14 +713,18 @@ def simulate_flow(graph: dict, seed: Optional[int] = None, trace: bool = True, s
     return FlowSim(graph, seed, trace, station_ids).run()
 
 
-def run_flow_experiment(graph: dict, replications: int = 1, station_ids: Optional[list] = None) -> dict:
+def run_flow_experiment(graph: dict, replications: int = 1, station_ids: Optional[list] = None, progress=None) -> dict:
     from engine.des.experiment import ci
     n = max(1, min(LIMITS["replications"], int(replications)))
     base = int(_f((graph.get("settings") or {}).get("seed"), 42))
     first = simulate_flow(graph, base, True, station_ids)
+    if progress:
+        progress(1, n)
     kp = [first["kpis"]]
     for r in range(1, n):
         kp.append(simulate_flow(graph, base + r, False, station_ids)["kpis"])
+        if progress:
+            progress(r + 1, n)
     keys = ["pieces", "per_hour", "lead_time_avg", "wip_avg", "wip_max"]
     first["replications"] = {"n": n, "kpis": {k: ci([x.get(k) for x in kp]) for k in keys}}
     return first

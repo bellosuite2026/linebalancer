@@ -508,7 +508,7 @@ def optimize(variants: list[dict], config: Optional[dict] = None, workshop_plan:
              "best_pieces": best}
         history.append(h)
         if progress:
-            progress({**h, "budget_s": cfg["time_budget_s"],
+            progress({**h, "budget_s": cfg["time_budget_s"], "max_evals": cfg["max_evals"],
                       "pct": min(99, round(100 * max(h["elapsed_s"] / cfg["time_budget_s"], len(cache) / cfg["max_evals"])))})
 
     report()
