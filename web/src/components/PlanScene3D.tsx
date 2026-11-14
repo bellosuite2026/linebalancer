@@ -3,7 +3,8 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import NavControls, { type NavApi } from "./NavControls";
 import { orbitNav } from "../lib/nav3d";
-import { addMachineBody } from "../lib/machines3d";
+import { addMachineBody, addMachineDetails } from "../lib/machines3d";
+import { loadStyle, saveStyle, type SimStyle } from "../lib/simIcons";
 import { MACHINE_CATALOG, ZONES, operatorPoint, type Machine, type WorkshopPlan } from "../lib/workshop";
 
 export interface SceneStation {
@@ -45,6 +46,12 @@ interface Props {
   title?: string;
   className?: string;
 }
+
+type AvatarsModule = typeof import("../lib/avatars3d");
+type AvPose = import("../lib/avatars3d").Pose;
+/** Personnage du style détaillé : posé à un poste (plan) ou ouvrier animé (jumeau). */
+interface AvatarSpec { x: number; z: number; heading: number; pose: AvPose; stationId?: number; seated?: boolean; bubble?: "wait" | "break" }
+const isSeatedType = (type: string) => (MACHINE_CATALOG[type]?.shape ?? "").startsWith("sew_");
 
 const EMPTY_STATIONS: SceneStation[] = [];
 const EMPTY_BUNDLES: SceneBundle[] = [];
@@ -199,12 +206,13 @@ function makeWorker(group: THREE.Group, worker: SceneWorker) {
   return actor;
 }
 
-function addMachine(group: THREE.Group, machine: Machine, shiftX: number, shiftZ: number, stationId?: number, showOperator = true) {
+function addMachine(group: THREE.Group, machine: Machine, shiftX: number, shiftZ: number, stationId?: number, showOperator = true, avatars: AvatarSpec[] | null = null) {
   const root = new THREE.Group();
   root.position.set(machine.x + shiftX, 0, machine.y + shiftZ);
   root.rotation.y = (-machine.rot * Math.PI) / 180;
   group.add(root);
   const tableTop = addMachineBody(root, machine.type, machine.w, machine.d, machine.status);
+  if (avatars) addMachineDetails(root, machine.type, machine.w, machine.d);
   if (stationId != null) {
     // plateau propre (non partagé) : sa couleur suit l'état du poste
     tableTop.material = (tableTop.material as THREE.MeshStandardMaterial).clone();
@@ -215,7 +223,10 @@ function addMachine(group: THREE.Group, machine: Machine, shiftX: number, shiftZ
   }
   if (showOperator && machine.status === "service" && MACHINE_CATALOG[machine.type]?.machine_type !== "") {
     const [ox, oz] = operatorPoint(machine);
-    addOperator(group, ox + shiftX, oz + shiftZ, false, stationId);
+    if (avatars) {
+      const seated = isSeatedType(machine.type);
+      avatars.push({ x: ox + shiftX, z: oz + shiftZ, heading: Math.atan2(machine.y - oz, machine.x - ox), pose: seated ? "sew" : "stand_work", stationId, seated });
+    } else addOperator(group, ox + shiftX, oz + shiftZ, false, stationId);
   }
   const label = makeLabel(`${machine.label} · ${MACHINE_CATALOG[machine.type]?.short ?? "POSTE"}`, machine.status === "panne" ? "#a83a2f" : "#263746");
   label.position.set(machine.x + shiftX, 1.8, machine.y + shiftZ);
@@ -240,6 +251,18 @@ export default function PlanScene3D({ plan, stations = EMPTY_STATIONS, states = 
   const [ready, setReady] = useState(false);
   const nav = useRef<NavApi | null>(null);
   const [error, setError] = useState("");
+  // style détaillé (même réglage que la page Simulation) : personnages low-poly, machines détaillées, paquets liés
+  const [style, setStyleState] = useState<SimStyle>(loadStyle);
+  const setStyle = (v: SimStyle) => { setStyleState(v); saveStyle(v); };
+  const [av, setAv] = useState<AvatarsModule | null>(null);
+  useEffect(() => { if (style === "detailed" && !av) import("../lib/avatars3d").then(setAv).catch(() => setAv(null)); }, [style, av]);
+  const D = style === "detailed" ? av : null;
+  const crowdRef = useRef<InstanceType<AvatarsModule["AvatarCrowd"]> | null>(null);
+  const staticAvatars = useRef<AvatarSpec[]>([]);
+  const workerAvatars = useRef<AvatarSpec[]>([]);
+  const statesRef = useRef(states);
+  statesRef.current = states;
+  const poolDetail = useRef(false);
 
   useEffect(() => {
     const host = hostRef.current;
@@ -300,6 +323,25 @@ export default function PlanScene3D({ plan, stations = EMPTY_STATIONS, states = 
     let frame = 0;
     const render = () => {
       controls.update();
+      const crowd = crowdRef.current;
+      if (crowd) {
+        const now = performance.now() / 1000;
+        crowd.begin();
+        const st = statesRef.current;
+        const hasStates = Object.keys(st).length > 0;
+        staticAvatars.current.forEach((a, i) => {
+          const s = a.stationId != null ? st[String(a.stationId)] : undefined;
+          const pose: AvPose = hasStates && a.stationId != null && !s?.working ? (a.seated ? "break" : "wait") : a.pose;
+          crowd.add(a.x, a.z, a.heading, "operatrice", pose, now * 5 + i * 1.7, i * 13 + 5);
+          if (pose === "wait") crowd.bubble("wait", a.x, 2.0, a.z);
+        });
+        workerAvatars.current.forEach((a, i) => {
+          crowd.add(a.x, a.z, a.heading, "operatrice", a.pose, now * (a.pose === "walk" ? 9 : 5) + i * 2.3, i * 31 + 11);
+          if (a.bubble) crowd.bubble(a.bubble, a.x, 2.0, a.z);
+        });
+        crowd.end();
+        crowd.face(camera);
+      }
       renderer.render(scene, camera);
       frame = requestAnimationFrame(render);
     };
@@ -336,6 +378,15 @@ export default function PlanScene3D({ plan, stations = EMPTY_STATIONS, states = 
   }, []);
 
   useEffect(() => {
+    const scene = sceneRef.current;
+    if (!ready || !scene || !D) return;
+    const crowd = new D.AvatarCrowd(320);
+    scene.add(crowd.group);
+    crowdRef.current = crowd;
+    return () => { crowdRef.current = null; scene.remove(crowd.group); crowd.dispose(); };
+  }, [ready, D]);
+
+  useEffect(() => {
     const group = workerGroupRef.current;
     if (!ready || !group) return;
     const activeIds = new Set(workers.map((worker) => worker.id));
@@ -351,9 +402,14 @@ export default function PlanScene3D({ plan, stations = EMPTY_STATIONS, states = 
         actor = makeWorker(group, worker);
         workerActors.current.set(worker.id, actor);
       }
-      actor.position.set(worker.x + shiftX, 0, worker.z + shiftZ);
+      const px = worker.x + shiftX, pz = worker.z + shiftZ;
+      const prev = actor.userData.prev as [number, number] | undefined;
+      if (prev && Math.hypot(px - prev[0], pz - prev[1]) > 0.02) actor.userData.heading = Math.atan2(pz - prev[1], px - prev[0]);
+      actor.userData.prev = [px, pz];
+      actor.position.set(px, 0, pz);
       actor.userData.kind = worker.kind;
       actor.traverse((object) => {
+        if (object instanceof THREE.Mesh && !(object instanceof THREE.Sprite)) object.visible = !D;
         if (!(object instanceof THREE.Mesh)) return;
         if (object.userData.workerPart) {
           const color = worker.kind === "work" ? "#1f6685" : worker.kind === "walk" ? "#c17b2c" : "#76858b";
@@ -362,7 +418,23 @@ export default function PlanScene3D({ plan, stations = EMPTY_STATIONS, states = 
         if (object.userData.walkLeg) object.rotation.x = worker.kind === "walk" ? Math.sin(performance.now() / 75 + (object.position.x < 0 ? 0 : Math.PI)) * 0.55 : 0;
       });
     }
-  }, [ready, workers]);
+    // style détaillé : l'ouvrier travaille face à la machine la plus proche, marche dans son sens de déplacement
+    const specs: AvatarSpec[] = [];
+    if (D) {
+      const machines = (plan?.elements ?? []).filter((e): e is Machine => e.kind === "machine");
+      for (const worker of workers) {
+        const actor = workerActors.current.get(worker.id)!;
+        const px = worker.x + shiftX, pz = worker.z + shiftZ;
+        if (worker.kind === "walk") { specs.push({ x: px, z: pz, heading: actor.userData.heading ?? 0, pose: "walk" }); continue; }
+        let tx = px + 1, tz = pz, seated = true, best = Infinity;
+        for (const m of machines) { const d = (m.x + shiftX - px) ** 2 + (m.y + shiftZ - pz) ** 2; if (d < best) { best = d; tx = m.x + shiftX; tz = m.y + shiftZ; seated = isSeatedType(m.type); } }
+        if (!machines.length) for (const s of stations) { const d = (s.x + shiftX - px) ** 2 + (s.z + shiftZ - pz) ** 2; if (d < best) { best = d; tx = s.x + shiftX; tz = s.z + shiftZ; } }
+        const heading = Math.atan2(tz - pz, tx - px);
+        specs.push(worker.kind === "work" ? { x: px, z: pz, heading, pose: seated ? "sew" : "stand_work" } : { x: px, z: pz, heading, pose: "wait", bubble: "wait" });
+      }
+    }
+    workerAvatars.current = specs;
+  }, [ready, workers, D, plan, stations]);
 
   useEffect(() => {
     const scene = sceneRef.current;
@@ -399,6 +471,7 @@ export default function PlanScene3D({ plan, stations = EMPTY_STATIONS, states = 
     const assigned = new Map<string, number>();
     for (const station of stations) for (const machineId of station.machineIds) assigned.set(machineId, station.station);
     const zoneMaterials: THREE.MeshStandardMaterial[] = [];
+    const avatarList: AvatarSpec[] | null = D ? [] : null;
     for (const element of elements) {
       if (element.kind === "zone" || element.kind === "aisle") {
         const material = new THREE.MeshStandardMaterial({
@@ -426,7 +499,7 @@ export default function PlanScene3D({ plan, stations = EMPTY_STATIONS, states = 
       else if (element.kind === "pillar") {
         makeBox(model, [element.w, ROOM_HEIGHT, element.d], [element.x + shiftX, ROOM_HEIGHT / 2, element.y + shiftZ], new THREE.MeshStandardMaterial({ color: "#555d5e", roughness: 0.9 }));
       } else if (element.kind === "machine") {
-        addMachine(model, element, shiftX, shiftZ, assigned.get(element.id), stations.length === 0);
+        addMachine(model, element, shiftX, shiftZ, assigned.get(element.id), stations.length === 0, avatarList);
       }
     }
     if (!elements.some((element) => element.kind === "wall")) {
@@ -444,7 +517,7 @@ export default function PlanScene3D({ plan, stations = EMPTY_STATIONS, states = 
         id: `virtual-${station.station}`, kind: "machine", type: "piqueuse_plate", x: station.x, y: station.z,
         w: 1.15, d: 0.72, rot: 0, label: `Poste ${station.station}`, operator: "front", status: "service",
       };
-      addMachine(model, machine, shiftX, shiftZ, undefined, false);
+      addMachine(model, machine, shiftX, shiftZ, undefined, false, avatarList);
     }
 
     for (const station of stations) {
@@ -478,10 +551,12 @@ export default function PlanScene3D({ plan, stations = EMPTY_STATIONS, states = 
       controls.update();
     };
     nav.current = orbitNav(camera, controls, { cx: width / 2, cz: length / 2, cy: 0.7, span, home: camera.position.clone(), homeTarget: target.clone() });
+    staticAvatars.current = avatarList ?? [];
     return () => {
       for (const material of zoneMaterials) material.dispose();
+      staticAvatars.current = [];
     };
-  }, [plan, ready, stations]);
+  }, [plan, ready, stations, D]);
 
   useEffect(() => {
     const activity = activityRef.current;
@@ -510,9 +585,14 @@ export default function PlanScene3D({ plan, stations = EMPTY_STATIONS, states = 
     const group = bundleRef.current;
     if (!ready || !group) return;
     const visibleBundles = bundles.slice(0, 260);
+    if (poolDetail.current !== !!D) {
+      for (const mesh of bundlePool.current) { group.remove(mesh); mesh.geometry.dispose(); (mesh.material as THREE.Material).dispose(); }
+      bundlePool.current = [];
+      poolDetail.current = !!D;
+    }
     while (bundlePool.current.length < visibleBundles.length) {
       const material = new THREE.MeshStandardMaterial({ color: "#d49a26", roughness: 0.46, metalness: 0.08, emissive: "#513600" });
-      const mesh = new THREE.Mesh(new THREE.SphereGeometry(0.12, 12, 10), material);
+      const mesh = new THREE.Mesh(D ? D.bundleGeometry() : new THREE.SphereGeometry(0.12, 12, 10), material);
       mesh.castShadow = true;
       group.add(mesh);
       bundlePool.current.push(mesh);
@@ -526,15 +606,19 @@ export default function PlanScene3D({ plan, stations = EMPTY_STATIONS, states = 
       const color = bundle.kind === "work" ? "#2c7792" : bundle.kind === "move" ? "#d49a26" : "#c57442";
       (mesh.material as THREE.MeshStandardMaterial).color.set(color);
       const scale = Math.min(1.8, 0.75 + Math.log2(Math.max(1, bundle.size)) * 0.16);
-      mesh.scale.setScalar(scale);
+      if (D) { mesh.scale.set(scale, 1, scale); mesh.position.y = bundle.kind === "work" ? 0.84 : 0.12; }
+      else mesh.scale.setScalar(scale);
     });
-  }, [bundles, ready]);
+  }, [bundles, ready, D]);
 
   return (
     <section className={`p3d ${className}`} aria-label={title}>
       <header className="p3d-bar">
         <h3 className="p3d-h">{title}</h3>
         <span className="p3d-help">Glisser : orbiter · molette/pincer : zoomer · Maj + glisser : déplacer · boutons à droite : zoom, déplacement, rotation, vues</span>
+        <div className="seg small" aria-label="Style de la 3D">
+          {(["simple", "detailed"] as SimStyle[]).map((v) => <button key={v} className={style === v ? "on" : ""} aria-pressed={style === v} onClick={() => setStyle(v)}>{v === "simple" ? "Style simple" : "Style détaillé"}</button>)}
+        </div>
         <button className="btn small" onClick={() => resetRef.current?.()} disabled={!ready} title="Réinitialiser la caméra">Réinitialiser la vue</button>
       </header>
       <NavControls api={nav} mode="3d" className="p3d-navwrap">
